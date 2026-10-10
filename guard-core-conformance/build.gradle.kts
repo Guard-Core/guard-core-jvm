@@ -12,6 +12,7 @@ dependencies {
   implementation(project(":guard-core-engine"))
   implementation(project(":guard-core"))
   implementation(libs.kotlinx.serialization.json)
+  implementation(libs.kotlinx.coroutines.core)
   testImplementation(libs.kotlin.test)
 }
 

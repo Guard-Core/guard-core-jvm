@@ -8,12 +8,18 @@ serializationJson = "1.11.0"
 detekt = "1.23.8"
 spotless = "8.10.4"
 jmh = "0.7.3"
+lettuce = "6.7.1.RELEASE"
+maxmindDb = "4.2.0"
+slf4j = "2.0.17"
 
 [libraries]
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serializationJson" }
+lettuce-core = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
+maxmind-db = { module = "com.maxmind.db:maxmind-db", version.ref = "maxmindDb" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
