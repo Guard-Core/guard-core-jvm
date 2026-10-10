@@ -42,6 +42,13 @@ exceptions:
   SwallowedException:
     # Python swallow-and-log paths (body reader, hooks) port verbatim.
     active: false
+  RethrowCaughtException:
+    # Python `raise GuardRedisError(...) from e` chaining ports verbatim
+    # (redis_handler.py:179, ratelimit_handler.py:51).
+    active: false
+  TooGenericExceptionThrown:
+    # Test fakes mirror python AsyncMock(side_effect=RuntimeError(...)).
+    active: false
 
 naming:
   MatchingDeclarationName:
@@ -57,6 +64,12 @@ style:
   MagicNumber:
     # Security constants (bounds, defaults, code points) are the port surface;
     # renaming them to named constants would break python file:line parity.
+    active: false
+  UseRequire:
+    # Python `raise ValueError(...)` guards port as IllegalArgumentException throws.
+    active: false
+  UseCheckOrError:
+    # Python `raise RuntimeError(...)` state guards port as IllegalStateException throws.
     active: false
   MaxLineLength:
     # Warning messages stay byte-exact with the python originals.
@@ -79,4 +92,9 @@ style:
   FunctionOnlyReturningConstant:
     active: false
   UnusedPrivateProperty:
+    active: false
+
+performance:
+  SpreadOperator:
+    # redis-py varargs ports: conn.delete(*keys), evalsha argv spread.
     active: false

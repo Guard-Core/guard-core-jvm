@@ -11,6 +11,10 @@ kotlin {
 dependencies {
   api(project(":guard-core-engine"))
   implementation(libs.kotlinx.coroutines.core)
+  implementation(libs.kotlinx.serialization.json)
+  api(libs.lettuce.core)
+  api(libs.maxmind.db)
+  api(libs.slf4j.api)
 
   testImplementation(libs.kotlin.test)
 }

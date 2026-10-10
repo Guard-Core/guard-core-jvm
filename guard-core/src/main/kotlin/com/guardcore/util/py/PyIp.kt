@@ -31,6 +31,10 @@ internal constructor(
     /** Unsigned 32-bit value in the low bits. */
     public val value: Long,
 ) : IpAddress() {
+  override fun equals(other: Any?): Boolean = other is IPv4Address && other.value == value
+
+  override fun hashCode(): Int = (value.toInt() * 31) + 4
+
   public override val version: Int
     get() = 4
 
@@ -84,6 +88,16 @@ internal constructor(
     public val low: Long,
     public val scopeId: String?,
 ) : IpAddress() {
+  override fun equals(other: Any?): Boolean =
+      other is IPv6Address && other.high == high && other.low == low && other.scopeId == scopeId
+
+  override fun hashCode(): Int {
+    var result = high.hashCode()
+    result = result * 31 + low.hashCode()
+    result = result * 31 + (scopeId?.hashCode() ?: 0)
+    return result
+  }
+
   public override val version: Int
     get() = 6
 
@@ -230,6 +244,21 @@ private constructor(
     public val prefixLen: Int,
     public val version: Int,
 ) {
+  override fun equals(other: Any?): Boolean =
+      other is IpNetwork &&
+          other.networkHigh == networkHigh &&
+          other.networkLow == networkLow &&
+          other.prefixLen == prefixLen &&
+          other.version == version
+
+  override fun hashCode(): Int {
+    var result = networkHigh.hashCode()
+    result = result * 31 + networkLow.hashCode()
+    result = result * 31 + prefixLen
+    result = result * 31 + version
+    return result
+  }
+
   /** `(ip in network)` per Python's `__contains__`. */
   public fun contains(addr: IpAddress): Boolean {
     if (addr.version != version) return false
