@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "**.kt"
+      - "**.kts"
+      - "gradle/**"
+      - "gradlew"
+      - "gradle.properties"
+      - "conformance/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    branches: [master]
+    paths:
+      - "**.kt"
+      - "**.kts"
+      - "gradle/**"
+      - "gradlew"
+      - "gradle.properties"
+      - "conformance/**"
+      - ".github/workflows/ci.yml"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        # pin: unverified (no in-org setup-java usage found; resolved from actions/setup-java v6.0.1)
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Validate Gradle wrapper
+        # pin: unverified (no in-org wrapper-validation usage found; resolved from gradle/actions v6.4.0)
+        uses: gradle/actions/wrapper-validation@b9bee63ef481cc545e4517ec730544a4d8b1dfa0 # v6.4.0
+
+      # TODO: Redis service container lands in W5 with the redis_interop suite.
+      - name: Build (detekt, ktfmt check, tests, benchmarks compile)
+        run: ./gradlew build --no-daemon

@@ -1,0 +1,53 @@
+"area: engine":
+  - changed-files:
+      - any-glob-to-any-file:
+          - guard-core-engine/**
+
+"area: facade":
+  - changed-files:
+      - any-glob-to-any-file:
+          - guard-core/**
+
+"area: conformance":
+  - changed-files:
+      - any-glob-to-any-file:
+          - guard-core-conformance/**
+          - conformance/**
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/src/test/**"
+
+benchmarks:
+  - changed-files:
+      - any-glob-to-any-file:
+          - guard-core-benchmark/**
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - docs/**
+          - README.md
+          - CHANGELOG.md
+          - LICENSE-MIT
+          - LICENSE-APACHE
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**
+
+build:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.gradle.kts"
+          - gradle/**
+          - gradlew
+          - gradle.properties
+          - detekt.yml
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - gradle/libs.versions.toml

@@ -1,0 +1,22 @@
+# Version catalog: single source of truth for all third-party pins.
+# Kotlin is the latest stable release line (pinned everywhere, including the wrapper-era plugins).
+
+[versions]
+kotlin = "2.4.21"
+coroutines = "1.11.0"
+serializationJson = "1.11.0"
+detekt = "1.23.8"
+spotless = "8.9.0"
+jmh = "0.7.3"
+
+[libraries]
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serializationJson" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+jmh = { id = "me.champeau.jmh", version.ref = "jmh" }

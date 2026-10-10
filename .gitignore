@@ -1,0 +1,19 @@
+# Gradle
+.gradle/
+build/
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Local configuration
+local.properties
+
+# JVM dumps and heap artifacts
+*.hprof
+
+# macOS
+.DS_Store

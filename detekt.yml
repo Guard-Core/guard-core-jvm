@@ -1,0 +1,3 @@
+# Minimal overrides on top of detekt's default rule set (buildUponDefaultConfig = true).
+build:
+  maxIssues: 0
