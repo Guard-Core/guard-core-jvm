@@ -6,7 +6,7 @@ kotlin = "2.4.21"
 coroutines = "1.11.0"
 serializationJson = "1.11.0"
 detekt = "1.23.8"
-spotless = "8.9.0"
+spotless = "8.10.4"
 jmh = "0.7.3"
 
 [libraries]
