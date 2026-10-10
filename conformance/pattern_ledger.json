@@ -1,0 +1,956 @@
+{
+ "spec_version": "4.1.0",
+ "engine": "java.util.regex (JDK 17) behind com.guardcore.engine.py.PyRe: python-grammar fail-closed parse, then translateSource (\\Z to \\z, (?P< to (?<, {,n} to {0,n}, python-literal braces escaped, (?-i:...) flag hoisting) with the flag mapping UNIX_LINES|UNICODE_CHARACTER_CLASS(+CI/ML/DOTALL/COMMENTS); match execution on the 512 MiB-stack scan pool under the DeadlineCharSequence hard deadline",
+ "how_to_regenerate": "GUARD_UPDATE_LEDGER=1 ./gradlew :guard-core-conformance:test --tests com.guardcore.conformance.LedgerGeneratorTest --rerun-tasks"
+,"counts": {"total": 158, "as_is": 158, "translated": 0, "unmatchable": 0},
+ "entries": [
+  {
+   "pattern": "<script[^>]*>[^<]*<\\/script\\s*>",
+   "category": "boundaries",
+   "status": "as_is",
+   "evidence_cases": ["boundaries::boundary_attack_beyond_scan_limit", "boundaries::boundary_attack_then_benign", "boundaries::boundary_padded_attack", "boundaries::boundary_split_signature", "context_matrix::ctx_xss_header", "context_matrix::ctx_xss_url_path", "encoding::enc_base64_xss_payload", "encoding::enc_mixed_encoding", "encoding::enc_unicode_escape", "semantic::sem_regex_plus_semantic_below_threshold", "table[0]:xss", "xss::xss_anchor_href_data", "xss::xss_broken_tag_escape", "xss::xss_encoded_script", "xss::xss_html_entities", "xss::xss_mixed_case", "xss::xss_script_alert", "xss::xss_src_doc"]
+  },
+  {
+   "pattern": "javascript:\\s*[^\\s]+",
+   "category": "table[1]:xss",
+   "status": "as_is",
+   "evidence_cases": ["table[1]:xss", "xss::xss_form_action", "xss::xss_iframe_javascript", "xss::xss_javascript_uri", "xss::xss_object_data"]
+  },
+  {
+   "pattern": "j[\\t\\r\\n]*a[\\t\\r\\n]*v[\\t\\r\\n]*a[\\t\\r\\n]*s[\\t\\r\\n]*c[\\t\\r\\n]*r[\\t\\r\\n]*i[\\t\\r\\n]*p[\\t\\r\\n]*t[\\t\\r\\n]*:\\s*[^\\s]+",
+   "category": "table[2]:xss",
+   "status": "as_is",
+   "evidence_cases": ["table[2]:xss", "xss::xss_form_action", "xss::xss_iframe_javascript", "xss::xss_javascript_uri", "xss::xss_object_data"]
+  },
+  {
+   "pattern": "(?:<[A-Za-z/](?:[^<>]*[^<>\\s/])?(?<!=)(?<!=\\\")(?<!=')[\\s/]+(?:onwebkitplaybacktargetavailabilitychanged|oncontentvisibilityautostatechange|onwebkitpresentationmodechanged|onwebkitmouseforcewillbegin|onwebkitanimationiteration|onsecuritypolicyviolation|onwebkitmouseforcechanged|onvalidationstatuschange|onwebkitfullscreenchange|onwebkitwillrevealbottom|onwebkitanimationstart|onwebkitmouseforcedown|onbeforescriptexecute|onmozfullscreenchange|onwebkittransitionend|onafterscriptexecute|onanimationiteration|onlostpointercapture|onscrollsnapchanging|onunhandledrejection|onwebkitanimationend|onwebkitmouseforceup|ondeviceorientation|ongotpointercapture|onbeforedeactivate|onfullscreenchange|onpointerrawupdate|onreadystatechange|onrejectionhandled|onscrollsnapchange|ontransitioncancel|onanimationcancel|onbeforeeditfocus|oncontextrestored|ondatasetcomplete|onselectionchange|ontransitionstart|onanimationstart|onbeforeactivate|oncanplaythrough|ondatasetchanged|ondurationchange|onlanguagechange|onlayoutcomplete|onloadedmetadata|onpropertychange|oncontrolselect|ondataavailable|ongesturechange|onmediacomplete|onpointercancel|onpromptdismiss|ontransitionend|ontransitionrun|onwebkitneedkey|onanimationend|onbeforetoggle|onbeforeunload|onbeforeupdate|ondevicemotion|onfilterchange|ongesturestart|onmessageerror|onpointerenter|onpointerleave|onpromptaction|onsyncrestored|onvolumechange|onafterupdate|onbeforeinput|onbeforematch|onbeforepaste|onbeforeprint|oncontextlost|oncontextmenu|onerrorupdate|onlosecapture|onpointerdown|onpointermove|onpointerover|onresizestart|onrowinserted|onselectstart|ontouchcancel|ontrackchange|onafterprint|onbeforecopy|oncellchange|ondeactivate|ongestureend|onhashchange|onloadeddata|onmediaerror|onmouseenter|onmouseleave|onmousewheel|onpagereveal|onpointerout|onratechange|onslotchange|ontimeupdate|ontouchstart|onbeforecut|oncuechange|ondragenter|ondragleave|ondragstart|onloadstart|onmousedown|onmousemove|onmouseover|onmovestart|onoutofsync|onpointerup|onresizeend|onrowdelete|onrowsenter|onscrollend|ontimeerror|ontouchmove|onactivate|onauxclick|ondblclick|ondragdrop|ondragexit|ondragover|onfocusout|onformdata|onkeypress|onlocation|onmouseout|onpagehide|onpageshow|onpageswap|onpopstate|onprogress|ontouchend|oncanplay|oncommand|ondragend|onemptied|onfocusin|oninvalid|onkeydown|onmessage|onmouseup|onmoveend|onoffline|onplaying|onreverse|onrowexit|onseeking|onstalled|onstorage|onsuspend|onurlflip|onwaiting|onbounce|oncancel|onchange|onfinish|ononline|onrepeat|onresize|onresume|onscroll|onsearch|onseeked|onselect|onsubmit|ontoggle|onunload|onabort|onbegin|onclick|onclose|onended|onerror|onfocus|oninput|onkeyup|onpaste|onpause|onreset|onstart|onwheel|onblur|oncopy|ondrag|ondrop|onhelp|onload|onmove|onplay|onredo|onseek|onstop|onundo|oncut|onend)\\s*=\\s{0,20}(?:[\\\"'][^\\\"']*[\\\"']|[^\\s>]+))",
+   "category": "semantic",
+   "status": "as_is",
+   "evidence_cases": ["semantic::sem_regex_plus_semantic_below_threshold", "table[3]:xss", "xss::xss_body_onload", "xss::xss_details_ontoggle", "xss::xss_event_handler_nested_quote", "xss::xss_img_onerror", "xss::xss_input_autofocus", "xss::xss_marquee_onstart", "xss::xss_select_onchange", "xss::xss_svg_onload", "xss::xss_video_source"]
+  },
+  {
+   "pattern": "(?:<[A-Za-z/](?:[^<>]*[^<>\\s])?\\s+(?:href|src|data|action)\\s*=[\\s\\\"\\']*(?:javascript|vbscript|data):)",
+   "category": "table[4]:xss",
+   "status": "as_is",
+   "evidence_cases": ["table[4]:xss", "xss::xss_anchor_href_data", "xss::xss_form_action", "xss::xss_iframe_javascript", "xss::xss_object_data"]
+  },
+  {
+   "pattern": "(?:<[A-Za-z/][^<>]*style\\s*=\\s{0,20}[\\\"']?[^<>\\\"']*(?:expression|behavior|url)\\s*\\([^)]*\\))",
+   "category": "table[5]:xss",
+   "status": "as_is",
+   "evidence_cases": ["table[5]:xss", "xss::xss_style_expression"]
+  },
+  {
+   "pattern": "(?:<object[^>]*>[\\s\\S]*<\\/object\\s*>)",
+   "category": "table[6]:xss",
+   "status": "as_is",
+   "evidence_cases": ["table[6]:xss"]
+  },
+  {
+   "pattern": "(?:<embed[^>]*>[\\s\\S]*<\\/embed\\s*>)",
+   "category": "table[7]:xss",
+   "status": "as_is",
+   "evidence_cases": ["table[7]:xss"]
+  },
+  {
+   "pattern": "(?:<applet[^>]*>[\\s\\S]*<\\/applet\\s*>)",
+   "category": "table[8]:xss",
+   "status": "as_is",
+   "evidence_cases": ["table[8]:xss"]
+  },
+  {
+   "pattern": "(?i)\\bSELECT\\b(?:(?!\\bSELECT\\b)[\\w\\s,\\*().])*?\\bFROM\\b",
+   "category": "context_matrix",
+   "status": "as_is",
+   "evidence_cases": ["context_matrix::ctx_sqli_narrow_body", "context_matrix::ctx_sqli_narrow_header", "semantic::sem_structural_dense", "sqli::sqli_double_query", "sqli::sqli_information_schema", "sqli::sqli_union_password", "table[9]:sqli"]
+  },
+  {
+   "pattern": "(?i)SELECT\\s+\\*",
+   "category": "table[10]:sqli",
+   "status": "as_is",
+   "evidence_cases": ["table[10]:sqli"]
+  },
+  {
+   "pattern": "(?i)\\bWHERE\\s+[\\w.\"]+\\s*(?:=|<|>|<=|>=|LIKE|IN)\\b",
+   "category": "semantic",
+   "status": "as_is",
+   "evidence_cases": ["semantic::sem_structural_dense", "sqli::sqli_update_set", "table[11]:sqli"]
+  },
+  {
+   "pattern": "(?i)\\b(?:OR|AND)\\s*(\\d+|'[^']*'|\\\"[^\\\"]*\\\"|[@:$][A-Za-z_]\\w*)\\s*=\\s*\\1\\b",
+   "category": "sqli",
+   "status": "as_is",
+   "evidence_cases": ["sqli::sqli_or_tautology", "sqli::sqli_sqlite_version", "table[12]:sqli"]
+  },
+  {
+   "pattern": "(?i)UNION\\s+(?:ALL\\s+)?SELECT",
+   "category": "context_matrix",
+   "status": "as_is",
+   "evidence_cases": ["context_matrix::ctx_sqli_narrow_body", "context_matrix::ctx_sqli_narrow_header", "semantic::sem_structural_dense", "sqli::sqli_double_query", "sqli::sqli_information_schema", "sqli::sqli_load_file", "sqli::sqli_union_password", "sqli::sqli_union_select", "table[13]:sqli"]
+  },
+  {
+   "pattern": "(?i)('\\s*(?:OR|AND)[\\s(]*'?(?:[@:$][A-Za-z_]\\w*|[\\d\\w]+)\\s*(?:LIKE|[<>]=?|=)[\\s(]*'?(?:[@:$][A-Za-z_]\\w*|[\\d\\w]+))",
+   "category": "sqli",
+   "status": "as_is",
+   "evidence_cases": ["sqli::sqli_or_tautology", "sqli::sqli_sqlite_version", "sqli::sqli_union_password", "table[14]:sqli"]
+  },
+  {
+   "pattern": "(?i)(UNION\\s+(?:ALL\\s+)?SELECT\\s+NULL(?:[,\\s]*NULL)*[,\\s]*|\\(\\s*SELECT\\s+(?:@@|VERSION))",
+   "category": "sqli",
+   "status": "as_is",
+   "evidence_cases": ["sqli::sqli_union_select", "table[15]:sqli"]
+  },
+  {
+   "pattern": "(?i)(?:INTO\\s+(?:OUTFILE|DUMPFILE)\\s+'[^']+')",
+   "category": "table[16]:sqli",
+   "status": "as_is",
+   "evidence_cases": ["table[16]:sqli"]
+  },
+  {
+   "pattern": "(?i)(?:LOAD_FILE\\s*\\([^)]+\\))",
+   "category": "sqli",
+   "status": "as_is",
+   "evidence_cases": ["sqli::sqli_load_file", "table[17]:sqli"]
+  },
+  {
+   "pattern": "(?i)(?:BENCHMARK\\s*\\(\\s*\\d+\\s*,)",
+   "category": "sqli",
+   "status": "as_is",
+   "evidence_cases": ["sqli::sqli_benchmark", "table[18]:sqli"]
+  },
+  {
+   "pattern": "(?i)(?:SLEEP\\s*\\(\\s*\\d+\\s*\\))",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::nosql_where_sleep", "sqli::sqli_pg_sleep", "sqli::sqli_sleep", "table[19]:sqli"]
+  },
+  {
+   "pattern": "(?i)(?:\\/\\*![0-9]*\\s*(?:OR|AND|UNION|SELECT|INSERT|DELETE|DROP|CONCAT|CHAR|UPDATE)\\b)",
+   "category": "table[20]:sqli",
+   "status": "as_is",
+   "evidence_cases": ["table[20]:sqli"]
+  },
+  {
+   "pattern": "\\w/\\*(?!!)[^*]*\\*/\\w",
+   "category": "sqli",
+   "status": "as_is",
+   "evidence_cases": ["sqli::sqli_inline_comment_obfuscation", "table[21]:sqli"]
+  },
+  {
+   "pattern": "(?i)(?:OR|AND)\\s+(?:'[\\w\\d]*'='[\\w\\d]*'?|[@:$][A-Za-z_]\\w*\\s*=\\s*[@:$][A-Za-z_]\\w*)",
+   "category": "cost_bodies",
+   "status": "as_is",
+   "evidence_cases": ["cost_bodies::cost_threat_8kib", "cost_bodies::cost_threat_tail_256kib", "encoding::enc_double_url_sqli", "sqli::sqli_or_string_compare", "sqli::sqli_url_encoded_quote", "table[22]:sqli"]
+  },
+  {
+   "pattern": "(?i);\\s*(?:DROP|TRUNCATE|ALTER|CREATE)\\s+(?:TABLE|DATABASE|SCHEMA)\\b",
+   "category": "binary_bodies",
+   "status": "as_is",
+   "evidence_cases": ["binary_bodies::binary_attack_sqli_padding", "sqli::sqli_drop_table", "table[23]:sqli"]
+  },
+  {
+   "pattern": "(?i);\\s*(?:INSERT\\s+INTO|UPDATE\\s+\\w+\\s+SET|DELETE\\s+FROM|SELECT\\b[^;]*?\\bFROM\\b|REPLACE\\s+INTO)\\b",
+   "category": "sqli",
+   "status": "as_is",
+   "evidence_cases": ["sqli::sqli_update_set", "table[24]:sqli"]
+  },
+  {
+   "pattern": "(?i)\\bEXEC(?:UTE)?\\s+(?:xp_\\w+|sp_\\w+)",
+   "category": "sqli",
+   "status": "as_is",
+   "evidence_cases": ["sqli::sqli_xp_cmdshell", "table[25]:sqli"]
+  },
+  {
+   "pattern": "(?i)(?:\\A|[;'\\\"])\\s*EXEC(?:UTE)?\\s+(?:xp_\\w+|sp_\\w+)",
+   "category": "sqli",
+   "status": "as_is",
+   "evidence_cases": ["sqli::sqli_xp_cmdshell", "table[26]:sqli"]
+  },
+  {
+   "pattern": "(?i)\\bORDER\\s+BY\\s+\\d+\\s*(?:--|#|;|\\)|,|/\\*|\\Z)|(?<=[=?&])ORDER\\s+BY\\s+\\d+\\s*\\n",
+   "category": "table[27]:sqli",
+   "status": "as_is",
+   "evidence_cases": ["table[27]:sqli"]
+  },
+  {
+   "pattern": "(?i)(?:['\\\")\\d]|/\\*)\\s{0,3}\\bORDER\\s+BY\\s+\\d+|\\bORDER\\s+BY\\s+\\d+\\s*(?:--|#|/\\*)",
+   "category": "table[28]:sqli",
+   "status": "as_is",
+   "evidence_cases": ["table[28]:sqli"]
+  },
+  {
+   "pattern": "'\\s*(?:[\\);]+\\s*)?--|'[\\);]*#(?:\\n|\\Z)",
+   "category": "sqli",
+   "status": "as_is",
+   "evidence_cases": ["sqli::sqli_comment_bypass", "sqli::sqli_load_file", "sqli::sqli_waitfor_delay", "sqli::sqli_xp_cmdshell", "table[29]:sqli"]
+  },
+  {
+   "pattern": "(?i)\\bWAITFOR\\s+(?:DELAY|TIME)\\s+'\\d{1,2}:\\d{1,2}:\\d{1,2}(?:\\.\\d+)?'",
+   "category": "sqli",
+   "status": "as_is",
+   "evidence_cases": ["sqli::sqli_waitfor_delay", "table[30]:sqli"]
+  },
+  {
+   "pattern": "(?:\\.\\.\\/|\\.\\.\\\\)(?:\\.\\.\\/|\\.\\.\\\\)+",
+   "category": "binary_bodies",
+   "status": "as_is",
+   "evidence_cases": ["binary_bodies::binary_attack_traversal_padding", "boundaries::boundary_binary_noise_payload_gap_kept", "context_matrix::ctx_trav_header", "context_matrix::ctx_trav_query_param", "context_matrix::ctx_trav_request_body", "context_matrix::ctx_trav_unknown", "context_matrix::ctx_trav_url_path", "path_traversal::trav_deep_padding", "path_traversal::trav_double_backslash", "path_traversal::trav_double_dot_slash", "path_traversal::trav_etc_shadow", "path_traversal::trav_proc_self_env", "table[31]:dir_traversal"]
+  },
+  {
+   "pattern": "\\A(?:(?!\\n).)*etc/(?:passwd|shadow|group|hosts|motd|issue|mysql/my\\.cnf|ssh/ssh_config)(?:[&#;,\\\"'<>]|\\s*\\Z)",
+   "category": "boundaries",
+   "status": "as_is",
+   "evidence_cases": ["boundaries::boundary_binary_noise_payload_gap_kept", "cmd_injection::cmdi_ifs_obfuscation", "cmd_injection::cmdi_semicolon_cat", "context_matrix::ctx_trav_header", "context_matrix::ctx_trav_query_param", "context_matrix::ctx_trav_request_body", "context_matrix::ctx_trav_unknown", "context_matrix::ctx_trav_url_path", "encoding::enc_base64_cmd_payload", "misc_injection::deser_php_object", "misc_injection::xml_xxe_file", "path_traversal::trav_absolute_etc", "path_traversal::trav_deep_padding", "path_traversal::trav_dots_repetition", "path_traversal::trav_double_dot_slash", "path_traversal::trav_double_encoded", "path_traversal::trav_etc_shadow", "path_traversal::trav_url_encoded", "sqli::sqli_load_file", "table[32]:dir_traversal"]
+  },
+  {
+   "pattern": "\\A(?=(?:(?!\\n).)*\\b(?:scan(?:ner|ning|ned|s)?|attack(?:er|ers|ed|s)?|attempt(?:ed|s)?|exploit(?:ation|ed|s|ing|kit)?|prob(?:e|ed|es|ing)|malicious|intrusion(?:s)?|botnet(?:s)?|honeypot(?:s)?|brute[- ]force|credential[- ]stuffing|threat feed|vulnerabilit(?:y|ies)|hostile|recon(?:naissance)?|spoofed referer|bad actor(?:s)?|WAF|IDS|SOC|pentest(?:ing)?|blocked|flagged|triggered|denied|enumerat(?:e|ed|ing)|suspicious)\\b)\\A(?:(?!\\n).)*[/\\\\](?:etc/(?:passwd|shadow|group|hosts|motd|issue|mysql/my\\.cnf|ssh/ssh_config))(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?\\b",
+   "category": "table[33]:dir_traversal",
+   "status": "as_is",
+   "evidence_cases": ["table[33]:dir_traversal"]
+  },
+  {
+   "pattern": "\\A(?:(?!\\n).)*(?:boot\\.ini|win\\.ini|system\\.ini|config\\.sys)(?:[&#;,\\\"'<>]|\\s*\\Z)",
+   "category": "path_traversal",
+   "status": "as_is",
+   "evidence_cases": ["path_traversal::trav_double_backslash", "path_traversal::trav_windows_ini", "table[34]:dir_traversal"]
+  },
+  {
+   "pattern": "\\A(?:(?!\\n).)*proc/self/environ(?:[&#;,\\\"'<>]|\\s*\\Z)",
+   "category": "path_traversal",
+   "status": "as_is",
+   "evidence_cases": ["path_traversal::trav_proc_self_env", "table[35]:dir_traversal"]
+  },
+  {
+   "pattern": "\\A(?:(?!\\n).)*var/log/[^\\s/]+(?:[&#;,\\\"'<>]|\\s*\\Z)",
+   "category": "table[36]:dir_traversal",
+   "status": "as_is",
+   "evidence_cases": ["table[36]:dir_traversal"]
+  },
+  {
+   "pattern": "\\.\\.;[^/\\\\]*[/\\\\]",
+   "category": "table[37]:dir_traversal",
+   "status": "as_is",
+   "evidence_cases": ["table[37]:dir_traversal"]
+  },
+  {
+   "pattern": ";\\s*(?:ls|cat|rm|chmod|chown|wget|curl|nc|netcat|ping|telnet)\\s+-[a-zA-Z]+\\s+",
+   "category": "table[38]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[38]:cmd_injection"]
+  },
+  {
+   "pattern": "\\|\\s*(?:wget|curl|fetch|lwp-download|lynx|links|GET)\\s+",
+   "category": "table[39]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[39]:cmd_injection"]
+  },
+  {
+   "pattern": "(?:[;&|]\\s*(?:\\$\\([^)]+\\)|\\$\\{[^}]+\\}))",
+   "category": "table[40]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[40]:cmd_injection"]
+  },
+  {
+   "pattern": "\\A\\s*(?:[;&|]\\s*)*`\\s*(?:[A-Za-z0-9_./~]|\\$[({])(?:[^`\\\\\\n]|\\\\.)*(?:\\n\\s*)?`(?:\\s*[;&|]\\s*`\\s*(?:[A-Za-z0-9_./~]|\\$[({])(?:[^`\\\\\\n]|\\\\.)*(?:\\n\\s*)?`)*\\s*(?:[;&|]\\s*)*\\Z",
+   "category": "cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["cmd_injection::cmdi_backtick", "table[41]:cmd_injection"]
+  },
+  {
+   "pattern": "(?<!`)`(?:[A-Za-z0-9_./~]|\\$[({])(?:[^`\\\\\\n]|\\\\.)*`",
+   "category": "binary_bodies",
+   "status": "as_is",
+   "evidence_cases": ["binary_bodies::binary_text_backtick_embedded_sample0", "binary_bodies::binary_text_backtick_embedded_sample1", "binary_bodies::binary_text_backtick_embedded_sample2", "table[42]:cmd_injection"]
+  },
+  {
+   "pattern": "\\$\\((?:[^()\\\\\\n]|\\\\.)*\\)|\\$\\{(?:[^{}\\\\\\n]|\\\\.)*\\}",
+   "category": "cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["cmd_injection::cmdi_dollar_paren", "cmd_injection::cmdi_ifs_obfuscation", "misc_injection::log4shell_jndi_dns", "misc_injection::log4shell_jndi_ldap", "misc_injection::log4shell_jndi_obfuscated", "misc_injection::template_dollar_brace", "table[43]:cmd_injection"]
+  },
+  {
+   "pattern": "(?i)\\$\\{(?:jndi:(?:ldap|rmi|dns)://|\\$?\\{?(?:lower|upper):j\\}ndi|::-j\\}ndi)",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::log4shell_jndi_dns", "misc_injection::log4shell_jndi_ldap", "misc_injection::log4shell_jndi_obfuscated", "table[44]:cmd_injection"]
+  },
+  {
+   "pattern": "(?:\\A|[;|&])\\s*/?(?:[\\w.-]+/)*(?:env\\s+/?(?:[\\w.-]+/)*)?(?:bash|sh|ksh|csh|tsch|zsh|ash)\\s+-[a-zA-Z]+(?:\\s+(?:'[^']*'|\\\"[^\\\"]*\\\"|[^\\s;|&]+))?(?=\\s*(?:[;|&]|\\Z))",
+   "category": "cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["cmd_injection::cmdi_bash_dash_c", "table[45]:cmd_injection"]
+  },
+  {
+   "pattern": "(?:\\A|[;|&])\\s*[^=\\s;|&]+=[^\\s;|&]+\\s+(?:/?(?:[\\w.-]+/)*env\\s+)?/?(?:[\\w.-]+/)*(?:bash|sh|ksh|csh|tsch|zsh|ash)\\s+-[a-zA-Z]+",
+   "category": "table[46]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[46]:cmd_injection"]
+  },
+  {
+   "pattern": "\\n[^\\S\\r\\n]*(?:[^=\\s;|&]+=[^\\s;|&]+\\s+)*(?:/?(?:[\\w.-]+/)*env\\s+)?/?(?:[\\w.-]+/)*(?:bash|sh|ksh|csh|tsch|zsh|ash)\\s+-c\\b",
+   "category": "table[47]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[47]:cmd_injection"]
+  },
+  {
+   "pattern": "\\b(?:eval|system|exec|shell_exec|passthru|popen|proc_open|create_function)\\s*\\(",
+   "category": "binary_bodies",
+   "status": "as_is",
+   "evidence_cases": ["binary_bodies::binary_attack_padded_webshell", "binary_bodies::binary_attack_pickle_opcodes", "cmd_injection::cmdi_eval_base64", "cmd_injection::cmdi_node_child_process", "cmd_injection::cmdi_python_exec", "inclusion_sensitive_recon::incl_data_uri", "misc_injection::code_injection_eval_request", "misc_injection::deser_pickle_reduce", "semantic::sem_regex_plus_semantic_below_threshold", "table[48]:cmd_injection"]
+  },
+  {
+   "pattern": "(?:require\\(\\s*[\\\"']child_process[\\\"']\\s*\\)|child_process)\\s*\\.\\s*(?:execSync|spawnSync|spawn|fork)\\s*\\(",
+   "category": "table[49]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[49]:cmd_injection"]
+  },
+  {
+   "pattern": "\\bassert\\s*\\(\\s*\\$",
+   "category": "cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["cmd_injection::cmdi_php_assert", "table[50]:cmd_injection"]
+  },
+  {
+   "pattern": "\\bos\\.exec(?:l|le|lp|lpe|v|ve|vp|vpe)\\s*\\(",
+   "category": "table[51]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[51]:cmd_injection"]
+  },
+  {
+   "pattern": "\\b(?:new\\s+)?Function\\s*\\(\\s*[\\\"']",
+   "category": "table[52]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[52]:cmd_injection"]
+  },
+  {
+   "pattern": "\\[\\s*[\\\"']eval[\\\"']\\s*\\]\\s*\\(\\s*[\\\"']",
+   "category": "table[53]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[53]:cmd_injection"]
+  },
+  {
+   "pattern": "(?:\\.\\s*constructor|\\[\\s*[\\\"']constructor[\\\"']\\s*\\])\\s*(?:\\.\\s*constructor|\\[\\s*[\\\"']constructor[\\\"']\\s*\\])\\s*\\(\\s*[\\\"']",
+   "category": "table[54]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[54]:cmd_injection"]
+  },
+  {
+   "pattern": "\\b(?:setTimeout|setInterval)\\s*\\(\\s*[\\\"']",
+   "category": "table[55]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[55]:cmd_injection"]
+  },
+  {
+   "pattern": "[;|&]\\s*(?:ls|cat|rm|id|whoami|uname|wget|curl|nc|netcat|socat|bash|sh|python|perl)\\b",
+   "category": "cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["cmd_injection::cmdi_curl_sh", "cmd_injection::cmdi_double_amp_rm", "cmd_injection::cmdi_pipe_nc", "cmd_injection::cmdi_semicolon_cat", "table[56]:cmd_injection"]
+  },
+  {
+   "pattern": "(?i)\\b(?:nc|netcat|ncat)\\s+-[a-z]*e\\b|/dev/tcp/\\d",
+   "category": "table[57]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[57]:cmd_injection"]
+  },
+  {
+   "pattern": "(?:\\A|[;&|]\\s*|\\$\\()\\{[^{}\\s,:'\\\"][^{},:'\\\"]*(?:,(?:[^{}\\s,:'\\\"][^{},:'\\\"]*)?)+\\}",
+   "category": "table[58]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[58]:cmd_injection"]
+  },
+  {
+   "pattern": "\\w+(?:['\\\"]+\\w+){1,10}",
+   "category": "table[59]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[59]:cmd_injection"]
+  },
+  {
+   "pattern": "[A-Za-z0-9_./*?-]*[?*][A-Za-z0-9_./*?-]*",
+   "category": "table[60]:cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[60]:cmd_injection"]
+  },
+  {
+   "pattern": "(?:php|data|zip|rar|file|glob|expect|input|phpinfo|zlib|phar|ssh2|rar|ogg|expect)://[^\\s]+",
+   "category": "inclusion_sensitive_recon",
+   "status": "as_is",
+   "evidence_cases": ["inclusion_sensitive_recon::incl_data_uri", "inclusion_sensitive_recon::incl_expect_scheme", "inclusion_sensitive_recon::incl_phar_stream", "inclusion_sensitive_recon::incl_php_filter", "inclusion_sensitive_recon::incl_zip_stream", "misc_injection::xml_xxe_file", "table[61]:file_inclusion"]
+  },
+  {
+   "pattern": "(?:(?<!:)\\/\\/[0-9a-zA-Z](?:[-\\w]*[0-9a-zA-Z])?(?:\\.[0-9a-zA-Z](?:[-\\w]*[0-9a-zA-Z])?)+(:[0-9]+)?(?:\\/?)(?:[a-zA-Z0-9\\-\\.\\?,'/\\\\\\+&amp;%\\$#_]*)?)",
+   "category": "table[62]:file_inclusion",
+   "status": "as_is",
+   "evidence_cases": ["table[62]:file_inclusion"]
+  },
+  {
+   "pattern": "=(?:https?|ftp):\\/\\/[^\\s'\\\"<>]+\\/[^\\s'\\\"<>\\/]*\\.(?:phtml|php[3-5]?|phar|jsp|aspx?|pl|py|txt|inc)(?![a-zA-Z0-9])",
+   "category": "table[63]:file_inclusion",
+   "status": "as_is",
+   "evidence_cases": ["table[63]:file_inclusion"]
+  },
+  {
+   "pattern": "[\\\"'](?:template|include|tpl|module|layout)[\\\"']\\s*:\\s*[\\\"'](?:https?|ftp)://[^\\s'\\\"<>]+/[^\\s'\\\"<>/]*\\.(?:phtml|php[3-5]?|phar|jsp|aspx?|cgi|pl|py|sh|txt|inc)(?![a-zA-Z0-9])[\\\"']",
+   "category": "table[64]:file_inclusion",
+   "status": "as_is",
+   "evidence_cases": ["table[64]:file_inclusion"]
+  },
+  {
+   "pattern": "\\([\\s]*[|&][\\s]*\\([^)(]+=[*]",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::ldap_injection_uid", "table[65]:ldap"]
+  },
+  {
+   "pattern": "\\*\\s*\\)+\\s*(?:[|&!]\\s*)?\\(+\\s*(?:[&|!]|(?::)?(?:[a-zA-Z][\\w.-]*|\\d+(?:\\.\\d+)*)(?:;[\\w.-]+)*(?::[\\w.-]+)*\\s*:?=)",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::ldap_injection_password", "misc_injection::ldap_injection_uid", "table[66]:ldap"]
+  },
+  {
+   "pattern": "\\)\\s*\\(\\s*(?:[&|!]|(?::)?(?:[a-zA-Z][\\w.-]*|\\d+(?:\\.\\d+)*)(?:;[\\w.-]+)*(?::[\\w.-]+)*\\s*:?[=~<>])",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::ldap_injection_uid", "table[67]:ldap"]
+  },
+  {
+   "pattern": "\\(\\s*[&|]\\s*",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::ldap_injection_password", "misc_injection::ldap_injection_uid", "table[68]:ldap"]
+  },
+  {
+   "pattern": "\\*\\)[|&]?\\(+\\s*(?::)?(?:[a-zA-Z][\\w.-]*|\\d+(?:\\.\\d+)*)(?:;[\\w.-]+)*(?::[\\w.-]+)*\\s*:?=",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::ldap_injection_uid", "table[69]:ldap"]
+  },
+  {
+   "pattern": "[a-zA-Z][\\w-]*\\s*=[\\d\\w\\s]*\\*\\)+(?:%00|\\\\u0000|\\\\x00|\\\\0|\\x00)",
+   "category": "table[70]:ldap",
+   "status": "as_is",
+   "evidence_cases": ["table[70]:ldap"]
+  },
+  {
+   "pattern": "\\*\\)\\)+(?:%00|\\\\u0000|\\\\x00|\\\\0|\\x00)",
+   "category": "table[71]:ldap",
+   "status": "as_is",
+   "evidence_cases": ["table[71]:ldap"]
+  },
+  {
+   "pattern": "[a-zA-Z][\\w-]*\\s*=[\\d\\w\\s]*\\*\\)+\\x00",
+   "category": "table[72]:ldap",
+   "status": "as_is",
+   "evidence_cases": ["table[72]:ldap"]
+  },
+  {
+   "pattern": "\\*\\)\\)+\\x00",
+   "category": "table[73]:ldap",
+   "status": "as_is",
+   "evidence_cases": ["table[73]:ldap"]
+  },
+  {
+   "pattern": "<!(?:ENTITY|DOCTYPE)[^>]+SYSTEM[^>]+>",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::xml_xxe_file", "misc_injection::xml_xxe_remote", "table[74]:xml"]
+  },
+  {
+   "pattern": "<!DOCTYPE[^>\\[]+PUBLIC[^>\\[]+[\\\"']https?://(?!(?:www\\.)?w3\\.org/)[^\\\"'>]+[\\\"'][^>\\[]*>",
+   "category": "table[75]:xml",
+   "status": "as_is",
+   "evidence_cases": ["table[75]:xml"]
+  },
+  {
+   "pattern": "(?:<!\\[CDATA\\[.*?\\]\\]>)",
+   "category": "table[76]:xml",
+   "status": "as_is",
+   "evidence_cases": ["table[76]:xml"]
+  },
+  {
+   "pattern": "<!DOCTYPE[^>\\[]*\\[[\\s\\S]*?<!ENTITY",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::xml_xxe_file", "misc_injection::xml_xxe_remote", "table[77]:xml"]
+  },
+  {
+   "pattern": "(?:^|\\s|/)(?:(?<=://)[^\\s/@]*@)?(?:localhost\\.?|127\\.0\\.0\\.1|0\\.0\\.0\\.0|\\[::(?:\\d*)\\]|\\[::ffff:127\\.0\\.0\\.1\\]|169\\.254(?:\\.\\d{1,3}){2}|192\\.168(?:\\.\\d{1,3}){2}|10(?:\\.\\d{1,3}){3}|172\\.(?:1[6-9]|2[0-9]|3[01])(?:\\.\\d{1,3}){2}|metadata\\.google\\.internal|metadata\\.goog|100\\.100\\.100\\.200)(?::\\d+)?(?:\\s|$|/)",
+   "category": "cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["cmd_injection::cmdi_curl_sh", "cmd_injection::cmdi_newline_wget", "cmd_injection::cmdi_pipe_nc", "inclusion_sensitive_recon::incl_remote_http", "misc_injection::log4shell_jndi_ldap", "misc_injection::log4shell_jndi_obfuscated", "misc_injection::xml_xxe_remote", "table[78]:ssrf"]
+  },
+  {
+   "pattern": "://(?:[^/@\\s]*@)?((?:0[xX][0-9a-fA-F]+|0[0-7]+|[1-9]\\d*|0)(?:\\.(?:0[xX][0-9a-fA-F]+|0[0-7]+|[1-9]\\d*|0)){0,3})(?=[:/\\s]|$)",
+   "category": "cmd_injection",
+   "status": "as_is",
+   "evidence_cases": ["cmd_injection::cmdi_curl_sh", "cmd_injection::cmdi_newline_wget", "inclusion_sensitive_recon::incl_remote_http", "misc_injection::log4shell_jndi_ldap", "misc_injection::log4shell_jndi_obfuscated", "misc_injection::xml_xxe_remote", "table[79]:ssrf"]
+  },
+  {
+   "pattern": "(?:file|dict|gopher|jar|tftp)://[^\\s]+",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::xml_xxe_file", "table[80]:ssrf"]
+  },
+  {
+   "pattern": "://[^/\\s@]*@[^/\\s@]*@",
+   "category": "table[81]:ssrf",
+   "status": "as_is",
+   "evidence_cases": ["table[81]:ssrf"]
+  },
+  {
+   "pattern": "://(?:metadata|instance-data)(?::\\d+)?(?:/|\\s|$)",
+   "category": "table[82]:ssrf",
+   "status": "as_is",
+   "evidence_cases": ["table[82]:ssrf"]
+  },
+  {
+   "pattern": "\\{\\s*\\$(?:where|gt|lt|ne|eq|regex|in|nin|all|size|exists|type|mod|options):",
+   "category": "table[83]:nosql",
+   "status": "as_is",
+   "evidence_cases": ["table[83]:nosql"]
+  },
+  {
+   "pattern": "(?:\\{\\s*\\$[a-zA-Z]+\\s*:\\s*(?:\\{|\\[))",
+   "category": "table[84]:nosql",
+   "status": "as_is",
+   "evidence_cases": ["table[84]:nosql"]
+  },
+  {
+   "pattern": "\"\\$(?:where|regex|expr|jsonSchema|function|accumulator|type|exists|size)\"\\s*:",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::nosql_where_sleep", "table[85]:nosql"]
+  },
+  {
+   "pattern": "\"\\$(?:gt|gte|lt|lte|ne|eq|in|nin|all|mod)\"\\s*:\\s*(?:\"\"|null|\\{|\\[)",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::nosql_gt_empty", "table[86]:nosql"]
+  },
+  {
+   "pattern": "\"[^\"]+\"\\s*:\\s*\\{\\s*\"\\$(?:ne|eq)\"\\s*:\\s*(?:true|false)",
+   "category": "table[87]:nosql",
+   "status": "as_is",
+   "evidence_cases": ["table[87]:nosql"]
+  },
+  {
+   "pattern": "\\[\\$(?:where|gt|gte|lt|lte|ne|eq|regex|in|nin|nor|and|or|not|all|size|exists|type|mod|options|expr|function|elemMatch)\\]",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::nosql_ne_null", "table[88]:nosql"]
+  },
+  {
+   "pattern": "(?:\\A|[;,:\\n])\\s*filename\\s*=\\s*[\\\"'][^\\\"']*\\.(?:php\\d*|phtml|shtml|asax|ascx|ashx|asmx|aspx|bash|jspx|phar|phps|asa|asp|bat|cer|cfc|cfm|cgi|cmd|com|exe|hta|jsp|msi|pht|vbe|vbs|war|wsf|js|pl|py|rb|sh|ws)[\\\"']",
+   "category": "binary_bodies",
+   "status": "as_is",
+   "evidence_cases": ["binary_bodies::binary_attack_base64_fragmented_multipart", "misc_injection::file_upload_php_ext", "table[89]:file_upload"]
+  },
+  {
+   "pattern": "(?:\\A|[;,:\\n])\\s*filename\\s*=\\s*[\\\"'][^\\\"']*\\.(?:php\\d*|phtml|shtml|asax|ascx|ashx|asmx|aspx|bash|jspx|phar|phps|asa|asp|bat|cer|cfc|cfm|cgi|cmd|exe|hta|jsp|msi|pht|vbe|vbs|war|wsf|js|pl|py|rb|sh|ws)(?![A-Za-z0-9])(?:[^ \\\"'][^\\\"']*)?\\.(?:docx|jpeg|pptx|tiff|webm|webp|xlsx|avi|bmp|doc|gif|ico|jpg|mkv|mov|mp3|mp4|odt|pdf|png|ppt|svg|tif|wav|xls)[\\\"']",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::file_upload_double_ext", "table[90]:file_upload"]
+  },
+  {
+   "pattern": "(?:\\A|[;,:\\n])\\s*filename\\s*=\\s*[\\\"'][^\\\"']*\\.(?:php\\d*|phtml|shtml|asax|ascx|ashx|asmx|aspx|bash|jspx|phar|phps|asa|asp|bat|cer|cfc|cfm|cgi|cmd|exe|hta|jsp|msi|pht|vbe|vbs|war|wsf|js|pl|py|rb|sh|ws)(?![A-Za-z0-9])(?:(?:%00|\\\\u0000|\\\\x00|\\\\0|\\x00|;)[^\\\"']*|\\.)[\\\"']",
+   "category": "table[91]:file_upload",
+   "status": "as_is",
+   "evidence_cases": ["table[91]:file_upload"]
+  },
+  {
+   "pattern": "(?:\\A|[;,:\\n])\\s*filename\\s*=\\s*[\\\"'][^\\\"']*\\.(?:php\\d*|phtml|shtml|asax|ascx|ashx|asmx|aspx|bash|jspx|phar|phps|asa|asp|bat|cer|cfc|cfm|cgi|cmd|exe|hta|jsp|msi|pht|vbe|vbs|war|wsf|js|pl|py|rb|sh|ws)(?![A-Za-z0-9])(?:(?:\\x00|;)[^\\\"']*|\\.)[\\\"']",
+   "category": "table[92]:file_upload",
+   "status": "as_is",
+   "evidence_cases": ["table[92]:file_upload"]
+  },
+  {
+   "pattern": "(?:%2e%2e|%252e%252e|%uff0e%uff0e|%c0%ae%c0%ae|%e0%40%ae|%c0%ae%e0%80%ae|%25c0%25ae)/",
+   "category": "table[93]:path_traversal",
+   "status": "as_is",
+   "evidence_cases": ["table[93]:path_traversal"]
+  },
+  {
+   "pattern": "\\{\\{\\s*[^\\}]+(?:system|exec|popen|eval|require|include)\\s*\\}\\}",
+   "category": "table[94]:template",
+   "status": "as_is",
+   "evidence_cases": ["table[94]:template"]
+  },
+  {
+   "pattern": "\\{\\%\\s*[^\\%]+(?:system|exec|popen|eval|require|include)\\s*\\%\\}",
+   "category": "table[95]:template",
+   "status": "as_is",
+   "evidence_cases": ["table[95]:template"]
+  },
+  {
+   "pattern": "(?i)<%[=#]?[^%]*(?:system|exec|eval|`|Runtime|IO\\.|File\\.|Dir\\.|\\d+\\s*[-+*/]\\s*\\d+)[^%]*%>",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::template_asp_eval", "table[96]:template"]
+  },
+  {
+   "pattern": "\\$\\{[^}]*(?:@[\\w.]+@|\\b\\w+\\s*\\(|\\d+\\s*[*/%+\\-]\\s*\\d+)[^}]*\\}",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::template_dollar_brace", "table[97]:template"]
+  },
+  {
+   "pattern": "\\{\\{(?![^\\}]*\\d{4}-\\d{1,2}-\\d{1,2}(?!\\d))(?=[^\\}]*(?:@[\\w.]+@|\\b\\w+\\(\\s*\\)|['\\\"]?\\d+['\\\"]?\\s*[*/%+\\-]\\s*['\\\"]?\\d+['\\\"]?))[^\\}]*\\}\\}",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::template_jinja_expr", "table[98]:template"]
+  },
+  {
+   "pattern": "#\\{(?![^\\}]*\\d{4}-\\d{1,2}-\\d{1,2}(?!\\d))(?=[^\\}]*(?:@[\\w.]+@|\\b\\w+\\s*\\(|['\\\"]?\\d+['\\\"]?\\s*[*/%+\\-]\\s*['\\\"]?\\d+['\\\"]?))[^\\}]*\\}",
+   "category": "table[99]:template",
+   "status": "as_is",
+   "evidence_cases": ["table[99]:template"]
+  },
+  {
+   "pattern": "[\\r\\n][^\\S\\r\\n]*(?:HTTP\\/[0-9.]+|Location:|Set-Cookie:)",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::http_split_crlf_cookie", "table[100]:http_split"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!\\.env(?:\\.\\w+)?(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*\\.env(?:\\.\\w+)?(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "inclusion_sensitive_recon",
+   "status": "as_is",
+   "evidence_cases": ["inclusion_sensitive_recon::sensitive_env_file", "table[101]:sensitive_file"]
+  },
+  {
+   "pattern": "\\A(?=(?:(?!\\n).)*\\b(?:scan(?:ner|ning|ned|s)?|attack(?:er|ers|ed|s)?|attempt(?:ed|s)?|exploit(?:ation|ed|s|ing|kit)?|prob(?:e|ed|es|ing)|malicious|intrusion(?:s)?|botnet(?:s)?|honeypot(?:s)?|brute[- ]force|credential[- ]stuffing|threat feed|vulnerabilit(?:y|ies)|hostile|recon(?:naissance)?|spoofed referer|bad actor(?:s)?|WAF|IDS|SOC|pentest(?:ing)?|blocked|flagged|triggered|denied|enumerat(?:e|ed|ing)|suspicious)\\b)\\A(?:(?!\\n).)*[/\\\\](?:\\.env(?:\\.\\w+)?)(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?\\b",
+   "category": "table[102]:sensitive_file",
+   "status": "as_is",
+   "evidence_cases": ["table[102]:sensitive_file"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:(?!config)[\\w-])*config[\\w-]*\\.(?:env|yml|yaml|json|toml|ini|xml|conf)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:(?!config)[\\w-])*config[\\w-]*\\.(?:env|yml|yaml|json|toml|ini|xml|conf)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[103]:sensitive_file",
+   "status": "as_is",
+   "evidence_cases": ["table[103]:sensitive_file"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?![\\w.\\-~%]*\\.map(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*[\\w.\\-~%]*\\.map(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[104]:sensitive_file",
+   "status": "as_is",
+   "evidence_cases": ["table[104]:sensitive_file"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:[\\w.\\-~%]+[/\\\\])*[\\w.\\-~%]*\\.(?:ts|tsx|jsx|py|rb|java|go|rs|php|pl|sh|sql)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "inclusion_sensitive_recon",
+   "status": "as_is",
+   "evidence_cases": ["inclusion_sensitive_recon::recon_joomla_installer", "inclusion_sensitive_recon::recon_phpmyadmin", "inclusion_sensitive_recon::recon_wp_admin", "inclusion_sensitive_recon::recon_wp_login", "table[105]:sensitive_file"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!\\.(?:git|svn|hg|bzr)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*\\.(?:git|svn|hg|bzr)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "inclusion_sensitive_recon",
+   "status": "as_is",
+   "evidence_cases": ["inclusion_sensitive_recon::sensitive_git_config", "table[106]:sensitive_file"]
+  },
+  {
+   "pattern": "\\A(?=(?:(?!\\n).)*\\b(?:scan(?:ner|ning|ned|s)?|attack(?:er|ers|ed|s)?|attempt(?:ed|s)?|exploit(?:ation|ed|s|ing|kit)?|prob(?:e|ed|es|ing)|malicious|intrusion(?:s)?|botnet(?:s)?|honeypot(?:s)?|brute[- ]force|credential[- ]stuffing|threat feed|vulnerabilit(?:y|ies)|hostile|recon(?:naissance)?|spoofed referer|bad actor(?:s)?|WAF|IDS|SOC|pentest(?:ing)?|blocked|flagged|triggered|denied|enumerat(?:e|ed|ing)|suspicious)\\b)\\A(?:(?!\\n).)*[/\\\\](?:\\.(?:git|svn|hg|bzr))(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?\\b",
+   "category": "table[107]:sensitive_file",
+   "status": "as_is",
+   "evidence_cases": ["table[107]:sensitive_file"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:[\\w.\\-~%]+[/\\\\])*[\\w.\\-~%]*\\.\\w+~(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[108]:sensitive_file",
+   "status": "as_is",
+   "evidence_cases": ["table[108]:sensitive_file"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:wp-(?:admin|login|content|includes|config)|administrator|xmlrpc)\\.?(?:php)?(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:wp-(?:admin|login|content|includes|config)|administrator|xmlrpc)\\.?(?:php)?(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "inclusion_sensitive_recon",
+   "status": "as_is",
+   "evidence_cases": ["inclusion_sensitive_recon::recon_wp_admin", "inclusion_sensitive_recon::recon_wp_login", "table[109]:cms_probing"]
+  },
+  {
+   "pattern": "\\A(?=(?:(?!\\n).)*\\b(?:scan(?:ner|ning|ned|s)?|attack(?:er|ers|ed|s)?|attempt(?:ed|s)?|exploit(?:ation|ed|s|ing|kit)?|prob(?:e|ed|es|ing)|malicious|intrusion(?:s)?|botnet(?:s)?|honeypot(?:s)?|brute[- ]force|credential[- ]stuffing|threat feed|vulnerabilit(?:y|ies)|hostile|recon(?:naissance)?|spoofed referer|bad actor(?:s)?|WAF|IDS|SOC|pentest(?:ing)?|blocked|flagged|triggered|denied|enumerat(?:e|ed|ing)|suspicious)\\b)\\A(?:(?!\\n).)*[/\\\\](?:(?:wp-(?:admin|login|content|includes|config)|administrator|xmlrpc)\\.?(?:php)?)(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?\\b",
+   "category": "table[110]:cms_probing",
+   "status": "as_is",
+   "evidence_cases": ["table[110]:cms_probing"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:phpinfo|info|test|php_info)\\.php(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:phpinfo|info|test|php_info)\\.php(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[111]:cms_probing",
+   "status": "as_is",
+   "evidence_cases": ["table[111]:cms_probing"]
+  },
+  {
+   "pattern": "\\A(?=(?:(?!\\n).)*\\b(?:scan(?:ner|ning|ned|s)?|attack(?:er|ers|ed|s)?|attempt(?:ed|s)?|exploit(?:ation|ed|s|ing|kit)?|prob(?:e|ed|es|ing)|malicious|intrusion(?:s)?|botnet(?:s)?|honeypot(?:s)?|brute[- ]force|credential[- ]stuffing|threat feed|vulnerabilit(?:y|ies)|hostile|recon(?:naissance)?|spoofed referer|bad actor(?:s)?|WAF|IDS|SOC|pentest(?:ing)?|blocked|flagged|triggered|denied|enumerat(?:e|ed|ing)|suspicious)\\b)\\A(?:(?!\\n).)*[/\\\\](?:(?:phpinfo|info|test|php_info)\\.php)(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?\\b",
+   "category": "table[112]:cms_probing",
+   "status": "as_is",
+   "evidence_cases": ["table[112]:cms_probing"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?![\\w.\\-~%]*\\.(?:bak|backup|old|orig|save|swp|swo|tmp|temp)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*[\\w.\\-~%]*\\.(?:bak|backup|old|orig|save|swp|swo|tmp|temp)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "inclusion_sensitive_recon",
+   "status": "as_is",
+   "evidence_cases": ["inclusion_sensitive_recon::sensitive_config_bak", "table[113]:cms_probing"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:\\.htaccess|\\.htpasswd|\\.DS_Store|Thumbs\\.db|\\.npmrc|\\.dockerenv|web\\.config)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:\\.htaccess|\\.htpasswd|\\.DS_Store|Thumbs\\.db|\\.npmrc|\\.dockerenv|web\\.config)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "inclusion_sensitive_recon",
+   "status": "as_is",
+   "evidence_cases": ["inclusion_sensitive_recon::sensitive_htpasswd", "table[114]:cms_probing"]
+  },
+  {
+   "pattern": "\\A(?=(?:(?!\\n).)*\\b(?:scan(?:ner|ning|ned|s)?|attack(?:er|ers|ed|s)?|attempt(?:ed|s)?|exploit(?:ation|ed|s|ing|kit)?|prob(?:e|ed|es|ing)|malicious|intrusion(?:s)?|botnet(?:s)?|honeypot(?:s)?|brute[- ]force|credential[- ]stuffing|threat feed|vulnerabilit(?:y|ies)|hostile|recon(?:naissance)?|spoofed referer|bad actor(?:s)?|WAF|IDS|SOC|pentest(?:ing)?|blocked|flagged|triggered|denied|enumerat(?:e|ed|ing)|suspicious)\\b)\\A(?:(?!\\n).)*[/\\\\](?:(?:\\.htaccess|\\.htpasswd|\\.DS_Store|Thumbs\\.db|\\.npmrc|\\.dockerenv|web\\.config))(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?(?:[/\\\\][\\w.\\-~%]{1,64})?\\b",
+   "category": "table[115]:cms_probing",
+   "status": "as_is",
+   "evidence_cases": ["table[115]:cms_probing"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:[\\w.\\-~%]+[/\\\\])*[\\w.\\-~%]*\\.(?:asp|aspx|jsp|jsa|jhtml|shtml|cfm|cgi|do|action|lua|inc|woa|nsf|esp)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[116]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[116]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\](?:(?!(?:management|config_dump|credentials|system[/\\\\]version|version[/\\\\]system)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:management|config_dump|credentials|system[/\\\\]version|version[/\\\\]system)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "inclusion_sensitive_recon",
+   "status": "as_is",
+   "evidence_cases": ["inclusion_sensitive_recon::sensitive_aws_credentials", "table[117]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\](?:system|version)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[118]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[118]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:actuator|server-status|telescope)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:actuator|server-status|telescope)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "inclusion_sensitive_recon",
+   "status": "as_is",
+   "evidence_cases": ["inclusion_sensitive_recon::recon_actuator", "inclusion_sensitive_recon::recon_server_status", "table[119]:recon"]
+  },
+  {
+   "pattern": "(?:CSCOE|dana-(?:na|cached)|sslvpn|RDWeb|/owa/|/ecp/|global-protect|ssl-vpn/|svpn/|sonicui|/remote/login|myvpn|vpntunnel|versa/login)",
+   "category": "table[120]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[120]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:geoserver|confluence|nifi|ScadaBR|pandora_console|centreon|kylin|decisioncenter|evox|MagicInfo|metasys|officescan|helpdesk|ignite)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:geoserver|confluence|nifi|ScadaBR|pandora_console|centreon|kylin|decisioncenter|evox|MagicInfo|metasys|officescan|helpdesk|ignite)(?:[.\\-][\\w.\\-~%]*)?(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[121]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[121]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!cgi-(?:bin|mod)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*cgi-(?:bin|mod)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[122]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[122]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:HNAP1|IPCamDesc\\.xml|SDK/webLanguage)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:HNAP1|IPCamDesc\\.xml|SDK/webLanguage)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[123]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[123]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:language|languages)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:language|languages)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[124]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[124]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:readme\\.txt|README\\.md|CHANGELOG|pom\\.xml|build\\.gradle|appsettings\\.json|crossdomain\\.xml)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:readme\\.txt|README\\.md|CHANGELOG|pom\\.xml|build\\.gradle|appsettings\\.json|crossdomain\\.xml)(?:\\.[\\w.\\-~%]*)?(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[125]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[125]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:sap|ise|nidp|cslu|rustfs|developmentserver|fog/management|lms/db|json/login_session|sms_mp|plugin/webs_model|wsman|am_bin)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:sap|ise|nidp|cslu|rustfs|developmentserver|fog/management|lms/db|json/login_session|sms_mp|plugin/webs_model|wsman|am_bin)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[126]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[126]:recon"]
+  },
+  {
+   "pattern": "(?:nmaplowercheck|nice\\s+ports|Trinity\\.txt)",
+   "category": "table[127]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[127]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!\\.(?:openclaw|clawdbot)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*\\.(?:openclaw|clawdbot)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[128]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[128]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:default|inicio|indice|localstart)(?:\\.[\\w.\\-~%]*)?(?:[/\\\\])?(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[129]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[129]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!inicio\\.html?(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*inicio\\.html?(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[130]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[130]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:\\.streamlit|\\.gpt-pilot|\\.aider|\\.cursor|\\.windsurf|\\.copilot|\\.devcontainer)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:\\.streamlit|\\.gpt-pilot|\\.aider|\\.cursor|\\.windsurf|\\.copilot|\\.devcontainer)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[131]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[131]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!(?:docker-compose|Dockerfile|Makefile|Vagrantfile|Jenkinsfile|Procfile)(?:\\.ya?ml)?(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*(?:docker-compose|Dockerfile|Makefile|Vagrantfile|Jenkinsfile|Procfile)(?:\\.ya?ml)?(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[132]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[132]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?![\\w.\\-~%]*(?:secrets?|credentials?)\\.(?:py|json|yml|yaml|toml|txt|env|xml|conf|cfg)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*[\\w.\\-~%]*(?:secrets?|credentials?)\\.(?:py|json|yml|yaml|toml|txt|env|xml|conf|cfg)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[133]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[133]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!autodiscover(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*autodiscover(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[134]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[134]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!dns-query(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*dns-query(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[135]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[135]:recon"]
+  },
+  {
+   "pattern": "\\A[/\\\\]?(?:(?!\\.git/(?:refs|index|HEAD|objects|logs)(?:[/\\\\]|\\Z))[\\w.\\-~%]+[/\\\\])*\\.git/(?:refs|index|HEAD|objects|logs)(?:[/\\\\][\\w.\\-~%]*)*(?:\\?\\S*)?\\s*\\Z",
+   "category": "table[136]:recon",
+   "status": "as_is",
+   "evidence_cases": ["table[136]:recon"]
+  },
+  {
+   "pattern": "(?:__proto__|constructor)\\s*(?:\\[\\s*[\\\"']prototype[\\\"']\\s*\\]|\\.\\s*prototype)|[\\\"']__proto__[\\\"']\\s*:",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::proto_pollution_dunder", "table[137]:proto_pollution"]
+  },
+  {
+   "pattern": "__proto__\\s*(?:\\[|\\.)|\\[\\s*[\\\"']?__proto__[\\\"']?\\s*\\]|constructor\\s*\\[\\s*[\\\"']?prototype[\\\"']?\\s*\\]|\\[\\s*[\\\"']?constructor[\\\"']?\\s*\\]\\s*\\[\\s*[\\\"']?prototype[\\\"']?\\s*\\]",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::proto_pollution_bracket", "table[138]:proto_pollution"]
+  },
+  {
+   "pattern": "Object\\.prototype\\.[A-Za-z_$][\\w$]*\\s*=(?!=)",
+   "category": "table[139]:proto_pollution",
+   "status": "as_is",
+   "evidence_cases": ["table[139]:proto_pollution"]
+  },
+  {
+   "pattern": "\\b(?:Object|Reflect)\\.setPrototypeOf\\s*\\(",
+   "category": "table[140]:proto_pollution",
+   "status": "as_is",
+   "evidence_cases": ["table[140]:proto_pollution"]
+  },
+  {
+   "pattern": "System\\.Diagnostics\\.Process\\.Start\\s*\\(|System\\.Reflection\\.|Assembly\\.Load\\s*\\(",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::code_injection_system_diagnostics", "table[141]:code_injection"]
+  },
+  {
+   "pattern": "(?-i:\\bgetattr\\(\\s*(?:__import__\\(\\s*['\\\"](?:os|subprocess|builtins|importlib)['\\\"]\\s*\\)|\\b(?:os|subprocess|builtins|importlib)\\b)\\s*,\\s*['\\\"](?:system|popen|exec|eval|call|run|Popen|check_output|check_call)['\\\"]\\s*\\)\\s*\\()",
+   "category": "table[142]:code_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[142]:code_injection"]
+  },
+  {
+   "pattern": "(?-i:\\bvars\\(\\s*(?:__import__\\(\\s*['\\\"](?:os|subprocess|builtins|importlib)['\\\"]\\s*\\)|\\b(?:os|subprocess|builtins|importlib)\\b)\\s*\\)\\s*\\[\\s*['\\\"](?:system|popen|exec|eval|call|run|Popen|check_output|check_call)['\\\"]\\s*\\]\\s*\\()",
+   "category": "table[143]:code_injection",
+   "status": "as_is",
+   "evidence_cases": ["table[143]:code_injection"]
+  },
+  {
+   "pattern": "(?<![A-Za-z0-9+/])(?-i:rO0AB)",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::deser_java_base64", "table[144]:deserialization"]
+  },
+  {
+   "pattern": "(?<![A-Za-z0-9+/])(?-i:AAEAAAD)",
+   "category": "table[145]:deserialization",
+   "status": "as_is",
+   "evidence_cases": ["table[145]:deserialization"]
+  },
+  {
+   "pattern": "(?<![A-Za-z0-9+/])(?-i:gA[SW]V)",
+   "category": "table[146]:deserialization",
+   "status": "as_is",
+   "evidence_cases": ["table[146]:deserialization"]
+  },
+  {
+   "pattern": "(?<![A-Za-z0-9+/])(?-i:BAh[Jv7bV])",
+   "category": "table[147]:deserialization",
+   "status": "as_is",
+   "evidence_cases": ["table[147]:deserialization"]
+  },
+  {
+   "pattern": "cos\\n",
+   "category": "binary_bodies",
+   "status": "as_is",
+   "evidence_cases": ["binary_bodies::binary_attack_pickle_opcodes", "misc_injection::deser_pickle_reduce", "table[148]:deserialization"]
+  },
+  {
+   "pattern": "c__builtin__",
+   "category": "table[149]:deserialization",
+   "status": "as_is",
+   "evidence_cases": ["table[149]:deserialization"]
+  },
+  {
+   "pattern": "csubprocess",
+   "category": "table[150]:deserialization",
+   "status": "as_is",
+   "evidence_cases": ["table[150]:deserialization"]
+  },
+  {
+   "pattern": "cposix",
+   "category": "table[151]:deserialization",
+   "status": "as_is",
+   "evidence_cases": ["table[151]:deserialization"]
+  },
+  {
+   "pattern": "(c[A-Za-z_][A-Za-z0-9_]{0,100}(?:\\.[A-Za-z_][A-Za-z0-9_]{0,100}){0,20}\\n[A-Za-z_][A-Za-z0-9_]{0,100}\\n)[^ \\t]{0,100}?[Rb]",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::deser_pickle_reduce", "table[152]:deserialization"]
+  },
+  {
+   "pattern": "O:\\d+:\"",
+   "category": "misc_injection",
+   "status": "as_is",
+   "evidence_cases": ["misc_injection::deser_php_object", "table[153]:deserialization"]
+  },
+  {
+   "pattern": "C:\\d+:\"",
+   "category": "table[154]:deserialization",
+   "status": "as_is",
+   "evidence_cases": ["table[154]:deserialization"]
+  },
+  {
+   "pattern": "E:\\d+:\"",
+   "category": "table[155]:deserialization",
+   "status": "as_is",
+   "evidence_cases": ["table[155]:deserialization"]
+  },
+  {
+   "pattern": "<ObjectDataProvider\\b",
+   "category": "table[156]:deserialization",
+   "status": "as_is",
+   "evidence_cases": ["table[156]:deserialization"]
+  },
+  {
+   "pattern": "\\.\\.[\\\\/]",
+   "category": "path_traversal",
+   "status": "as_is",
+   "evidence_cases": ["path_traversal::trav_double_encoded", "path_traversal::trav_url_encoded"]
+  }
+ ]
+}
