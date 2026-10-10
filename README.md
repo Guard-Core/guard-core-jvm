@@ -33,7 +33,7 @@ conformance corpus are in place; the ported engine code lands in W1+.
 **Mirror statement:** guard-core-jvm 4.3.2 mirrors the
 [guard-core 4.3.2](https://github.com/Guard-Core/guard-core) release. Versions
 move in lockstep, and the conformance corpus records the exact engine commit it
-was regenerated at (`adbdccd402ed0fdb0c26023f11c6acc534344521`, spec 4.1.0).
+was regenerated at (`37b6a132b7df974f0ea014f3100fd90a76e1ebc5`, spec 4.1.0).
 
 ## Modules
 

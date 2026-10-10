@@ -44,7 +44,7 @@ class ConformanceSmokeTest {
     assertEquals("4.1.0", index.getValue("spec_version").jsonPrimitive.content)
     assertEquals("4.3.2", index.getValue("engine_version").jsonPrimitive.content)
     assertEquals(
-        "adbdccd402ed0fdb0c26023f11c6acc534344521",
+        "37b6a132b7df974f0ea014f3100fd90a76e1ebc5",
         index.getValue("engine_commit").jsonPrimitive.content,
     )
   }

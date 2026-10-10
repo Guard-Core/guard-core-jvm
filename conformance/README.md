@@ -9,7 +9,7 @@ by the reference engine, never hand-written.
 ## Provenance
 
 - Spec: 4.1.0
-- Engine: 4.3.2, commit `adbdccd402ed0fdb0c26023f11c6acc534344521`
+- Engine: 4.3.2, commit `37b6a132b7df974f0ea014f3100fd90a76e1ebc5`
 - Corpus: `guard-core-spec-4.1.0/cases/` holds 1 index plus 21 suites, vendored
   byte-identical (`cp -p`, verified with `diff -r`). Do not pretty-print,
   re-order, or re-encode the JSON.
