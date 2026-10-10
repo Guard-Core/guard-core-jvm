@@ -15,31 +15,29 @@ jobs:
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         issue_message: |
-            Thanks for opening your first issue on **guard-core-rs**!
+            Thanks for opening your first issue on **guard-core-jvm**!
 
             To help us triage quickly, please make sure your report includes:
-            - A clear reproduction (a short Rust snippet or failing test is ideal)
-            - Output of `rustc --version && cargo --version` (MSRV is 1.92)
-            - The crate you are using (`guard-core-rs` facade, `guard-core-engine`, or the PyO3 bindings) and the version you depend on
-            - A conformance data point if relevant: the corpus case id and whether it passes, xfails, or drifts (`cargo test -p guard-core-conformance`)
+            - A clear reproduction (a short Kotlin snippet or failing test is ideal)
+            - Output of `./gradlew --version` (JDK 17 is the floor)
+            - The module you are using (`guard-core-engine`, the `guard-core` facade, `guard-core-conformance`, or `guard-core-benchmark`) and the version you depend on
+            - A conformance data point if relevant: the corpus case id and whether it passes, xfails, or drifts (`./gradlew :guard-core-conformance:test`)
 
             A few pointers:
-            - Scan [README.md](../blob/master/README.md) and [AGENTS.md](../blob/master/AGENTS.md) for the engine layout and its honest status (the 4.x pattern-table scan stage is not ported yet; do not expect full parity with the Python engine).
+            - Scan [README.md](../blob/master/README.md) for the workspace layout and its honest status (W0 scaffold: the engine port lands wave by wave; do not expect parity with the Python engine yet).
             - **Security vulnerability?** Do **not** open a public issue - please use GitHub's private vulnerability reporting.
 
             Thanks again - a maintainer will be with you soon.
         pr_message: |
-            Thanks for opening your first pull request on **guard-core-rs**!
+            Thanks for opening your first pull request on **guard-core-jvm**!
 
             Quick checklist before review (most of these are enforced by CI, but worth a glance):
             - [ ] The PR body says `Closes #N` for an open issue (the `issue-link` check enforces it); chores take the `no-issue` label
-            - [ ] `cargo fmt --all -- --check` reports no files
-            - [ ] `cargo clippy --workspace --all-targets --exclude guard-core-python -- -D warnings` is clean
-            - [ ] `cargo test --workspace --exclude guard-core-python` passes
-            - [ ] The conformance gate is green: `cargo test -p guard-core-conformance` (a flipped corpus case needs a ledger or xfail update with a written reason)
-            - [ ] `RUSTDOCFLAGS="-D warnings" cargo doc --workspace --exclude guard-core-python --no-deps --all-features` is clean
-            - [ ] No outer `#[allow(...)]` in non-test, non-fuzz code; an entry under `## Unreleased` in [CHANGELOG.md](../blob/master/CHANGELOG.md)
+            - [ ] `./gradlew spotlessCheck detekt` is clean
+            - [ ] `./gradlew build` passes
+            - [ ] The conformance smoke is green: `./gradlew :guard-core-conformance:test` (a flipped corpus case needs a ledger or xfail update with a written reason)
+            - [ ] No blanket `@Suppress` in non-test code; the [CHANGELOG.md](../blob/master/CHANGELOG.md) entry for the current version mentions the change
 
-            See [AGENTS.md](../blob/master/AGENTS.md) for the boundary rules (the engine crate stays pure, synchronous, CPU-bound) and the conformance honesty policy.
+            See [AGENTS.md](../blob/master/AGENTS.md) for the boundary rules (the engine module stays dependency-free; conformance data is vendored byte-identical, never hand-edited) and the mirror-lockstep versioning note.
 
             Welcome aboard - a maintainer will review shortly.
