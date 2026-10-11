@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.jmh) apply false
+    alias(libs.plugins.dokka) apply false
 }
 
 // Maven coordinates: groupId com.guard-core (the Central Portal namespace;
@@ -22,6 +23,15 @@ subprojects {
     apply(plugin = "jacoco")
     apply(plugin = "io.gitlab.arturbosch.detekt")
     apply(plugin = "com.diffplug.spotless")
+    apply(plugin = "org.jetbrains.dokka")
+
+    // Section 14.3 lockfile analog: every configuration resolves against the
+    // committed gradle/gradle.lockfile state (per module directory). A
+    // dependency change without `./gradlew --write-locks` fails the build,
+    // and the lockfiles are what the osv-scanner dependency-audit job reads.
+    dependencyLocking {
+        lockAllConfigurations()
+    }
 
     configure<DetektExtension> {
         buildUponDefaultConfig = true

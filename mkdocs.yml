@@ -1,0 +1,33 @@
+site_name: guard-core-jvm
+site_description: Kotlin/JVM port of the guard-core engine - detection, rate limiting, IP banning, and cloud provider blocking for the JVM
+site_author: Renn F
+repo_url: https://github.com/Guard-Core/guard-core-jvm
+repo_name: Guard-Core/guard-core-jvm
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: amber
+  features:
+    - content.code.copy
+    - navigation.sections
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - tables
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Configuration: configuration.md
+  - API: api.md
+  - Architecture: architecture.md
+  - Detection: detection.md
+  - Adapters: adapters.md
+  - Migration: migration.md
+  - Release notes: release-notes.md
