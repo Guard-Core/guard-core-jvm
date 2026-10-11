@@ -123,6 +123,12 @@ public class TestMiddleware(
 ) : GuardMiddlewareProtocol {
   public val bus: RecordingBus = bus ?: RecordingBus()
 
+  /**
+   * Swap-in point for a misbehaving bus (the python tests assign
+   * `mw.event_bus.send_middleware_event = AsyncMock(side_effect=...)`).
+   */
+  public var eventBusOverride: MiddlewareEventBusProtocol? = null
+
   public constructor(
       config: SecurityConfig,
       bus: RecordingBus?,
@@ -138,7 +144,7 @@ public class TestMiddleware(
   override var lastCloudIpRefresh: Int = 0
   override val suspiciousRequestCounts: MutableMap<String, MutableMap<String, Int>> = linkedMapOf()
   override val eventBus: MiddlewareEventBusProtocol
-    get() = this.bus
+    get() = eventBusOverride ?: this.bus
 
   override val routeResolver: com.guardcore.protocols.RouteConfigResolverProtocol? = resolver
   override val responseFactory: MiddlewareResponseFactoryProtocol = TestResponseFactory()
