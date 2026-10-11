@@ -92,12 +92,12 @@ class ProtocolsTest {
   private class FakeMiddleware : GuardMiddlewareProtocol {
     override val config: SecurityConfig = SecurityConfigBuilder().build()
     override val logger: Logger = Logger.getLogger("test")
-    override val lastCloudIpRefresh: Int = 0
+    override var lastCloudIpRefresh: Int = 0
     override val suspiciousRequestCounts: MutableMap<String, MutableMap<String, Int>> =
         mutableMapOf()
-    override val eventBus: Any? = null
-    override val routeResolver: Any? = null
-    override val responseFactory: Any? = null
+    override val eventBus: com.guardcore.protocols.MiddlewareEventBusProtocol? = null
+    override val routeResolver: com.guardcore.protocols.RouteConfigResolverProtocol? = null
+    override val responseFactory: com.guardcore.protocols.MiddlewareResponseFactoryProtocol? = null
     override val rateLimitHandler: Any? = null
     override val agentHandler: AgentHandlerProtocol? = null
     override val geoIpHandler: GeoIPHandler? = null

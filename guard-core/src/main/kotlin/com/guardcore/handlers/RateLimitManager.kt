@@ -233,7 +233,7 @@ public suspend fun feedRateLimitAutoban(ip: String, config: SecurityConfig) {
   RateLimitState.byIpAutobanCounts[ip] = count
   val ipCounts = mapOf("rate_limit" to count)
   val result =
-      ThresholdBans.resolveAndApplyThresholdBan(
+      com.guardcore.core.checks.ChecksHelpers.resolveAndApplyThresholdBan(
           ipCounts,
           config,
           ipBanManager,
