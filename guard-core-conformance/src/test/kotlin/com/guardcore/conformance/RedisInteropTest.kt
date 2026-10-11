@@ -72,6 +72,9 @@ class RedisInteropTest {
         false
       }
 
+  /** Public availability probe for the full-corpus gate (which must not skip redis_interop). */
+  fun redisAvailableForGate(): Boolean = redisAvailable()
+
   private suspend fun scrub(redis: RedisManager) {
     val keys = redis.operations()!!.keys("guard_core:corpus_rio:*")
     if (keys.isNotEmpty()) {
@@ -87,6 +90,15 @@ class RedisInteropTest {
         redisAvailable(),
         "redis_interop needs a live Redis on REDIS_URL (localhost:6379)",
     )
+    val failures = runAll()
+    assertTrue(failures.isEmpty(), "redis_interop failures:\n" + failures.joinToString("\n"))
+  }
+
+  /**
+   * Runs every redis_interop case; returns per-case failure strings (empty = all 14 match the
+   * corpus). Requires a live Redis; the full-corpus gate asserts availability before calling.
+   */
+  fun runAll(): List<String> {
     val caseFile =
         json.parseToJsonElement(Files.readString(corpusDir().resolve("redis_interop.json")))
     val cases =
@@ -107,7 +119,7 @@ class RedisInteropTest {
         }
       }
     }
-    assertTrue(failures.isEmpty(), "redis_interop failures:\n" + failures.joinToString("\n"))
+    return failures
   }
 
   // ------------------------------------------------------------- operation drivers
