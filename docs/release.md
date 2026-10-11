@@ -141,9 +141,11 @@ Only after step 1.5 succeeds (their workflows re-check it anyway):
 - [ ] The workflow's `tag-consistency` job is the safety net: it fails with a
       clear message if the tag is pushed without the flip (SNAPSHOT version)
       or if the tag does not equal the in-file version.
-- [ ] After the train: the consumers' `GUARD_CORE_JVM_REF` pins (ci.yml +
-      settings comments) move to the released engine tag SHA in the next
-      regular development PR.
+- [ ] The consumers' `GUARD_CORE_JVM_REF` pins (ci.yml + settings comments)
+      already point at the released engine SHA: they bump AT TRAIN TIME,
+      before the consumer tags, so the at-tag tests run against the engine
+      that actually ships (the family spec pins this; a pin bump is an
+      ordinary development PR).
 
 ## Post-release audits (per train, per tag - the php v4.3.1 lesson)
 
