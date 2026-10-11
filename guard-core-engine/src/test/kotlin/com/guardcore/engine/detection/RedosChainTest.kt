@@ -113,6 +113,32 @@ class RedosChainTest {
   }
 
   @Test
+  fun broadCharClassInnerMatchesThePythonLiteralText() {
+    // python _is_broad_char_class_inner compares the RAW class text: inner in ("\\s\\S",
+    // "\\S\\s") i.e. the four-character strings backslash-s-backslash-S. The Kotlin source must
+    // carry the same two escapes per backslash (regression: a double-escaped comparison never
+    // matched, so [\s\S] was not counted broad).
+    assertTrue(isBroadCharClassInner("\\s\\S"))
+    assertTrue(isBroadCharClassInner("\\S\\s"))
+    assertFalse(isBroadCharClassInner("\\d\\D"))
+    assertFalse(isBroadCharClassInner("ab"))
+    // Negated classes stay broad unless an already-broad shorthand is excluded.
+    assertTrue(isBroadCharClassInner("^%"))
+    assertFalse(isBroadCharClassInner("^\\S"))
+  }
+
+  @Test
+  fun adjacentBroadDetectsTheCorpusShapes() {
+    // safety_gates corpus pins (W5): both fire the adjacent-broad prefilter.
+    val both = detectAdjacentBroadUnboundedQuantifiers("""[\s\S]*[\s\S]+$""")
+    assertTrue(both != null, "[\\s\\S]*[\\s\\S]+\$ must be flagged: $both")
+    assertEquals("[\\s\\S] and [\\s\\S]", both)
+    val mixed = detectAdjacentBroadUnboundedQuantifiers("""[\s\S]*x[^%]+""")
+    assertTrue(mixed != null, "[\\s\\S]*x[^%]+ must be flagged: $mixed")
+    assertEquals("[\\s\\S] and [^%]", mixed)
+  }
+
+  @Test
   fun dangerousConstructsRejectTheClassicFamily() {
     val dangerous = listOf("(.*)+", "(.+)+", "([a-z]*)+", "([a-z]+)+", ".*.*", ".+.+")
     for (pattern in dangerous) {

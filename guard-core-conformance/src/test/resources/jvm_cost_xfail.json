@@ -1,0 +1,5 @@
+{
+  "spec_version": "4.1.0",
+  "_comment": "Fail-closed cost-ceiling ledger for the cost_bodies suite. A workload over its self-relative ceiling (best_ms <= K * best8_ms * size/8192 + floor_ms, K=5, floor 250ms) must be listed here with a reason; a listed workload that comes back under ceiling is a stale entry and fails the build. Empty at W5: every workload fits its ceiling on the engine as shipped.",
+  "workloads": {}
+}

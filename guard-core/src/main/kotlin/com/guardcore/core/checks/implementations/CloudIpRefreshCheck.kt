@@ -60,6 +60,7 @@ public class CloudIpRefreshCheck(
         routeConfigs: Collection<RouteConfig>?,
     ): Boolean =
         config.blockCloudProviders?.isNotEmpty() == true ||
+            config.enableDynamicRules ||
             ChecksHelpers.routeConfigApplies(routeConfigs) { rc ->
               rc.blockCloudProviders.isNotEmpty()
             }

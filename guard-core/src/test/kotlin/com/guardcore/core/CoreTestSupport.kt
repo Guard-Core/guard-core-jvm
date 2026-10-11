@@ -119,8 +119,15 @@ public class TestMiddleware(
     override val config: SecurityConfig,
     bus: RecordingBus? = null,
     geoIpHandler: GeoIPHandler? = null,
+    resolver: com.guardcore.protocols.RouteConfigResolverProtocol? = null,
 ) : GuardMiddlewareProtocol {
   public val bus: RecordingBus = bus ?: RecordingBus()
+
+  public constructor(
+      config: SecurityConfig,
+      bus: RecordingBus?,
+      geoIpHandler: GeoIPHandler?,
+  ) : this(config, bus, geoIpHandler, null)
 
   init {
     HandlerSeamsRegister.register()
@@ -133,7 +140,7 @@ public class TestMiddleware(
   override val eventBus: MiddlewareEventBusProtocol
     get() = this.bus
 
-  override val routeResolver: com.guardcore.protocols.RouteConfigResolverProtocol? = null
+  override val routeResolver: com.guardcore.protocols.RouteConfigResolverProtocol? = resolver
   override val responseFactory: MiddlewareResponseFactoryProtocol = TestResponseFactory()
   override val rateLimitHandler: Any? = com.guardcore.handlers.RateLimitManager.getInstance(config)
   override val agentHandler: com.guardcore.protocols.AgentHandlerProtocol? = null
