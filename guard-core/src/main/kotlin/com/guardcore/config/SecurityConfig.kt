@@ -372,12 +372,13 @@ internal constructor(
   public var globalBehaviorRules: List<BehaviorRuleConfig>
     get() = _globalBehaviorRules
     set(value) {
+      // python revalidator: _validate_typed_collection_field_value with
+      // _GLOBAL_BEHAVIOR_RULES_ADAPTER (coerces dicts to models at assignment).
       val validated =
-          ConfigValidators.validateStrListFieldValue(
-                  value,
-                  "global_behavior_rules",
-              )
-              .filterIsInstance<BehaviorRuleConfig>()
+          ConfigValidators.validateGlobalBehaviorRulesFieldValue(
+              value,
+              "global_behavior_rules",
+          )
       if (geoStateHook("global_behavior_rules", validated)) return
       if (globalBehaviorRuleHook("global_behavior_rules", validated)) return
       _globalBehaviorRules = validated
