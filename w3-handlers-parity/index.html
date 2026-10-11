@@ -1,0 +1,1052 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Kotlin/JVM port of the guard-core engine - detection, rate limiting, IP banning, and cloud provider blocking for the JVM">
+      
+      
+        <meta name="author" content="Renn F">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>W3 handlers parity (guard-core-jvm) - guard-core-jvm</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#w3-handlers-parity-guard-core-jvm" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="guard-core-jvm" class="md-header__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            guard-core-jvm
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              W3 handlers parity (guard-core-jvm)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="guard-core-jvm" class="md-nav__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    guard-core-jvm
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adapters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adapters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#wave-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wave gate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#handler-by-handler-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Handler-by-handler map
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#observable-identifiers-byte-exact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Observable identifiers (byte-exact)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test surface
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#idiom-mappings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Idiom mappings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#seams-closed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seams closed
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="w3-handlers-parity-guard-core-jvm">W3 handlers parity (guard-core-jvm)</h1>
+<p>Wave 3 of the guard-core port: the remaining handler surface of the Python
+reference (<code>guard_core/handlers/</code>) into the <code>guard-core</code> facade module, with
+the handler test surface ported and green as the wave gate.</p>
+<p>Reference scope: <code>guard_core/handlers/</code> is 10,353 LOC across 46 files
+(measured 2026-10-10, specs/impl/jvm.md module map). The <code>_suspatterns_*</code>
+family (4,414 LOC) landed engine-side in W2 and is out of W3 scope; the W3
+handler scope is therefore ~5,875 reference LOC plus <code>scripts/rate_lua.py</code>
+(19 LOC) and the models slice <code>DynamicRules</code>/<code>LastKnownRulesSnapshot</code>
+(<code>guard_core/_dynamic_rules.py</code>, 124 LOC) that the dynamic-rule handler owns.</p>
+<h2 id="wave-gate">Wave gate</h2>
+<ul>
+<li>Handler test surface ported to JUnit: <strong>307 tests</strong> across 12 classes in
+  <code>guard-core/src/test/kotlin/com/guardcore/handlers/</code>, all green.</li>
+<li>Redis key schema byte-exact per spec section 08: unit-asserted against the
+  pinned key strings/TTLs and proven by the vendored <code>redis_interop</code> corpus
+  (14/14 cases, <code>RedisInteropTest</code> in <code>guard-core-conformance</code>, run against a
+  live Redis under the suite prefix).</li>
+<li>The live-Redis tests run under the conftest-identical isolation scheme
+  (<code>test:guard_core:&lt;pid&gt;:&lt;hex&gt;:</code> prefix per run, HandlerTestSupport.kt).</li>
+</ul>
+<h2 id="handler-by-handler-map">Handler-by-handler map</h2>
+<table>
+<thead>
+<tr>
+<th>python file</th>
+<th>LOC</th>
+<th>kotlin file</th>
+<th>status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>handlers/redis_handler.py</code></td>
+<td>368</td>
+<td><code>handlers/RedisManager.kt</code> (RedisHandlerProtocol impl, lettuce ops at <code>LettuceRedisOperations</code>, url redaction <code>redactRedisUrl</code> at RedisManager.kt:692)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>scripts/rate_lua.py</code></td>
+<td>19</td>
+<td><code>handlers/RateLimitScript.kt</code> (byte-exact Lua)</td>
+<td>ported</td>
+</tr>
+<tr>
+<td><code>handlers/ratelimit_handler.py</code></td>
+<td>576</td>
+<td><code>handlers/RateLimitManager.kt</code> (module state <code>RateLimitState</code>, primitive <code>checkRateLimitByIp</code> at RateLimitManager.kt:264, manager at :380)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/ipban_handler.py</code></td>
+<td>77</td>
+<td><code>handlers/IpBanManager.kt</code> (singleton + eviction counter + reset)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_ipban_bans.py</code></td>
+<td>160</td>
+<td><code>handlers/IpBanBans.kt</code> (banIp at IpBanBans.kt:196, self-DoS guard at :143)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_ipban_cache.py</code></td>
+<td>23</td>
+<td><code>handlers/TtlCache.kt</code> (cachetools TTLCache port, injectable <code>clock</code> = cachetools <code>timer</code>, eviction callback = <code>_ObservableTTLCache</code>)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_ipban_events.py</code></td>
+<td>55</td>
+<td><code>handlers/IpBanBans.kt</code> (IpBanEvents group, IpBanBans.kt:20-63)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_ipban_migration.py</code></td>
+<td>65</td>
+<td><code>handlers/IpBanMigration.kt</code> (legacy <code>::ffff:</code> key migration over SCAN/PTTL/PSETEX)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_ipban_queries.py</code></td>
+<td>91</td>
+<td><code>handlers/IpBanQueries.kt</code> (isIpBanned at IpBanQueries.kt:47)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/security_headers_handler.py</code></td>
+<td>129</td>
+<td><code>handlers/SecurityHeadersManager.kt</code> (getHeaders at SecurityHeadersManager.kt:330, default header table at :68)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_security_headers_config.py</code></td>
+<td>287</td>
+<td><code>handlers/SecurityHeadersManager.kt</code> (config-method group :117-322)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_security_headers_cache.py</code></td>
+<td>130</td>
+<td><code>handlers/SecurityHeadersManager.kt</code> (cache group :393-497)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_security_headers_cors.py</code></td>
+<td>99</td>
+<td><code>handlers/SecurityHeadersManager.kt</code> (CORS group :502-576)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_security_headers_events.py</code></td>
+<td>110</td>
+<td><code>handlers/SecurityHeadersManager.kt</code> (events group :581-660)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/cors_handler.py</code></td>
+<td>169</td>
+<td><code>handlers/CorsHandler.kt</code> (buildPreflightResponse at CorsHandler.kt:130)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/cloud_handler.py</code></td>
+<td>427</td>
+<td><code>handlers/CloudManager.kt</code> (isCloudIp at CloudManager.kt:262, schedule_refresh single-flight at :100)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_cloud_provider_registry.py</code></td>
+<td>47</td>
+<td><code>handlers/CloudProviderRegistry.kt</code></td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_cloud_provider_fetchers.py</code></td>
+<td>134</td>
+<td><code>handlers/CloudFetchers.kt</code> (java.net.http; same endpoints, 10s timeouts, CSV/JSON parsing)</td>
+<td>ported</td>
+</tr>
+<tr>
+<td><code>handlers/_cloud_azure_fetch.py</code></td>
+<td>198</td>
+<td><code>handlers/CloudAzureFetch.kt</code> (trusted-host extraction, failover link, newest-date selection, no-redirect download)</td>
+<td>ported</td>
+</tr>
+<tr>
+<td><code>handlers/cloud_ip_stores.py</code></td>
+<td>72</td>
+<td><code>handlers/CloudIpStores.kt</code> (InMemory + Redis <code>cloud_ip_v2</code> JSON store)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/dynamic_rule_handler.py</code></td>
+<td>277</td>
+<td><code>handlers/DynamicRuleManager.kt</code> (manager + update loop + match_event + expiry)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_dynamic_rule_application.py</code></td>
+<td>225</td>
+<td><code>handlers/DynamicRuleManager.kt</code> (open member group under the <code>_dynamic_rule_application.py</code> banner, DynamicRuleManager.kt:313+)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_dynamic_rule_events.py</code></td>
+<td>102</td>
+<td><code>handlers/DynamicRuleEvents.kt</code></td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_dynamic_rule_snapshot.py</code></td>
+<td>142</td>
+<td><code>handlers/DynamicRuleManager.kt</code> (hydration/persistence group, DynamicRuleManager.kt:600+)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_dynamic_rule_persistence.py</code></td>
+<td>11</td>
+<td><code>handlers/DynamicRuleManager.kt</code> (namespace constants, DynamicRuleManager.kt:24-25)</td>
+<td>ported</td>
+</tr>
+<tr>
+<td><code>_dynamic_rules.py</code> (models slice)</td>
+<td>124</td>
+<td><code>handlers/DynamicRules.kt</code> (model + <code>dumpLastKnownRulesSnapshot</code>/<code>loadLastKnownRulesSnapshot</code>, pydantic-exact JSON pinned against the interop case)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/behavior_handler.py</code></td>
+<td>191</td>
+<td><code>handlers/BehaviorTracker.kt</code> (BehaviorRule, usage/return tracking, <code>config_to_rule</code>)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_behavior_action_dispatch.py</code></td>
+<td>152</td>
+<td><code>handlers/BehaviorActionDispatch.kt</code></td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_behavior_response_pattern.py</code></td>
+<td>90</td>
+<td><code>handlers/BehaviorResponsePattern.kt</code></td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_behavior_json_pattern.py</code></td>
+<td>54</td>
+<td><code>handlers/BehaviorResponsePattern.kt</code> (json-pattern group)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/ipinfo_handler.py</code></td>
+<td>339</td>
+<td><code>handlers/IpInfoManager.kt</code> (GeoIPHandler impl; maxmind-db JVM reader; download retry/backoff; latin-1 Redis cache)</td>
+<td>ported, tests green</td>
+</tr>
+<tr>
+<td><code>handlers/_suspatterns_registry.py</code></td>
+<td>269</td>
+<td><code>handlers/SusPatternsRegistry.kt</code> (W3 slice: add/remove pattern, <code>patterns:custom</code> Redis schema, restore-on-initialize, pattern_added/pattern_removed events; the compile/validate/detect surface is the W2 engine <code>SusPatternsManager</code>)</td>
+<td>ported (W3 slice), tests green</td>
+</tr>
+<tr>
+<td><code>handlers/suspatterns_handler.py</code></td>
+<td>1075</td>
+<td>engine-side from W2 (<code>com.guardcore.engine.suspatterns.SusPatternsManager.detect()</code>); the W3 registry surface above carries the handler's Redis/event/persistence behavior</td>
+<td>engine-side (W2) + W3 slice</td>
+</tr>
+<tr>
+<td><code>handlers/__init__.py</code></td>
+<td>64</td>
+<td>Kotlin package surface: every handler is a top-level type in <code>com.guardcore.handlers</code> (no lazy-import machinery needed)</td>
+<td>structure mapping</td>
+</tr>
+<tr>
+<td><code>handlers/_suspatterns_*.py</code> (14 files)</td>
+<td>4,414</td>
+<td>engine-side from W2</td>
+<td>engine-side (W2)</td>
+</tr>
+</tbody>
+</table>
+<p>Support modules ported as part of the wave (python source in parentheses):
+<code>handlers/ThresholdBans.kt</code> (<code>core/checks/helpers.py:375-411</code>
+<code>_resolve_and_apply_threshold_ban</code>, the minimal real surface the rate-limit
+auto-ban path needs, G-9), <code>handlers/DetectionScanRedaction.kt</code>
+(<code>_utils/detection_scan.py:137-178</code>, the <code>_redact_pattern_source</code> slice with
+the sensitive-name unions as registered seams), <code>handlers/PyJsonDumps.kt</code>
+(CPython <code>json.dumps</code> + pydantic <code>model_dump_json</code> renderers, byte-exact
+separators), <code>handlers/HandlerSeams.kt</code> (G-2/G-6 registration).</p>
+<h2 id="observable-identifiers-byte-exact">Observable identifiers (byte-exact)</h2>
+<ul>
+<li>Redis key schema (spec 08): <code>{prefix}rate_limit:rate:{ip}[:{sha256(path)}]</code>
+  (zset, ttl window*2), <code>{prefix}banned_ips:{ip}</code> / <code>{prefix}banned_networks:{cidr}</code>
+  (string ttl=duration), <code>{prefix}behavior_usage:behavior:usage:{h}:{h}</code> /
+  <code>{prefix}behavior_returns:behavior:return:{h}:{h}:{h}</code> (zset, uuid4-hex
+  members, ttl=window), <code>{prefix}security_headers:{csp_config,hsts_config,custom_headers}</code>
+  (json, ttl 86400), <code>{prefix}patterns:custom</code> (comma-joined, persistent),
+  <code>{prefix}ipinfo:database</code> (latin-1 blob, ttl=max_age),
+  <code>{prefix}cloud_ranges_v2:{provider}</code> (sorted CSV, ttl),
+  <code>{prefix}cloud_ip_v2:{provider}</code> (sorted-range JSON, persistent),
+  <code>{prefix}dynamic_rules:last_known</code> (pydantic snapshot, persistent).</li>
+<li>Event type strings: every handler event uses <code>EventTypes</code> constants
+  (<code>rate_limited</code>, <code>rate_limit_script_reloaded</code>, <code>redis_connection</code>,
+  <code>redis_error</code>, <code>ip_banned</code>, <code>ip_unbanned</code>, <code>cloud_blocked</code>,
+  <code>dynamic_rule_updated</code>, <code>dynamic_rule_applied</code>, <code>emergency_mode_activated</code>,
+  <code>behavioral_violation</code>, <code>security_headers_applied</code>, <code>csp_violation</code>,
+  <code>country_blocked</code>, <code>geo_lookup_failed</code>, <code>pattern_added</code>,
+  <code>pattern_removed</code>) with the python handler names (<code>redis</code>, <code>rate_limit</code>,
+  <code>ip_ban</code>, <code>cloud</code>, <code>dynamic_rules</code>, <code>behavior</code>, <code>security_headers</code>,
+  <code>ipinfo</code>, <code>sus_patterns</code>).</li>
+<li>Header names/values: the security-headers default table, CORS response
+  headers, and <code>Retry-After</code> are string-identical.</li>
+<li>Check name <code>rate_limit</code> for the rate-limit log_activity path.</li>
+<li>Rate-limit Lua script: byte-exact (<code>RateLimitScript.kt</code>), SCRIPT LOAD +
+  NOSCRIPT reload recovery with the <code>rate_limit_script_reloaded</code> event.</li>
+</ul>
+<h2 id="test-surface">Test surface</h2>
+<table>
+<thead>
+<tr>
+<th>kotlin test class</th>
+<th>tests</th>
+<th>python source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RedisManagerTest</td>
+<td>30</td>
+<td>tests/test_redis/test_redis.py, test_redis_resilience.py</td>
+</tr>
+<tr>
+<td>IpBanManagerTest</td>
+<td>38</td>
+<td>test_ipban_lifecycle.py, test_ipban_ttl.py, test_ipban_eviction.py, test_ipban_cidr.py</td>
+</tr>
+<tr>
+<td>IpBanGuardAndRaceTest</td>
+<td>24</td>
+<td>test_ipban_loopback_guard.py, test_ipban_expiry_race.py</td>
+</tr>
+<tr>
+<td>IpBanLegacyKeyMigrationTest</td>
+<td>11</td>
+<td>test_ipban_legacy_key_migration.py</td>
+</tr>
+<tr>
+<td>RateLimitManagerTest + CheckRateLimitByIpTest + CheckRateLimitByIpAutobanTest + RateLimitSingletonIsolationTest</td>
+<td>38</td>
+<td>test_core/test_rate_limit_noscript.py, test_check_rate_limit_by_ip.py, test_check_rate_limit_by_ip_autoban.py, test_rate_limit_singleton_isolation.py, handler tests of test_rate_limit_edge_cases.py</td>
+</tr>
+<tr>
+<td>SecurityHeadersTest (3 classes)</td>
+<td>32</td>
+<td>test_security_headers/ (validation, edge cases, csp, per-config, redis integration)</td>
+</tr>
+<tr>
+<td>CorsHandlerTest</td>
+<td>20</td>
+<td>test_cors_handler.py</td>
+</tr>
+<tr>
+<td>CloudTest (2 classes)</td>
+<td>36</td>
+<td>test_cloud_ip_stores.py, test_cloud_region_scope.py, store surface of test_cloud_ips</td>
+</tr>
+<tr>
+<td>DynamicRuleManagerTest (2 classes)</td>
+<td>18</td>
+<td>test_dynamic_rule_atomicity.py, test_dynamic_rule_persistence.py</td>
+</tr>
+<tr>
+<td>BehaviorAndIpInfoTest (2 classes)</td>
+<td>30</td>
+<td>test_behavior_rule_ban_duration.py, tracker/response-pattern ports, test_ipinfo core</td>
+</tr>
+<tr>
+<td>HandlerEdgeCasesTest</td>
+<td>18</td>
+<td>handler-scope tests of test_handler_edge_cases.py</td>
+</tr>
+<tr>
+<td>SusPatternsRegistryTest</td>
+<td>12</td>
+<td>_suspatterns_registry.py W3 surface</td>
+</tr>
+<tr>
+<td>RedisInteropTest (conformance)</td>
+<td>14 cases</td>
+<td>conformance/guard-core-spec-4.1.0/cases/redis_interop.json</td>
+</tr>
+</tbody>
+</table>
+<p>Total: 307 handler tests green + 14/14 redis_interop cases green.</p>
+<p>Python tests NOT ported here (owned by later waves): the <code>RateLimitCheck</code>
+middleware-check halves of test_rate_limit_edge_cases.py /
+test_rate_limit_singleton_isolation.py (W4 pipeline surface), the response
+factory halves of test_security_headers/test_per_config_isolation.py and
+test_handler_edge_cases.py (W4 responses), the live HTTP fetcher halves of
+test_cloud_ips (environment-bound network calls; the fetch parsing kernel is
+ported and the fetch path is seam-scripted in the interop runner), and the
+mock-heavy halves of test_ipinfo that stub the maxminddb reader with fixtures
+(the JVM port uses the real maxmind-db reader; reader-bound behavior is
+exercised through the corruption/redis-cache paths).</p>
+<h2 id="idiom-mappings">Idiom mappings</h2>
+<ul>
+<li><code>redis.asyncio.Redis</code> -&gt; Lettuce <code>StatefulRedisConnection</code> behind the
+  <code>RedisOperations</code> interface; <code>pipeline(transaction=True)</code> -&gt; MULTI/EXEC with
+  per-command futures read in order. The redis-py client-level retry
+  (<code>Retry(ExponentialBackoff(), retries)</code>, redis_handler.py:116) maps to the
+  Lettuce reconnect/timeout options: transient failures surface as
+  <code>GuardRedisError(503, ...)</code> after the timeout budget either way.</li>
+<li><code>cachetools.TTLCache</code> -&gt; <code>handlers/TtlCache.kt</code> (expiry-ordered eviction,
+  lazy purge, injectable clock standing in for cachetools <code>timer</code>).</li>
+<li><code>aiohttp.ClientSession</code> -&gt; JDK <code>java.net.http.HttpClient</code> (no redirects on
+  the Azure download path, matching <code>allow_redirects=False</code>).</li>
+<li><code>maxminddb.open_database</code> -&gt; <code>com.maxmind.db:maxmind-db</code> reader with a
+  <code>@MaxMindDbConstructor</code> country record projection.</li>
+<li>Mixins -&gt; one class per python module group with <code>internal</code>/open members;
+  <code>_apply_blocking_rules</code> and the application steps are open members so the
+  python test idiom of overriding a step to drive the rollback path ports
+  verbatim (<code>ScriptedStepManager</code> in the tests).</li>
+<li>asyncio singletons (<code>__new__</code>-based) -&gt; companion <code>getInstance</code> with
+  <code>resetInstance()</code> test seams.</li>
+<li><code>monkeypatch.setattr(manager, "ban_ip", fake)</code> -&gt; assertions against the
+  real ban store (local TTL cache expiry) since Kotlin extension dispatch is
+  static; durations pinned below the 3600s local cache cap to keep the same
+  distinguishing power.</li>
+<li><code>asyncio.create_task</code> (ipinfo lookup-failure event) -&gt; a manager-scope
+  coroutine scope launch.</li>
+</ul>
+<h2 id="seams-closed">Seams closed</h2>
+<ul>
+<li>G-2: <code>ConfigSeams.geoIpHandlerFactory</code> now constructs the real
+  <code>IpInfoManager</code> (<code>handlers/HandlerSeams.kt</code>, registered from the facade
+  entry point and the tests; python resolves the same construction lazily
+  inside <code>_security_config_geo_validators.py:69-94</code>).</li>
+<li>G-6: <code>AccessControl.cloudIpChecker</code> resolves through <code>CloudManager</code>'s
+  <code>get_cloud_provider_details</code> (<code>handlers/HandlerSeams.kt</code>).</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

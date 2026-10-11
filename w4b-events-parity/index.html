@@ -1,0 +1,956 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Kotlin/JVM port of the guard-core engine - detection, rate limiting, IP banning, and cloud provider blocking for the JVM">
+      
+      
+        <meta name="author" content="Renn F">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>W4b Events + Decorators + Bridges Parity (guard-core-jvm) - guard-core-jvm</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#w4b-events-decorators-bridges-parity-guard-core-jvm" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="guard-core-jvm" class="md-header__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            guard-core-jvm
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              W4b Events + Decorators + Bridges Parity (guard-core-jvm)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="guard-core-jvm" class="md-nav__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    guard-core-jvm
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adapters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adapters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#event-surface-g-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Event surface (G-11)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#event_stream-conformance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        event_stream conformance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decorators-g-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decorators (G-12)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#java-bridges" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Java bridges
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#g-13-deeper-test_core-halves-landed-this-wave" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        G-13 deeper test_core halves landed this wave
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-residuals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Known residuals
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="w4b-events-decorators-bridges-parity-guard-core-jvm">W4b Events + Decorators + Bridges Parity (guard-core-jvm)</h1>
+<p>Wave 4b closed the events remainder (G-11), the decorators idiom closure with the route-id
+collision study (G-12), the Java bridge surface, and the pipeline-rebuild/events halves of the
+deeper test_core port (G-13, remainder re-scoped to W5). Gate: the vendored <code>event_stream</code>
+corpus (39 cases, 38 pinning 47 real envelopes + 1 advisory) green through a real-pipeline
+runner; 37 cases compare byte-exact and the 2 residual divergences are the TS family's
+documented reason-string-shape class.</p>
+<h2 id="event-surface-g-11">Event surface (G-11)</h2>
+<p>Python reference: <code>guard_core/core/events/</code> (event_types.py, middleware_events.py,
+composite_handler.py, enricher.py, metrics.py, otel_handler.py, logfire_handler.py).</p>
+<table>
+<thead>
+<tr>
+<th>Python</th>
+<th>JVM</th>
+<th>Parity notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>event_types.py:5-44 event constants</td>
+<td>core/events/EventTypes.kt:14-53</td>
+<td>verbatim strings; <code>config/EventTypes.kt</code> (W1) remains the muted-field validation copy</td>
+</tr>
+<tr>
+<td>event_types.py:46-100 EVENT_TYPE_VALUES / METRIC_TYPE_VALUES</td>
+<td>core/events/EventTypes.kt:55-105</td>
+<td>39 event + 3 metric values</td>
+</tr>
+<tr>
+<td>event_types.py:102-122 CHECK_NAME_VALUES</td>
+<td>core/events/EventTypes.kt (W4a)</td>
+<td>17 check names</td>
+</tr>
+<tr>
+<td>event_types.py:125-131 enrichment keys</td>
+<td>core/events/EventTypes.kt:107-120</td>
+<td>8 <code>guard.*</code> keys verbatim</td>
+</tr>
+<tr>
+<td>event_types.py:135-144 EventFilter</td>
+<td>core/events/EventTypes.kt:123-132</td>
+<td>muted set membership</td>
+</tr>
+<tr>
+<td>middleware_events.py:26 SecurityEventBus</td>
+<td>core/events/SecurityEventBus.kt:31</td>
+<td>agent_enable_events + filter gating (middleware_events.py:119-121)</td>
+</tr>
+<tr>
+<td>middleware_events.py:40 _lookup_country</td>
+<td>SecurityEventBus.lookupCountry:34</td>
+<td>warning + on_error hook, null country</td>
+</tr>
+<tr>
+<td>middleware_events.py:56 _forward_trace_headers</td>
+<td>SecurityEventBus.forwardTraceHeaders:46</td>
+<td>traceparent/tracestate fold</td>
+</tr>
+<tr>
+<td>middleware_events.py:67 _build_event</td>
+<td>SecurityEventBus.buildEvent:65</td>
+<td>full SecurityEvent field set (guard_agent/models.py:208) as the map envelope; middleware passes status_code/pattern_matched as null (middleware_events.py:82-109)</td>
+</tr>
+<tr>
+<td>middleware_events.py:111 send_middleware_event</td>
+<td>SecurityEventBus.sendMiddlewareEvent:127</td>
+<td>extract_client_ip carries the agent handler (middleware_events.py:125-127) so ip_extraction-seam events emit</td>
+</tr>
+<tr>
+<td>middleware_events.py:137 send_https_violation_event</td>
+<td>SecurityEventBus.sendHttpsViolationEvent:152</td>
+<td>require_https decorator branch (middleware_events.py:147-157)</td>
+</tr>
+<tr>
+<td>middleware_events.py:168 send_cloud_detection_events</td>
+<td>SecurityEventBus.sendCloudDetectionEvents:188</td>
+<td>handler event + decorator_violation branch</td>
+</tr>
+<tr>
+<td>composite_handler.py:11 CompositeAgentHandler</td>
+<td>core/events/CompositeAgentHandler.kt:44</td>
+<td>filter + enrichment before member fan-out (composite_handler.py:36-58); degraded/failed-handler semantics (composite_handler.py:67-76)</td>
+</tr>
+<tr>
+<td>enricher.py:65-106 _THREAT_SCORE_MAP</td>
+<td>core/events/EventEnricher.kt ThreatScorer:20</td>
+<td>39-entry table + default 20</td>
+</tr>
+<tr>
+<td>enricher.py:111 ThreatScorer.score_for</td>
+<td>EventEnricher.kt ThreatScorer.scoreFor</td>
+<td></td>
+</tr>
+<tr>
+<td>enricher.py:117 EnrichmentContext</td>
+<td>core/events/EventEnricher.kt:117</td>
+<td>config/agent/dynamic-rule/behavior tracker</td>
+</tr>
+<tr>
+<td>enricher.py:125 EventEnricher.enrich_event</td>
+<td>EventEnricher.enrichEvent:131</td>
+<td>identity + threat score + rule correlation + behavior correlation into the metadata bag</td>
+</tr>
+<tr>
+<td>enricher.py:141 enrich_metric</td>
+<td>EventEnricher.enrichMetric:150</td>
+<td>identity into the tags bag</td>
+</tr>
+<tr>
+<td>enricher.py:150-191 appliers</td>
+<td>EventEnricher.applyIdentity/applyThreatScore/applyRuleCorrelation/applyBehaviorCorrelation</td>
+<td>sha256(ip|service|bucket)[:16] behavior key (enricher.py:188-191)</td>
+</tr>
+<tr>
+<td>metrics.py:16 MetricsCollector</td>
+<td>core/events/MetricsCollector.kt (W4a)</td>
+<td>agent_enable_metrics gating (metrics.py:31-32)</td>
+</tr>
+<tr>
+<td>otel_handler.py:50 OtelHandler</td>
+<td>core/events/OtelHandler.kt:34</td>
+<td>the ImportError branch (otel_handler.py:27-38) is the default: absent SDK logs "opentelemetry-sdk not installed, OTEL handler disabled" (otel_handler.py:64) and health_check reports availability (otel_handler.py:229-230); span/attr/enrichment-forward/metric-dispatch logic ported over the OtelSurface seam; _otlp_signal_endpoint port (otel_handler.py:157-165)</td>
+</tr>
+<tr>
+<td>logfire_handler.py:21 LogfireHandler</td>
+<td>core/events/LogfireHandler.kt:32</td>
+<td>absent-SDK branch logs "logfire not installed, Logfire handler disabled" (logfire_handler.py:29); already-configured warning (logfire_handler.py:36-41); span enrichment filter (logfire_handler.py:60-69); metric safe-tags (logfire_handler.py:90)</td>
+</tr>
+<tr>
+<td>handler_initializer.py:58 build_enricher</td>
+<td>core/initialization/HandlerInitializer.kt buildEnricher</td>
+<td>real EventEnricher; DynamicRuleManager when enable_dynamic_rules, decorator behavior_tracker fallback (handler_initializer.py:66-84)</td>
+</tr>
+<tr>
+<td>handler_initializer.py:87 build_composite_handler</td>
+<td>HandlerInitializer.buildCompositeHandler</td>
+<td>composes agent sink members; enable_otel/enable_logfire through the default composition raises explicitly naming the absent SDK packages (the W4a contract, kept) - a host providing the <code>core.events</code> SDK surfaces registers compositeMemberFactory</td>
+</tr>
+<tr>
+<td>_utils/agent_events.py:39 send_agent_event</td>
+<td>util/AgentEvents.kt sendAgentEvent:59</td>
+<td>full envelope; extra kwargs fold into top-level model fields (the <code>extra="allow"</code> construction)</td>
+</tr>
+<tr>
+<td>per-handler SecurityEvent constructors (_ipban_events.py:15/36, _suspatterns_registry.py:32, ipinfo_handler.py:164, redis_handler.py:73, ratelimit_handler.py:345/515, cloud_handler.py:397, _behavior_action_dispatch.py:124, _dynamic_rule_events.py:15/47/77, _security_headers_events.py:35/82)</td>
+<td>the same sites through core/events/SecurityEventEnvelope.kt</td>
+<td>every emitter carries the model's 17-key envelope with model defaults (ip_address=""/action_taken=""/reason=""/metadata={}), matching model_dump key sets byte-for-byte after volatile drop</td>
+</tr>
+<tr>
+<td>detection_engine/monitor_anomalies.py:81-133 anomaly + callback-error event data</td>
+<td>guard-core-engine Monitor.kt anomalyEventType/buildAnomalyEventData/buildCallbackErrorEventData</td>
+<td>5-key emitter-shaped envelopes (timestamp volatile); _redact_pattern_source is the engine seam param (identity with empty unions)</td>
+</tr>
+<tr>
+<td>detection_engine/monitor.py:149-176 anomaly send + callback failure emission</td>
+<td>Monitor.recordMetric(agentHandler, correlationId) + checkAnomalies/notifyCallbacks</td>
+<td>AnomalyEventSink engine seam; callback failures emit detection_engine_callback_error (monitor.py:190-193)</td>
+</tr>
+<tr>
+<td>suspatterns_handler.py:855 handler detect</td>
+<td>handlers/SusPatternsRegistry.kt detect</td>
+<td>overall_detection record (suspatterns_handler.py:966-976) + pattern_detected threat event (suspatterns_handler.py:990-1050)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="event_stream-conformance">event_stream conformance</h2>
+<p>Runner: <code>guard-core-conformance/src/main/kotlin/com/guardcore/conformance/EventsHarness.kt</code>
+(Kotlin port of <code>specs/fixtures/tools/events_harness.py</code>) driving the REAL SecurityEventBus and
+the REAL fixed-order pipeline over the corpus stubs, capturing full envelopes at the agent seam;
+comparison per <code>index.json</code> <code>events_envelopes</code> (only-keys-present per expected envelope,
+<code>events_volatile_fields</code> dropped recursively, 6-decimal floats) in
+<code>EventsComparison.kt</code>; fail-closed ledger <code>guard-core-conformance/src/test/resources/
+jvm_events_xfail.json</code> (failing-not-listed red, listed-but-passing red, drifted diff red).</p>
+<p>Per-case results (39/39 green: 37 byte-exact + 2 ledgered + 1 advisory, matching the TS floor):</p>
+<ul>
+<li>36 real-pin cases: exact (penetration_attempt x2, ip_blocked x2, ip_banned/ip_unbanned,
+  ip_ban_failed, cloud_blocked+decorator_violation, https_enforced, decorator_violation,
+  behavioral_violation, pattern_detected, dynamic_rule_updated/applied/violation,
+  emergency_mode_activated, access_denied, authentication_failed, content_filtered,
+  country_blocked, csp_violation, custom_request_check, emergency_mode_block, geo country,
+  path_excluded, pattern_added/removed, rate_limited, rate_limit_script_reloaded,
+  redis_connection, route_unresolved, security_bypass, security_headers_applied,
+  user_agent_blocked, suspicious_request, detection_engine_callback_error, pattern anomaly
+  timeout/slow_execution/statistical)</li>
+<li><code>evt_geo_lookup_failed_download</code>: LEDGERED - reason embeds the exception CLASS NAME
+  (ipinfo_handler.py:221 formats <code>type(e).__name__</code>); want <code>RuntimeError</code> (python), got
+  <code>RuntimeException</code> (the JVM generic's class name). Same divergence class as the TS ledger's
+  first entry; the engine behavior (class-name embedding) is ported 1:1.</li>
+<li><code>evt_redis_error_connection_failed</code>: LEDGERED - reason embeds the python redis-driver error
+  text (<code>redis.exceptions.ConnectionError</code> errno text); got the Lettuce driver text
+  (<code>RedisConnectionException: Unable to connect to localhost/&lt;unresolved&gt;:59999</code>). Same class
+  as the TS ledger's second entry; not hiding a missing emitter.</li>
+<li><code>evt_decoding_error_unreachable</code>: advisory xfail (expected <code>[]</code>), runs expectation-free.</li>
+</ul>
+<p>Emitter fixes the corpus forced (all byte-exact against python):</p>
+<ul>
+<li>RedisManager await unwraps <code>ExecutionException</code> so the NOSCRIPT reload path catches
+  <code>RedisNoScriptException</code> like redis-py's inline raise (ratelimit_handler.py NOSCRIPT recovery).</li>
+<li><code>emitBanEscalationFailed</code> renders <code>str(error)</code> (message only, helpers.py:467).</li>
+<li><code>sendDecoratorEvent</code> folds <code>decorator_type</code> into the forwarded metadata (the python kwarg
+  pass through middleware_events.py:111).</li>
+<li>pattern add/remove events carry <code>pattern</code> in metadata with <code>pattern_matched</code> null (the python
+  <code>**kwargs</code> binding, _suspatterns_registry.py:190).</li>
+<li>SecurityEventBus hands the agent handler to extract_client_ip (middleware_events.py:125).</li>
+<li>RedisManager.discardClientQuietlyForCorpus mirrors the harness <code>_closed/_discard_client</code>
+  teardown (events_harness.py:551-552).</li>
+</ul>
+<h2 id="decorators-g-12">Decorators (G-12)</h2>
+<p><code>guard-core/src/main/kotlin/com/guardcore/decorators/SecurityDecorator.kt</code> ports the decorator
+factory surface 1:1 (parameter surface, validation, warnings):</p>
+<table>
+<thead>
+<tr>
+<th>Python</th>
+<th>JVM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>access_control.py:16 require_ip</td>
+<td>SecurityDecorator.requireIp</td>
+</tr>
+<tr>
+<td>access_control.py:30/42 block_countries/allow_countries</td>
+<td>blockCountries/allowCountries (upper-cased)</td>
+</tr>
+<tr>
+<td>access_control.py:54 block_clouds</td>
+<td>blockClouds (VALID_CLOUD_PROVIDERS + <code>:!</code> selector partition + sorted-invalid warning)</td>
+</tr>
+<tr>
+<td>access_control.py:71 bypass</td>
+<td>bypass (VALID_BYPASS_CHECKS filtering + warning)</td>
+</tr>
+<tr>
+<td>rate_limiting.py:11/20 rate_limit/geo_rate_limit</td>
+<td>rateLimit/geoRateLimit</td>
+</tr>
+<tr>
+<td>behavioral.py:18/34/52/70 usage_monitor/return_monitor/behavior_analysis/suspicious_frequency</td>
+<td>usageMonitor/returnMonitor/behaviorAnalysis/suspiciousFrequency (_validate_return_pattern_body_scan enforced)</td>
+</tr>
+<tr>
+<td>authentication.py:15/22/44/68/82 require_https/require_auth/api_key_auth/require_authorization_header/require_headers</td>
+<td>requireHttps/requireAuth/apiKeyAuth/requireAuthorizationHeader/requireHeaders (mutual-exclusion ValueErrors)</td>
+</tr>
+<tr>
+<td>content_filtering.py:17 block_user_agents</td>
+<td>blockUserAgents (ReDoS gate BEFORE route mutation, redacted-pattern rejection message)</td>
+</tr>
+<tr>
+<td>content_filtering.py:40/50/60/70/79 content_type_filter/max_request_size/require_referrer/custom_validation/detection_exclusion</td>
+<td>contentTypeFilter/maxRequestSize/requireReferrer/customValidation/detectionExclusion</td>
+</tr>
+<tr>
+<td>advanced.py:52/64/72 time_window/suspicious_detection/honeypot_detection</td>
+<td>timeWindow/suspiciousDetection/honeypotDetection (honeypot closure over readCappedBody + parse_qs; PyUrllib.parseQs port)</td>
+</tr>
+</tbody>
+</table>
+<p>Route-id collision study (the guard-core #141/#142 class): the python bug was factory-built
+endpoints (closures sharing one <code>__qualname__</code>) deriving the same <code>module.qualname</code> route id, so
+one endpoint could select another's RouteConfig; python's defense
+(decorators/base.py:84-105) reuses a stamped id only when the SAME instance assigned it to the
+SAME function object (owner chain over <code>id(func)</code>/<code>__wrapped__</code>), else allocates <code>key#2</code>.</p>
+<p>JVM capability comparison: route identity is caller-supplied object identity (<code>StampedRoute</code>
+carrying <code>stampedRouteId</code>, or a string key) - the analog of the TS WeakMap case. Two factory-built
+endpoints in the JVM are two distinct <code>StampedRoute</code> objects, so the derived-key collision class
+python had cannot occur: identical base keys get <code>key#2</code>-style suffixes per instance, and stamped
+ids are never reused across instances (the owner map). <code>SecurityDecoratorTest</code>
+(route-id collision campaign) ports tests/test_decorators/test_route_id_per_function.py 1:1:
+own-rate-limit isolation, settings not leaking, first endpoint keeps the plain key, stacked
+decorators share one config (the intentional case), and cross-instance stamped-id non-reuse.</p>
+<h2 id="java-bridges">Java bridges</h2>
+<p><code>guard-core/src/main/kotlin/com/guardcore/java/JavaBridges.kt</code> - the convention: every public
+async entry point ships three shapes (suspend for Kotlin, <code>blocking</code> static = runBlocking
+confined to the entry point (the unasync analog per specs/impl/jvm.md), <code>future</code> static =
+CompletableFuture over the IO dispatcher):</p>
+<ul>
+<li>pipeline run: executePipeline / executePipelineBlocking</li>
+<li>detection: detect / detectBlocking (SusPatternsManager.detect)</li>
+<li>handlers: banIp, unbanIp, checkRateLimit (adapter supplies the error factory),
+  getSecurityHeaders, initializeRedis, applyBehaviorAction (+ blocking pairs)</li>
+</ul>
+<p>Proven from Java source in <code>guard-core/src/test/java/com/guardcore/java/JavaBridgeConsumerTest.java</code>.</p>
+<h2 id="g-13-deeper-test_core-halves-landed-this-wave">G-13 deeper test_core halves landed this wave</h2>
+<ul>
+<li>PipelineRebuildPolicyTest.kt: test_pipeline_concurrent_rebuild.py (race self-heal through the
+  public execute surface) + test_pipeline_rebuild_failure_policy.py (fail-secure block,
+  last-known-good continuation, transient recovery, empty-pipeline reraise) + the
+  user_agent/cloud_provider/custom_request config-revision halves of
+  test_pipeline_config_revision.py (the EmptyRoutesMiddleware shape mirrors the python Mock
+  decorator presenting an empty route-config collection).</li>
+<li>EventsGatingTest.kt: test_events.py halves (metrics no-agent/disabled/send/exception +
+  collect counts; bus no-agent/disabled/send/geo/geo-failure/muted-filter/https routing).</li>
+</ul>
+<h2 id="known-residuals">Known residuals</h2>
+<ul>
+<li>The 2 ledgered reason-string shapes above (TS divergence class; fail-closed ledger).</li>
+<li>G-13 remainder re-scoped to W5 in KNOWN_GAPS.md (check_applies_to matrix, edge cases,
+  exempt_ips, ip_security variants, authentication verifier, behavioral global variants,
+  initialization variants, escalate-identity/block-vs-ban escalation, rate-limit-by-ip handler
+  halves, pipeline route-config revision).</li>
+<li>guard-agent SecurityEvent/SecurityMetric model classes remain the W7 seam; the envelope
+  field set they produce is already byte-shaped here.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,947 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Kotlin/JVM port of the guard-core engine - detection, rate limiting, IP banning, and cloud provider blocking for the JVM">
+      
+      
+        <meta name="author" content="Renn F">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Release runbook (guard-core-jvm) - guard-core-jvm</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#release-runbook-guard-core-jvm" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="guard-core-jvm" class="md-header__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            guard-core-jvm
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Release runbook (guard-core-jvm)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="guard-core-jvm" class="md-nav__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    guard-core-jvm
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adapters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adapters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#versioning-law" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Versioning law
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#publishing-auth-reality-verified-2026-10-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Publishing auth reality (verified 2026-10-11)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#one-time-prerequisites-operator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One-time prerequisites (operator)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#release-choreography-family-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Release choreography (family order)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Release choreography (family order)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-engine-this-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Engine (this repo)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-adapters-and-agent-spring-boot-guard-ktor-guard-guard-agent-jvm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Adapters and agent (spring-boot-guard, ktor-guard, guard-agent-jvm)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-flip-checklist-adapters-agent-per-release-pr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version-flip checklist (adapters + agent, per release PR)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-release-audits-per-train-per-tag-the-php-v431-lesson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Post-release audits (per train, per tag - the php v4.3.1 lesson)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rerun-safety-and-failure-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rerun safety and failure recovery
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rollback-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rollback notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rehearsal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rehearsal
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="release-runbook-guard-core-jvm">Release runbook (guard-core-jvm)</h1>
+<p>The exact choreography for the operator on release day. NOTHING releases
+without fresh explicit operator go (W8b standing rule): every step below is a
+deliberate human action. This document covers the engine repo; the adapters
+(spring-boot-guard, ktor-guard) and the agent (guard-agent-jvm) have their own
+runbooks with the same structure and a version-flip checklist.</p>
+<h2 id="versioning-law">Versioning law</h2>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Repo</th>
+<th>Version</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>guard-core-engine</code></td>
+<td>guard-core-jvm (this repo)</td>
+<td>4.3.2</td>
+<td>lockstep with guard-core 4.3.2</td>
+</tr>
+<tr>
+<td><code>guard-core</code> (facade)</td>
+<td>guard-core-jvm (this repo)</td>
+<td>4.3.2</td>
+<td>lockstep with guard-core 4.3.2</td>
+</tr>
+<tr>
+<td><code>spring-boot-guard</code></td>
+<td>spring-boot-guard</td>
+<td>1.0.0</td>
+<td>fresh family version</td>
+</tr>
+<tr>
+<td><code>ktor-guard</code></td>
+<td>ktor-guard</td>
+<td>1.0.0</td>
+<td>fresh family version</td>
+</tr>
+<tr>
+<td><code>guard-agent-jvm</code></td>
+<td>guard-agent-jvm</td>
+<td>3.2.2</td>
+<td>mirrors guard-agent 3.2.2</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>The engine version is set in-file (<code>build.gradle.kts</code>, <code>allprojects</code>).
+  Tags must match it exactly: the engine tags <code>v4.3.2</code>.</li>
+<li>Tags are bare <code>vX.Y.z</code> only: no suffixes (<code>v4.3.2-jvm</code> is wrong), no build
+  metadata. The <code>tag-consistency</code> job refuses anything else. This audit exists
+  because of the guard-core-rs invisible-rule incident on <code>refs/tags/v4.3.2</code>.</li>
+<li>CHANGELOG entries use <code>## [SEMVER] - YYYY-MM-DD</code> and mirror the narrative
+  naming of the guard-core Python repo.</li>
+<li>groupId <code>com.guard-core</code> (the Maven Central Portal namespace; it reverses
+  to guard-core.com). Kotlin/JVM packages stay <code>com.guardcore.*</code>: hyphens are
+  illegal in JVM packages and the groupId/package mismatch is standard for
+  hyphenated domains.</li>
+</ul>
+<h2 id="publishing-auth-reality-verified-2026-10-11">Publishing auth reality (verified 2026-10-11)</h2>
+<ul>
+<li>The Central Portal Publisher API authenticates with a <strong>Portal user token</strong>
+  (<code>Authorization: Bearer base64(username:password)</code>), generated in the Portal
+  under Account -&gt; Generate User Token. <strong>OIDC trusted publishing does not
+  exist for Maven Central</strong> as of October 2026 (npm/PyPI/Packagist have it;
+  Maven does not): the publish jobs therefore request no <code>id-token</code> scope and
+  are the least-privilege set. If Sonatype ships trusted publishing later,
+  this section and the workflows get a follow-up.</li>
+<li><strong>GPG signing is mandatory.</strong> Every deployed file needs an <code>.asc</code> signature.
+  The key never leaves the runner: the workflow passes the armored private
+  key + passphrase through Gradle's <code>useInMemoryPgpKeys</code>.</li>
+<li><strong>Checksums</strong> <code>.md5</code>/<code>.sha1</code> are mandatory (<code>.sha256</code>/<code>.sha512</code> optional);
+  Gradle's <code>maven-publish</code> generates them.</li>
+<li><strong>Sources and javadoc jars are mandatory</strong> for every artifact (the build
+  files produce them; the javadoc jar carries the README until Dokka lands).</li>
+<li><strong>Publishing limits</strong> took effect 2026-10-01: three monthly metrics per
+  organization (file count, release size, release count), evaluated as hard
+  thresholds with a grace flow. The source of truth for thresholds and usage
+  is the Portal's Usage Center. A JVM family train (4 deployments, well under
+  100 files) is far below the community thresholds; check the Usage Center
+  before each train anyway.</li>
+<li>Publishing type is fixed to <code>USER_MANAGED</code> in the workflows: deployments are
+  uploaded and VALIDATED by CI, and a human releases them from the Portal UI.
+  This is the deliberate human gate before artifacts go immutable-live.
+  (<code>AUTOMATIC</code> would skip that gate; do not switch without an operator ruling.)</li>
+</ul>
+<h2 id="one-time-prerequisites-operator">One-time prerequisites (operator)</h2>
+<ol>
+<li>Portal namespace <code>com.guard-core</code> shows <strong>Verified</strong> at
+   central.sonatype.com. (History: the <code>com.guardcore</code> claim was abandoned as
+   unverifiable on 2026-10-11 - guardcore.com is a parked domain the operator
+   does not own; <code>com.guard-core</code> reverses to guard-core.com, TXT record
+   placed, re-registered 2026-10-11. repo1.maven.org has no prior art for
+   either group.)</li>
+<li>Generate a Portal user token (Account -&gt; Generate User Token).</li>
+<li>Prepare the signing key, if none exists yet:</li>
+<li><code>gpg --full-generate-key</code> (RSA 4096, no expiry is fine, email
+     <code>rennf93@guard-core.com</code>).</li>
+<li>Distribute the public key: <code>gpg --keyserver keyserver.ubuntu.com
+     --send-key &lt;KEYID&gt;</code> (Portal validation checks public availability).</li>
+<li>Export for CI: <code>gpg --armor --export-secret-keys &lt;KEYID&gt;</code>.</li>
+<li>Set four GitHub secrets on <strong>each</strong> family repo (Settings -&gt; Secrets and
+   variables -&gt; Actions):</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Secret</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CENTRAL_PORTAL_USERNAME</code></td>
+<td>user token username</td>
+</tr>
+<tr>
+<td><code>CENTRAL_PORTAL_PASSWORD</code></td>
+<td>user token password</td>
+</tr>
+<tr>
+<td><code>GPG_PRIVATE_KEY</code></td>
+<td>armored private key (whole <code>-----BEGIN ... KEY BLOCK-----</code> block)</td>
+</tr>
+<tr>
+<td><code>GPG_PASSPHRASE</code></td>
+<td>the key's passphrase</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>Check the Portal Usage Center (Publishing -&gt; Usage Center) shows the org
+   comfortably below all three thresholds.</li>
+</ol>
+<h2 id="release-choreography-family-order">Release choreography (family order)</h2>
+<p>Engine first, then the Portal release clicks, then (and only then) the
+adapters and the agent.</p>
+<h3 id="1-engine-this-repo">1. Engine (this repo)</h3>
+<ol>
+<li>Confirm <code>build.gradle.kts</code> carries the release version (4.3.2 - no flip
+   needed while in lockstep; the version lives in the file, never on the
+   command line) and the CHANGELOG has a <code>## [4.3.2] - YYYY-MM-DD</code> section.</li>
+<li>Tag on the release commit: <code>git tag v4.3.2 &amp;&amp; git push origin v4.3.2</code>.
+   The tag push runs the gate suite (build + full-corpus certification +
+   tag-consistency audit). Wait for it to go green.</li>
+<li>Create the GitHub release for <code>v4.3.2</code> (Create release from the tag). The
+   <code>release: created</code> event starts the publish job:</li>
+<li>secrets gate -&gt; existence check per artifact (skip if already live) -&gt;
+     <code>guard-core-engine</code> staging bundle -&gt; Portal upload -&gt; VALIDATED -&gt;
+     <code>guard-core</code> staging bundle -&gt; Portal upload -&gt; VALIDATED
+   (engine-before-facade is enforced by job structure; a partial failure
+   re-drives with workflow_dispatch and only the missing artifact publishes).</li>
+<li>In the Portal UI (central.sonatype.com, Publishing -&gt; Deployments):
+   inspect both VALIDATED deployments, then click <strong>Release</strong> on the engine
+   deployment first, the facade second.</li>
+<li>Wait for replication and verify liveness (this is the signal the consumer
+   releases wait on):</li>
+<li><code>curl -f https://repo1.maven.org/maven2/com/guard-core/guard-core-engine/4.3.2/guard-core-engine-4.3.2.pom</code></li>
+<li><code>curl -f https://repo1.maven.org/maven2/com/guard-core/guard-core/4.3.2/guard-core-4.3.2.pom</code></li>
+</ol>
+<h3 id="2-adapters-and-agent-spring-boot-guard-ktor-guard-guard-agent-jvm">2. Adapters and agent (spring-boot-guard, ktor-guard, guard-agent-jvm)</h3>
+<p>Only after step 1.5 succeeds (their workflows re-check it anyway):</p>
+<ol>
+<li>Version-flip PR per repo (see the checklist below): flip the project
+   version, update the CHANGELOG, merge with CI green.</li>
+<li>Tag: <code>git tag v1.0.0 &amp;&amp; git push origin v1.0.0</code> (agent: <code>v3.2.2</code>). Gates
+   run: engine-artifact pre-flight, tests at tag, tag-consistency.</li>
+<li>Create the GitHub release. The publish job runs with
+   <code>GUARD_CORE_USE_COMPOSITE=false</code>, so the build resolves
+   <code>com.guard-core:guard-core:4.3.2</code> from Maven Central (mavenLocal, then
+   Central) - proving the published graph, not the composite checkout.</li>
+<li>Release the VALIDATED deployment in the Portal UI.</li>
+<li>Verify liveness:</li>
+<li><code>curl -f https://repo1.maven.org/maven2/com/guard-core/spring-boot-guard/1.0.0/spring-boot-guard-1.0.0.pom</code></li>
+<li><code>curl -f https://repo1.maven.org/maven2/com/guard-core/ktor-guard/1.0.0/ktor-guard-1.0.0.pom</code></li>
+<li><code>curl -f https://repo1.maven.org/maven2/com/guard-core/guard-agent-jvm/3.2.2/guard-agent-jvm-3.2.2.pom</code></li>
+</ol>
+<h3 id="version-flip-checklist-adapters-agent-per-release-pr">Version-flip checklist (adapters + agent, per release PR)</h3>
+<ul>
+<li>[ ] <code>build.gradle.kts</code>: <code>version = "1.0.0-SNAPSHOT"</code> -&gt; <code>version = "1.0.0"</code>
+      (agent: <code>3.2.2-SNAPSHOT</code> -&gt; <code>3.2.2</code>).</li>
+<li>[ ] <code>gradle/libs.versions.toml</code>: the <code>guardCore</code> version ref still reads
+      <code>4.3.2</code> (the lockstep engine pin - bump it only when the engine train
+      moves).</li>
+<li>[ ] <code>CHANGELOG.md</code>: rename the <code>Unreleased</code> section to
+      <code>## [1.0.0] - YYYY-MM-DD</code> and state the engine pin.</li>
+<li>[ ] The workflow's <code>tag-consistency</code> job is the safety net: it fails with a
+      clear message if the tag is pushed without the flip (SNAPSHOT version)
+      or if the tag does not equal the in-file version.</li>
+<li>[ ] The consumers' <code>GUARD_CORE_JVM_REF</code> pins (ci.yml + settings comments)
+      already point at the released engine SHA: they bump AT TRAIN TIME,
+      before the consumer tags, so the at-tag tests run against the engine
+      that actually ships (the family spec pins this; a pin bump is an
+      ordinary development PR).</li>
+</ul>
+<h2 id="post-release-audits-per-train-per-tag-the-php-v431-lesson">Post-release audits (per train, per tag - the php v4.3.1 lesson)</h2>
+<ol>
+<li><strong>Release page audit</strong>: every tag in the train has a GitHub release page
+   with the expected artifact notes and no draft leftovers.</li>
+<li><strong>Registry existence check</strong>: every artifact coordinates above answers
+   HTTP 200 on repo1 (the same check the workflows use for rerun safety).</li>
+<li><strong>Portal Deployments audit</strong>: no deployment left in VALIDATED/PENDING.</li>
+<li><strong>Usage Center</strong>: the train registered without warnings.</li>
+</ol>
+<h2 id="rerun-safety-and-failure-recovery">Rerun safety and failure recovery</h2>
+<ul>
+<li>A publish job that dies mid-train re-drives via workflow_dispatch: the
+  existence check skips anything already live on repo1, and only the missing
+  deployment uploads again.</li>
+<li>A deployment stuck in VALIDATED that you do NOT want: click <strong>Drop</strong> in the
+  Portal UI, then re-drive the workflow.</li>
+<li>Validation FAILED: the job logs print the Portal's error messages; fix the
+  POM/jar/signature issue, drop the failed deployment in the Portal, re-drive.</li>
+<li>Workflow re-runs NEVER double-publish: repo1 serving 200 is authoritative.</li>
+</ul>
+<h2 id="rollback-notes">Rollback notes</h2>
+<ul>
+<li>Published Maven Central artifacts are <strong>immutable and undeleteable</strong>. There
+  is no rollback after the Portal Release click - only a fixed follow-up
+  version.</li>
+<li>The rollback surface that exists:</li>
+<li>Before the click: Drop the VALIDATED deployment (nothing was published).</li>
+<li>After the click: cut a fix version through the same choreography, and
+     (for security-grade breakage) yank consumers off the artifact via a
+     patch release of the adapters plus a documented advisory.</li>
+<li>Delete the git tag and GitHub release only for a train that never released
+  (no VALIDATED deployment was released); a published artifact's tag must
+  stay forever.</li>
+</ul>
+<h2 id="rehearsal">Rehearsal</h2>
+<p>The W8b dry-run proof (publishToMavenLocal, POM validation, workflow lint)
+and its findings live in <a href="../release-rehearsal/">docs/release-rehearsal.md</a>.
+The rehearsal never touched a remote registry: the first real upload happens
+only on operator go, on release day, through the choreography above.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

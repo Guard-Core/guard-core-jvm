@@ -1,0 +1,1909 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Kotlin/JVM port of the guard-core engine - detection, rate limiting, IP banning, and cloud provider blocking for the JVM">
+      
+      
+        <meta name="author" content="Renn F">
+      
+      
+      
+        <link rel="prev" href="../installation/">
+      
+      
+        <link rel="next" href="../api/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Configuration - guard-core-jvm</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#configuration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="guard-core-jvm" class="md-header__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            guard-core-jvm
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="guard-core-jvm" class="md-nav__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    guard-core-jvm
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#network-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network / proxy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#registry-fields-beyond-the-spec-02-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registry fields beyond the spec 02 tables
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adapters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adapters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#network-proxy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network / proxy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#registry-fields-beyond-the-spec-02-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Registry fields beyond the spec 02 tables
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="configuration">Configuration</h1>
+<p>Every <code>SecurityConfig</code> field with its type, default, and effect. The
+canonical field names are the snake_case python names (the cross-language
+interop surface, spec 02): the Kotlin properties are the camelCase forms,
+and adapters bind them idiomatically (Spring relaxed binding maps
+<code>guard.redis-url</code> to <code>redisUrl</code>; Ktor takes the builder or the Kotlin
+property names). Types and defaults are normative; a conformant build
+with default config behaves as the reference with default config.</p>
+<p>Generated by <code>docs/tools/w8d_config_docs.py</code> from
+<code>ConfigFieldRegistry.kt</code> (the ported reference field table) joined with
+the spec 02 field semantics. Re-run it whenever the registry or spec 02
+changes; a field that exists in code but not here is a defect.</p>
+<h2 id="network-proxy">Network / proxy</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>trusted_proxies</code></td>
+<td><code>trustedProxies</code></td>
+<td>str list (IP or CIDR; <code>"unix"</code> allowed)</td>
+<td><code>[]</code></td>
+<td>Peers trusted to set <code>X-Forwarded-For</code>. Entries are normalized to canonical IP/CIDR string form at validation. <code>/0</code> entry logs a warning (spoof risk) but is accepted.</td>
+</tr>
+<tr>
+<td><code>trusted_proxy_depth</code></td>
+<td><code>trustedProxyDepth</code></td>
+<td>int</td>
+<td><code>1</code></td>
+<td>Number of proxies expected in the <code>X-Forwarded-For</code> chain. MUST be &gt;= 1; 0 or negative rejected.</td>
+</tr>
+<tr>
+<td><code>trust_x_forwarded_proto</code></td>
+<td><code>trustXForwardedProto</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>When true, HTTPS detection consults <code>X-Forwarded-Proto</code>; otherwise only the URL scheme.</td>
+</tr>
+<tr>
+<td><code>whitelist</code></td>
+<td><code>whitelist</code></td>
+<td>str list (IP/CIDR) or none</td>
+<td><code>null</code></td>
+<td>Non-empty = restrictive: only listed IPs pass the global IP check. An explicit whitelist match overrides the blacklist; dynamic IP bans still apply. <code>null</code> (not empty) means "no whitelist".</td>
+</tr>
+<tr>
+<td><code>blacklist</code></td>
+<td><code>blacklist</code></td>
+<td>str list (IP/CIDR)</td>
+<td><code>[]</code></td>
+<td>Blocked IPs/CIDRs. Enforced ahead of country and cloud checks; overridden by an explicit whitelist match. Entries normalized to canonical form.</td>
+</tr>
+<tr>
+<td>## Redis / distributed state</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable_redis</code></td>
+<td><code>enableRedis</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Enables distributed state (shared bans, counters, caches). Requires the <code>redis</code> optional package; see Capability gating.</td>
+</tr>
+<tr>
+<td><code>redis_url</code></td>
+<td><code>redisUrl</code></td>
+<td>str or none</td>
+<td><code>"redis://localhost:6379"</code></td>
+<td>Connection URL.</td>
+</tr>
+<tr>
+<td><code>redis_prefix</code></td>
+<td><code>redisPrefix</code></td>
+<td>str</td>
+<td><code>"guard_core:"</code></td>
+<td>Prefix on every Redis key (section 08 key names embed it).</td>
+</tr>
+<tr>
+<td><code>redis_socket_connect_timeout</code></td>
+<td><code>redisSocketConnectTimeout</code></td>
+<td>float or none, &gt; 0 (gt=0.0)</td>
+<td><code>2.0</code></td>
+<td>Seconds to wait for a TCP connection. MUST be &gt; 0 (0 = non-blocking mode, not "no timeout"). <code>null</code> disables the timeout.</td>
+</tr>
+<tr>
+<td><code>redis_socket_timeout</code></td>
+<td><code>redisSocketTimeout</code></td>
+<td>float or none, &gt; 0 (gt=0.0)</td>
+<td><code>2.0</code></td>
+<td>Seconds to wait per read/write. MUST be &gt; 0. <code>null</code> = no timeout.</td>
+</tr>
+<tr>
+<td><code>redis_health_check_interval</code></td>
+<td><code>redisHealthCheckInterval</code></td>
+<td>int, &gt;= 0 (ge=0)</td>
+<td><code>30</code></td>
+<td>Seconds between pooled-connection health checks; 0 disables.</td>
+</tr>
+<tr>
+<td><code>redis_max_connections</code></td>
+<td><code>redisMaxConnections</code></td>
+<td>int or none, &gt;= 1 (ge=1)</td>
+<td><code>null</code></td>
+<td>Connection-pool cap; <code>null</code> = backend default.</td>
+</tr>
+<tr>
+<td><code>redis_retries</code></td>
+<td><code>redisRetries</code></td>
+<td>int, &gt;= 0 (ge=0)</td>
+<td><code>1</code></td>
+<td>Retries with exponential backoff on transient connection/timeout errors before surfacing; 0 disables.</td>
+</tr>
+<tr>
+<td><code>redis_fail_open</code></td>
+<td><code>redisFailOpen</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>On Redis unavailability, skip the failing check and let the request through instead of honoring <code>fail_secure</code>. Default false: <code>fail_secure</code> governs every check failure including Redis outages.</td>
+</tr>
+<tr>
+<td>## IP banning / penalties</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable_ip_banning</code></td>
+<td><code>enableIpBanning</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Master switch for IP banning.</td>
+</tr>
+<tr>
+<td><code>auto_ban_threshold</code></td>
+<td><code>autoBanThreshold</code></td>
+<td>int, &gt;= 1 (ge=1)</td>
+<td><code>10</code></td>
+<td>Suspicious-request count that triggers auto-ban.</td>
+</tr>
+<tr>
+<td><code>auto_ban_duration</code></td>
+<td><code>autoBanDuration</code></td>
+<td>int, &gt;= 1 (ge=1)</td>
+<td><code>3600</code></td>
+<td>Auto-ban duration in seconds.</td>
+</tr>
+<tr>
+<td><code>threat_ban_config</code></td>
+<td><code>threatBanConfig</code></td>
+<td>map of category → <code>{threshold: int &gt;= 1, duration: int &gt;= 1}</code></td>
+<td><code>{}</code></td>
+<td>Per-category overrides of <code>auto_ban_threshold</code>/<code>auto_ban_duration</code>. Valid categories: the penetration-detection categories (see <code>enabled_detection_categories</code>) plus the pseudo-category <code>"rate_limit"</code>. Unknown category keys: rejected. Unlisted categories fall back to the flat thresholds.</td>
+</tr>
+<tr>
+<td><code>enable_rate_limit_auto_ban</code></td>
+<td><code>enableRateLimitAutoBan</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>Feed rate-limit violations into the auto-ban engine: each active-mode violation increments the <code>"rate_limit"</code> suspicious count and runs the same threshold logic (<code>threat_ban_config["rate_limit"]</code> first, then flat). Requires <code>enable_ip_banning</code> to actually ban.</td>
+</tr>
+<tr>
+<td>## Geo / countries</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>whitelist_countries</code></td>
+<td><code>whitelistCountries</code></td>
+<td>str set (ISO 3166-1 alpha-2)</td>
+<td><code>[]</code></td>
+<td>Non-empty = restrictive: only listed countries pass; unresolved country is blocked. Overrides <code>blocked_countries</code> (setting both warns).</td>
+</tr>
+<tr>
+<td><code>blocked_countries</code></td>
+<td><code>blockedCountries</code></td>
+<td>str set</td>
+<td><code>[]</code></td>
+<td>Countries always blocked.</td>
+</tr>
+<tr>
+<td><code>geo_ip_handler</code></td>
+<td><code>geoIpHandler</code></td>
+<td>handler or none</td>
+<td><code>null</code></td>
+<td>GeoIP provider (section 01 surface). Auto-resolved at validation when country rules exist and this is <code>null</code> (see Validation semantics).</td>
+</tr>
+<tr>
+<td><code>ipinfo_token</code></td>
+<td><code>ipinfoToken</code></td>
+<td>str or none</td>
+<td><code>null</code></td>
+<td>IPInfo API token for geolocation download.</td>
+</tr>
+<tr>
+<td><code>ipinfo_db_path</code></td>
+<td><code>ipinfoDbPath</code></td>
+<td>path</td>
+<td><code>"data/ipinfo/country_asn.mmdb"</code></td>
+<td>Local MMDB file path.</td>
+</tr>
+<tr>
+<td><code>geo_ip_db_max_age</code></td>
+<td><code>geoIpDbMaxAge</code></td>
+<td>int, 3600–604800 (ge=3600, le=604800)</td>
+<td><code>86400</code></td>
+<td>Max age in seconds of the IPInfo MMDB before re-download.</td>
+</tr>
+<tr>
+<td>## Cloud providers</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>block_cloud_providers</code></td>
+<td><code>blockCloudProviders</code></td>
+<td>str set or none</td>
+<td><code>null</code></td>
+<td>Providers to block. Valid names: <code>AWS</code>, <code>GCP</code>, <code>Azure</code>, <code>DigitalOcean</code>, <code>Linode</code>, <code>Vultr</code>. A bare name blocks the whole provider; <code>"&lt;name&gt;:!&lt;region&gt;"</code> blocks the provider except that region. Region data exists for AWS and GCP only; a carve-out on other providers exempts nothing. Unknown provider names: rejected.</td>
+</tr>
+<tr>
+<td><code>cloud_ip_refresh_interval</code></td>
+<td><code>cloudIpRefreshInterval</code></td>
+<td>int, 60–86400 (ge=60, le=86400)</td>
+<td><code>3600</code></td>
+<td>Seconds between cloud IP range refreshes.</td>
+</tr>
+<tr>
+<td><code>cloud_ip_store</code></td>
+<td><code>cloudIpStore</code></td>
+<td>store instance, store factory, or none</td>
+<td><code>null</code></td>
+<td>Override for the shared cloud-IP cache (section 01 surface). <code>null</code> = auto-construct the Redis-backed store when Redis is enabled. A factory is a callable taking the redis handler and returning a store (defers construction).</td>
+</tr>
+<tr>
+<td><code>lazy_init</code></td>
+<td><code>lazyInit</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Defer cloud-IP HTTP fetches and geo MMDB downloads to a background task. Effective only when Redis is enabled AND the adapter wires the deferred-init startup hook; otherwise cloud/geo init happens on demand and this flag is inert. First requests may see partially populated ranges.</td>
+</tr>
+<tr>
+<td>## Rate limiting</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable_rate_limiting</code></td>
+<td><code>enableRateLimiting</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Master switch for rate limiting.</td>
+</tr>
+<tr>
+<td><code>rate_limit</code></td>
+<td><code>rateLimit</code></td>
+<td>int</td>
+<td><code>10</code></td>
+<td>Max requests per <code>rate_limit_window</code>.</td>
+</tr>
+<tr>
+<td><code>rate_limit_window</code></td>
+<td><code>rateLimitWindow</code></td>
+<td>int</td>
+<td><code>60</code></td>
+<td>Window in seconds.</td>
+</tr>
+<tr>
+<td><code>endpoint_rate_limits</code></td>
+<td><code>endpointRateLimits</code></td>
+<td>map of endpoint str → (requests int, window int)</td>
+<td><code>{}</code></td>
+<td>Per-endpoint overrides; normally populated by dynamic rules.</td>
+</tr>
+<tr>
+<td>## Detection / penetration</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable_penetration_detection</code></td>
+<td><code>enablePenetrationDetection</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Master switch.</td>
+</tr>
+<tr>
+<td><code>enabled_detection_categories</code></td>
+<td><code>enabledDetectionCategories</code></td>
+<td>str set</td>
+<td>all categories</td>
+<td>Subset of: <code>xss</code>, <code>sqli</code>, <code>dir_traversal</code>, <code>path_traversal</code>, <code>cmd_injection</code>, <code>file_inclusion</code>, <code>ldap</code>, <code>xml</code>, <code>ssrf</code>, <code>nosql</code>, <code>file_upload</code>, <code>template</code>, <code>http_split</code>, <code>sensitive_file</code>, <code>cms_probing</code>, <code>recon</code>, <code>proto_pollution</code>, <code>code_injection</code>, <code>deserialization</code>. Unknown names: rejected. Empty set while detection is on: warning (detection enabled but never matches).</td>
+</tr>
+<tr>
+<td><code>excluded_detection_headers</code></td>
+<td><code>excludedDetectionHeaders</code></td>
+<td>str set</td>
+<td><code>{}</code></td>
+<td>Headers exempted from the categories known to false-positive on their typical values (identity/proxy headers skip <code>ssrf</code> only); other categories still scan them. Merged with the hardcoded default exclusion set.</td>
+</tr>
+<tr>
+<td><code>excluded_detection_params</code></td>
+<td><code>excludedDetectionParams</code></td>
+<td>str set</td>
+<td><code>{}</code></td>
+<td>Query parameters excluded from detection scanning.</td>
+</tr>
+<tr>
+<td><code>excluded_detection_body_fields</code></td>
+<td><code>excludedDetectionBodyFields</code></td>
+<td>str set</td>
+<td><code>{}</code></td>
+<td>JSON body keys excluded from detection scanning, matched at any nesting depth; also applied to form-urlencoded and multipart text-part field names.</td>
+</tr>
+<tr>
+<td><code>detection_scan_body</code></td>
+<td><code>detectionScanBody</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Scan the request body. False: detection restricted to path, query, headers; the body is never read.</td>
+</tr>
+<tr>
+<td><code>detection_max_body_inspect_bytes</code></td>
+<td><code>detectionMaxBodyInspectBytes</code></td>
+<td>int, 1024–10485760 (ge=1024, le=10485760)</td>
+<td><code>262144</code></td>
+<td>Max bytes read from the start of the request body for detection. Only this prefix is scanned; payloads beyond it, or split across the boundary, are not detected. Also bounds gzip-bomb decompression. Without a bounded body reader (section 01.2), the body is not read at all and detection falls back to path/query/headers; either way a one-time warning names the cap, the client, and which happened.</td>
+</tr>
+<tr>
+<td><code>detection_max_content_length</code></td>
+<td><code>detectionMaxContentLength</code></td>
+<td>int, 1000–100000 (ge=1000, le=100000)</td>
+<td><code>10000</code></td>
+<td>Budget for the semantic (ML) analyzer slice of preprocessed content and the divisor for retained attack-indicator regions during truncation. Does NOT bound the regex scan window (that is <code>detection_max_body_inspect_bytes</code>).</td>
+</tr>
+<tr>
+<td><code>detection_max_scan_values</code></td>
+<td><code>detectionMaxScanValues</code></td>
+<td>int, 2–100000 (ge=2, le=100000)</td>
+<td><code>512</code></td>
+<td>Max individual values (query params, header values, JSON keys/leaf values, form fields, multipart parts) scanned per request; each value costs two units (name + value). Beyond the cap, remaining values are not scanned; one-time warning names the client IP.</td>
+</tr>
+<tr>
+<td><code>detection_max_scan_chars</code></td>
+<td><code>detectionMaxScanChars</code></td>
+<td>int, 1024–262144 (ge=1024, le=262144)</td>
+<td><code>65536</code></td>
+<td>Max total characters across every value handed to the pattern engine per request. Beyond the cap: same fail-open + warning as above.</td>
+</tr>
+<tr>
+<td><code>detection_max_json_depth</code></td>
+<td><code>detectionMaxJsonDepth</code></td>
+<td>int, 1–1000 (ge=1, le=1000)</td>
+<td><code>32</code></td>
+<td>Max JSON nesting depth walked structurally. At the cap, the value is serialized to text and scanned as one value (still scanned, bounded by <code>detection_max_content_length</code>); one-time warning.</td>
+</tr>
+<tr>
+<td><code>detection_preserve_attack_patterns</code></td>
+<td><code>detectionPreserveAttackPatterns</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Preserve attack patterns during content truncation.</td>
+</tr>
+<tr>
+<td><code>detection_semantic_threshold</code></td>
+<td><code>detectionSemanticThreshold</code></td>
+<td>float, 0.0–1.0 (ge=0.0, le=1.0)</td>
+<td><code>0.7</code></td>
+<td>Semantic attack-detection threshold.</td>
+</tr>
+<tr>
+<td><code>detection_anomaly_threshold</code></td>
+<td><code>detectionAnomalyThreshold</code></td>
+<td>float, 1.0–10.0 (ge=1.0, le=10.0)</td>
+<td><code>3.0</code></td>
+<td>Standard deviations from mean to flag an anomaly.</td>
+</tr>
+<tr>
+<td><code>detection_threat_score_threshold</code></td>
+<td><code>detectionThreatScoreThreshold</code></td>
+<td>float, 0.0–10.0 (ge=0.0, le=10.0)</td>
+<td><code>1.0</code></td>
+<td>Anomaly score required to flag a request as a threat.</td>
+</tr>
+<tr>
+<td><code>detection_slow_pattern_threshold</code></td>
+<td><code>detectionSlowPatternThreshold</code></td>
+<td>float, 0.01–1.0 (ge=0.01, le=1.0)</td>
+<td><code>0.1</code></td>
+<td>Execution time (seconds) to consider a pattern slow.</td>
+</tr>
+<tr>
+<td><code>detection_monitor_history_size</code></td>
+<td><code>detectionMonitorHistorySize</code></td>
+<td>int, 100–10000 (ge=100, le=10000)</td>
+<td><code>1000</code></td>
+<td>Recent metrics kept in history.</td>
+</tr>
+<tr>
+<td><code>detection_max_tracked_patterns</code></td>
+<td><code>detectionMaxTrackedPatterns</code></td>
+<td>int, 100–5000 (ge=100, le=5000)</td>
+<td><code>1000</code></td>
+<td>Max patterns tracked for performance.</td>
+</tr>
+<tr>
+<td><code>detection_anomaly_emission_cooldown</code></td>
+<td><code>detectionAnomalyEmissionCooldown</code></td>
+<td>float, 1.0–3600.0 (ge=1.0, le=3600.0)</td>
+<td><code>60.0</code></td>
+<td>Min seconds between anomaly events for the same pattern.</td>
+</tr>
+<tr>
+<td><code>detection_min_samples_for_anomaly</code></td>
+<td><code>detectionMinSamplesForAnomaly</code></td>
+<td>int, 10–1000 (ge=10, le=1000)</td>
+<td><code>30</code></td>
+<td>Samples recorded before anomaly detection engages.</td>
+</tr>
+<tr>
+<td><code>detection_compiler_timeout</code></td>
+<td><code>detectionCompilerTimeout</code></td>
+<td>float, 0.1–10.0 (ge=0.1, le=10.0)</td>
+<td><code>2.0</code></td>
+<td>Timeout for pattern compilation and matching (seconds).</td>
+</tr>
+<tr>
+<td>## Behavioral rules</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>global_behavior_rules</code></td>
+<td><code>globalBehaviorRules</code></td>
+<td>rule list</td>
+<td><code>[]</code></td>
+<td>Behavior rules applied to every route in addition to decorator rules (section 12).</td>
+</tr>
+<tr>
+<td><code>behavior_scan_response_body</code></td>
+<td><code>behaviorScanResponseBody</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>When false, no response body is ever read for pattern matching and non-<code>status:</code> return_pattern rules can never match; construction rejects such a rule instead of accepting a silent no-op.</td>
+</tr>
+<tr>
+<td><code>behavior_max_response_body_inspect_bytes</code></td>
+<td><code>behaviorMaxResponseBodyInspectBytes</code></td>
+<td>int, 1024–10485760 (ge=1024, le=10485760)</td>
+<td><code>262144</code></td>
+<td>Max bytes of response body retained for return_pattern inspection. Bounds what is retained, not what the app produces: the reader must deliver the full body afterward (section 01.4).</td>
+</tr>
+<tr>
+<td><code>body_read_timeout</code></td>
+<td><code>bodyReadTimeout</code></td>
+<td>float, &gt; 0, &lt;= 30.0 (gt=0.0, le=30.0)</td>
+<td><code>3.0</code></td>
+<td>Seconds to wait for an adapter's body read (request-detection read and response-behavior read) before treating the body as unavailable (fail-closed, same as an adapter raising).</td>
+</tr>
+<tr>
+<td><code>sync_body_read_max_concurrent</code></td>
+<td><code>syncBodyReadMaxConcurrent</code></td>
+<td>int, 1–10000 (ge=1, le=10000)</td>
+<td><code>64</code></td>
+<td>Max concurrent blocked synchronous body reads before further attempts give up and log exhaustion. Applies to sync-only deployments.</td>
+</tr>
+<tr>
+<td>## User agents</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>blocked_user_agents</code></td>
+<td><code>blockedUserAgents</code></td>
+<td>str list</td>
+<td><code>[]</code></td>
+<td>User-agent patterns to block. Each pattern MUST pass the pattern-safety (ReDoS) validator; unsafe patterns: rejected.</td>
+</tr>
+<tr>
+<td>## HTTPS / passive / failure policy</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enforce_https</code></td>
+<td><code>enforceHttps</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>Redirect HTTP requests to HTTPS.</td>
+</tr>
+<tr>
+<td><code>passive_mode</code></td>
+<td><code>passiveMode</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>Log-only mode: no request is ever blocked; violations are logged/flagged only.</td>
+</tr>
+<tr>
+<td><code>fail_secure</code></td>
+<td><code>failSecure</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>On an unexpected exception in any check: true = block with 500 (check bugs surface); false = log and fall through (fail-open, staging diagnostics only).</td>
+</tr>
+<tr>
+<td><code>route_resolution_strict</code></td>
+<td><code>routeResolutionStrict</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>Block (500) when the adapter cannot resolve the route. False lets unrouted/undecorated requests through with global checks only.</td>
+</tr>
+<tr>
+<td><code>exclude_paths</code></td>
+<td><code>excludePaths</code></td>
+<td>str list</td>
+<td><code>["/docs", "/redoc", "/openapi.json", "/openapi.yaml", "/favicon.ico", "/static"]</code></td>
+<td>Paths excluded from security checks. Each entry MUST normalize (reject malformed percent-encoding/invalid UTF-8); an entry that normalizes to <code>/</code> is rejected unless it is the literal <code>/</code>, which is accepted with a warning (excludes the whole application).</td>
+</tr>
+<tr>
+<td>## Headers / responses / CORS</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>security_headers</code></td>
+<td><code>securityHeaders</code></td>
+<td>map or none</td>
+<td>see below</td>
+<td>Header configuration. Default: <code>{enabled: true, hsts: {max_age: 31536000, include_subdomains: true, preload: false}, csp: null, frame_options: "SAMEORIGIN", content_type_options: "nosniff", xss_protection: "1; mode=block", referrer_policy: "strict-origin-when-cross-origin", permissions_policy: "geolocation=(), microphone=(), camera=()", custom: null}</code>.</td>
+</tr>
+<tr>
+<td><code>custom_error_responses</code></td>
+<td><code>customErrorResponses</code></td>
+<td>map of int (status) → str</td>
+<td><code>{}</code></td>
+<td>Custom response bodies per HTTP status code.</td>
+</tr>
+<tr>
+<td><code>custom_response_modifier</code></td>
+<td><code>customResponseModifier</code></td>
+<td>callable(response) → response or none</td>
+<td><code>null</code></td>
+<td>Applied to every response before send.</td>
+</tr>
+<tr>
+<td><code>custom_request_check</code></td>
+<td><code>customRequestCheck</code></td>
+<td>callable(request) → response-or-none or none</td>
+<td><code>null</code></td>
+<td>Extra per-request check; a returned response blocks.</td>
+</tr>
+<tr>
+<td><code>auth_verifier</code></td>
+<td><code>authVerifier</code></td>
+<td>callable or none</td>
+<td><code>null</code></td>
+<td>Default verifier for auth decorators: <code>verifier(request, credential) -&gt; Principal | null</code>.</td>
+</tr>
+<tr>
+<td><code>enable_cors</code></td>
+<td><code>enableCors</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>CORS handling on/off.</td>
+</tr>
+<tr>
+<td><code>cors_allow_origins</code></td>
+<td><code>corsAllowOrigins</code></td>
+<td>str list</td>
+<td><code>["*"]</code></td>
+<td>Allowed origins.</td>
+</tr>
+<tr>
+<td><code>cors_allow_methods</code></td>
+<td><code>corsAllowMethods</code></td>
+<td>str list</td>
+<td><code>["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]</code></td>
+<td>Allowed methods.</td>
+</tr>
+<tr>
+<td><code>cors_allow_headers</code></td>
+<td><code>corsAllowHeaders</code></td>
+<td>str list</td>
+<td><code>["*"]</code></td>
+<td>Allowed headers.</td>
+</tr>
+<tr>
+<td><code>cors_allow_credentials</code></td>
+<td><code>corsAllowCredentials</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>Allow credentials in CORS.</td>
+</tr>
+<tr>
+<td><code>cors_expose_headers</code></td>
+<td><code>corsExposeHeaders</code></td>
+<td>str list</td>
+<td><code>[]</code></td>
+<td>Headers exposed to browsers.</td>
+</tr>
+<tr>
+<td><code>cors_max_age</code></td>
+<td><code>corsMaxAge</code></td>
+<td>int</td>
+<td><code>600</code></td>
+<td>Preflight max-age in seconds.</td>
+</tr>
+<tr>
+<td>## Logging / observability</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>custom_log_file</code></td>
+<td><code>customLogFile</code></td>
+<td>str or none</td>
+<td><code>null</code></td>
+<td>Path of a custom log file for security events.</td>
+</tr>
+<tr>
+<td><code>log_suspicious_level</code></td>
+<td><code>logSuspiciousLevel</code></td>
+<td>enum <code>INFO/DEBUG/WARNING/ERROR/CRITICAL</code> or none</td>
+<td><code>"WARNING"</code></td>
+<td>Level for suspicious-request logs.</td>
+</tr>
+<tr>
+<td><code>log_request_level</code></td>
+<td><code>logRequestLevel</code></td>
+<td>same enum or none</td>
+<td><code>null</code></td>
+<td>Level for request logs; <code>null</code> = off.</td>
+</tr>
+<tr>
+<td><code>log_country_check_level</code></td>
+<td><code>logCountryCheckLevel</code></td>
+<td>same enum or none</td>
+<td><code>"INFO"</code></td>
+<td>Level for non-blocking country verdicts. Blocked-country hits log at <code>log_suspicious_level</code>; no-rules and no-geolocation cases always log at DEBUG.</td>
+</tr>
+<tr>
+<td><code>log_format</code></td>
+<td><code>logFormat</code></td>
+<td>enum <code>text/json</code></td>
+<td><code>"text"</code></td>
+<td>Log output format.</td>
+</tr>
+<tr>
+<td><code>muted_event_types</code></td>
+<td><code>mutedEventTypes</code></td>
+<td>str set</td>
+<td><code>{}</code></td>
+<td>Event types suppressed from telemetry dispatch. Values MUST be from the event-type vocabulary (section 10); unknown: rejected.</td>
+</tr>
+<tr>
+<td><code>muted_metric_types</code></td>
+<td><code>mutedMetricTypes</code></td>
+<td>str set</td>
+<td><code>{}</code></td>
+<td>Metric types suppressed. Valid: <code>response_time</code>, <code>request_count</code>, <code>error_rate</code>. Unknown: rejected.</td>
+</tr>
+<tr>
+<td><code>muted_check_logs</code></td>
+<td><code>mutedCheckLogs</code></td>
+<td>str set</td>
+<td><code>{}</code></td>
+<td>Check names muted from pipeline logging. Values MUST be from the check-name vocabulary (section 03); unknown: rejected.</td>
+</tr>
+<tr>
+<td><code>log_sensitive_headers</code></td>
+<td><code>logSensitiveHeaders</code></td>
+<td>str set</td>
+<td><code>{}</code></td>
+<td>Header names redacted from guard log lines, case-insensitive; merged with the hardcoded default set. Bare-string input: rejected (must be a collection).</td>
+</tr>
+<tr>
+<td><code>log_sensitive_params</code></td>
+<td><code>logSensitiveParams</code></td>
+<td>str set</td>
+<td><code>{}</code></td>
+<td>Query parameter names whose values are redacted from logs, case-insensitive; merged with defaults. Same rejection rule.</td>
+</tr>
+<tr>
+<td><code>log_sensitive_body_fields</code></td>
+<td><code>logSensitiveBodyFields</code></td>
+<td>str set</td>
+<td><code>{}</code></td>
+<td>Body field names redacted from detection log lines (JSON keys at any depth, form-urlencoded and multipart text-part names), case-insensitive; merged with defaults. Same rejection rule.</td>
+</tr>
+<tr>
+<td><code>enable_otel</code></td>
+<td><code>enableOtel</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>OpenTelemetry export (requires <code>otel</code> extra; inert without it).</td>
+</tr>
+<tr>
+<td><code>otel_service_name</code></td>
+<td><code>otelServiceName</code></td>
+<td>str</td>
+<td><code>"guard-core"</code></td>
+<td>OTel resource service name.</td>
+</tr>
+<tr>
+<td><code>otel_exporter_endpoint</code></td>
+<td><code>otelExporterEndpoint</code></td>
+<td>str or none</td>
+<td><code>null</code></td>
+<td>OTLP HTTP endpoint.</td>
+</tr>
+<tr>
+<td><code>otel_resource_attributes</code></td>
+<td><code>otelResourceAttributes</code></td>
+<td>map of str → str</td>
+<td><code>{}</code></td>
+<td>Additional OTel resource attributes.</td>
+</tr>
+<tr>
+<td><code>enable_logfire</code></td>
+<td><code>enableLogfire</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>Logfire export (requires <code>logfire</code> extra; inert without it).</td>
+</tr>
+<tr>
+<td><code>logfire_service_name</code></td>
+<td><code>logfireServiceName</code></td>
+<td>str</td>
+<td><code>"guard-core"</code></td>
+<td>Logfire service name.</td>
+</tr>
+<tr>
+<td><code>enable_enrichment</code></td>
+<td><code>enableEnrichment</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>Populate <code>guard.*</code> metadata (project identity, deterministic threat score, matched dynamic rule, per-IP correlation keys) on every event and metric. Requires <code>enable_agent</code> (rejected otherwise).</td>
+</tr>
+<tr>
+<td>## Guard Agent (telemetry)</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable_agent</code></td>
+<td><code>enableAgent</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>Enable Guard Agent telemetry.</td>
+</tr>
+<tr>
+<td><code>agent_api_key</code></td>
+<td><code>agentApiKey</code></td>
+<td>str or none</td>
+<td><code>null</code></td>
+<td>SaaS API key. REQUIRED when <code>enable_agent</code> is true (rejected otherwise).</td>
+</tr>
+<tr>
+<td><code>agent_strict</code></td>
+<td><code>agentStrict</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>True: an enabled agent that cannot be initialized raises at middleware init; false: degrade to agent-off.</td>
+</tr>
+<tr>
+<td><code>on_error</code></td>
+<td><code>onError</code></td>
+<td>callable(stage, exception, context) or none</td>
+<td><code>null</code></td>
+<td>Best-effort failure callback. <code>stage</code> ∈ {<code>agent_init</code>, <code>geoip</code>, <code>transport_send</code>, <code>encryption</code>}. A raising callback is caught and logged, never propagated.</td>
+</tr>
+<tr>
+<td><code>on_block</code></td>
+<td><code>onBlock</code></td>
+<td>callable(request, payload) or none</td>
+<td><code>null</code></td>
+<td>Fired exactly once per blocked (or passive-mode-flagged) request. Payload keys: <code>check_name</code>, <code>reason</code>, <code>trigger_info</code>, <code>passive_mode</code>, <code>client_ip</code>, <code>path</code>, <code>method</code>, <code>status_code</code> (null on the passive path — no response is sent). NOT fired for <code>custom_request_check</code>/route validators (app-authored), the HTTPS redirect (not a block), or an adapter's Redis-unavailable response. A raising callback is caught and logged.</td>
+</tr>
+<tr>
+<td><code>agent_endpoint</code></td>
+<td><code>agentEndpoint</code></td>
+<td>str</td>
+<td><code>"https://api.guard-core.com"</code></td>
+<td>SaaS endpoint.</td>
+</tr>
+<tr>
+<td><code>agent_project_id</code></td>
+<td><code>agentProjectId</code></td>
+<td>str or none</td>
+<td><code>null</code></td>
+<td>Project ID for telemetry organization.</td>
+</tr>
+<tr>
+<td><code>agent_buffer_size</code></td>
+<td><code>agentBufferSize</code></td>
+<td>int</td>
+<td><code>100</code></td>
+<td>Events buffered before auto-flush.</td>
+</tr>
+<tr>
+<td><code>agent_flush_interval</code></td>
+<td><code>agentFlushInterval</code></td>
+<td>int</td>
+<td><code>30</code></td>
+<td>Seconds between automatic flushes.</td>
+</tr>
+<tr>
+<td><code>agent_enable_events</code></td>
+<td><code>agentEnableEvents</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Send security events.</td>
+</tr>
+<tr>
+<td><code>agent_enable_metrics</code></td>
+<td><code>agentEnableMetrics</code></td>
+<td>bool</td>
+<td><code>true</code></td>
+<td>Send performance metrics.</td>
+</tr>
+<tr>
+<td><code>agent_timeout</code></td>
+<td><code>agentTimeout</code></td>
+<td>int</td>
+<td><code>30</code></td>
+<td>Agent HTTP timeout (seconds).</td>
+</tr>
+<tr>
+<td><code>agent_retry_attempts</code></td>
+<td><code>agentRetryAttempts</code></td>
+<td>int</td>
+<td><code>3</code></td>
+<td>Retry attempts for failed agent requests.</td>
+</tr>
+<tr>
+<td><code>agent_backoff_factor</code></td>
+<td><code>agentBackoffFactor</code></td>
+<td>float or none</td>
+<td><code>null</code></td>
+<td>Retry backoff factor; <code>null</code> = agent default.</td>
+</tr>
+<tr>
+<td><code>agent_high_watermark_ratio</code></td>
+<td><code>agentHighWatermarkRatio</code></td>
+<td>float or none</td>
+<td><code>null</code></td>
+<td>Buffer occupancy ratio triggering early flush; <code>null</code> = agent default.</td>
+</tr>
+<tr>
+<td><code>agent_max_concurrent_flushes</code></td>
+<td><code>agentMaxConcurrentFlushes</code></td>
+<td>int or none</td>
+<td><code>null</code></td>
+<td>Max concurrent early flushes; <code>null</code> = agent default.</td>
+</tr>
+<tr>
+<td><code>agent_buffer_overflow_policy</code></td>
+<td><code>agentBufferOverflowPolicy</code></td>
+<td>enum <code>drop/block/raise</code> or none</td>
+<td><code>null</code></td>
+<td>Behavior on full buffer: drop oldest / block caller / raise. <code>null</code> = agent default (<code>drop</code>).</td>
+</tr>
+<tr>
+<td><code>agent_sensitive_headers</code></td>
+<td><code>agentSensitiveHeaders</code></td>
+<td>str list or none</td>
+<td><code>null</code></td>
+<td>Headers excluded from telemetry; <code>null</code> = agent default.</td>
+</tr>
+<tr>
+<td><code>agent_max_payload_size</code></td>
+<td><code>agentMaxPayloadSize</code></td>
+<td>int or none</td>
+<td><code>null</code></td>
+<td>Max telemetry payload bytes; <code>null</code> = agent default.</td>
+</tr>
+<tr>
+<td><code>agent_compression_enabled</code></td>
+<td><code>agentCompressionEnabled</code></td>
+<td>bool or none</td>
+<td><code>null</code></td>
+<td>Gzip-compress batch bodies above the threshold; <code>null</code> = agent default.</td>
+</tr>
+<tr>
+<td><code>agent_compression_threshold</code></td>
+<td><code>agentCompressionThreshold</code></td>
+<td>int or none</td>
+<td><code>null</code></td>
+<td>Min body size before compression; <code>null</code> = agent default.</td>
+</tr>
+<tr>
+<td><code>agent_install_id</code></td>
+<td><code>agentInstallId</code></td>
+<td>str or none</td>
+<td><code>null</code></td>
+<td>Install ID override; <code>null</code> = auto-generate.</td>
+</tr>
+<tr>
+<td><code>agent_payload_signing_secret</code></td>
+<td><code>agentPayloadSigningSecret</code></td>
+<td>str or none</td>
+<td><code>null</code></td>
+<td>HMAC-SHA256 secret signing the <code>X-Payload-Signature</code> header.</td>
+</tr>
+<tr>
+<td><code>agent_project_encryption_key</code></td>
+<td><code>agentProjectEncryptionKey</code></td>
+<td>str or none</td>
+<td><code>null</code></td>
+<td>AES-256-GCM key for encrypted telemetry; when set, the agent posts to <code>/api/v1/events/encrypted</code> instead of <code>/api/v1/events</code>.</td>
+</tr>
+<tr>
+<td><code>agent_guard_version</code></td>
+<td><code>agentGuardVersion</code></td>
+<td>str or none</td>
+<td><code>null</code></td>
+<td>Framework wrapper version propagated to the SaaS for attribution.</td>
+</tr>
+<tr>
+<td><code>agent_status_interval</code></td>
+<td><code>agentStatusInterval</code></td>
+<td>int, 60–86400 (ge=60, le=86400)</td>
+<td><code>300</code></td>
+<td>Seconds between agent status reports.</td>
+</tr>
+<tr>
+<td>## Dynamic rules</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enable_dynamic_rules</code></td>
+<td><code>enableDynamicRules</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>Enable dynamic rule updates from the SaaS. Requires <code>enable_agent</code> (rejected otherwise).</td>
+</tr>
+<tr>
+<td><code>dynamic_rule_interval</code></td>
+<td><code>dynamicRuleInterval</code></td>
+<td>int, &gt;= 60 (ge=60)</td>
+<td><code>300</code></td>
+<td>Seconds between dynamic-rule update polls.</td>
+</tr>
+<tr>
+<td><code>dynamic_rules_cache_path</code></td>
+<td><code>dynamicRulesCachePath</code></td>
+<td>path or none</td>
+<td><code>null</code></td>
+<td>Local JSON file persisting the last-known dynamic-rules snapshot (restart-during-outage fallback; Redis holds the primary snapshot when present). Written/read only when set. Empty/whitespace string: rejected.</td>
+</tr>
+<tr>
+<td>## Emergency mode (dynamic-rule controlled)</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>emergency_mode</code></td>
+<td><code>emergencyMode</code></td>
+<td>bool</td>
+<td><code>false</code></td>
+<td>Emergency lockdown; set by dynamic rules (section 12).</td>
+</tr>
+<tr>
+<td><code>emergency_whitelist</code></td>
+<td><code>emergencyWhitelist</code></td>
+<td>str list</td>
+<td><code>[]</code></td>
+<td>IPs exempt during emergency mode.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="registry-fields-beyond-the-spec-02-tables">Registry fields beyond the spec 02 tables</h2>
+<p>These fields exist in the reference field table and the JVM
+registry but have no row in the spec 02 field semantics tables.
+Their effect text here is verified against the reference's field
+descriptions (<code>guard_core/_security_config_fields.py</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kotlin property</th>
+<th>Type</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>detection_binary_min_run_length</code></td>
+<td><code>detectionBinaryMinRunLength</code></td>
+<td>int (ge=4, le=1024)</td>
+<td><code>16</code></td>
+<td>Minimum length a consecutive printable-character run inside a binary-dense multipart file-part payload must reach before that run is handed to the pattern scan. Text uploads and short or mostly-text payloads never reach the binary-density ratio and keep their full scan, and whole-body fallback scans are never island-reduced, so raw-body signature coverage stays intact.</td>
+</tr>
+<tr>
+<td><code>detection_pattern_validation_cache_path</code></td>
+<td><code>detectionPatternValidationCachePath</code></td>
+<td>str or none</td>
+<td><code>None</code></td>
+<td>Optional file path for a disk-backed pattern-validation cache. When set, the empirical cost-verdict outcome of pattern-safety validation is cached keyed by pattern, flags, and engine version, so a process boot reuses prior certifications instead of re-timing every custom pattern; the cheap deterministic layers always re-run. Cache entries from a different engine version are ignored and overwritten. Leave unset (the default) to keep every validation fully empirical.</td>
+</tr>
+<tr>
+<td><code>exempt_ips</code></td>
+<td><code>exemptIps</code></td>
+<td>str list (IP/CIDR)</td>
+<td><code>()</code></td>
+<td>IP addresses or CIDR ranges that skip rate limiting and the user-agent and cloud-provider checks. Not restrictive: every other IP is checked as usual. The blacklist, dynamic IP bans, per-route IP rules and penetration detection still apply to listed IPs.</td>
+</tr>
+</tbody>
+</table>
+<p>Assignment-time revalidation: the fields flagged in the registry
+(list at <code>ConfigFieldRegistry.kt</code>, <code>revalidatedOnAssignment</code>) re-run
+their validators on every mutation after construction, mirroring
+<code>_FIELD_REVALIDATORS</code> in the reference.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

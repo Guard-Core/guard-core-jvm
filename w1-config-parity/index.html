@@ -1,0 +1,2082 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Kotlin/JVM port of the guard-core engine - detection, rate limiting, IP banning, and cloud provider blocking for the JVM">
+      
+      
+        <meta name="author" content="Renn F">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>W1 config parity gate (guard-core-jvm) - guard-core-jvm</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#w1-config-parity-gate-guard-core-jvm" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="guard-core-jvm" class="md-header__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            guard-core-jvm
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              W1 config parity gate (guard-core-jvm)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="guard-core-jvm" class="md-nav__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    guard-core-jvm
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adapters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adapters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#field-by-field-parity-securityconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Field-by-field parity (SecurityConfig)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cross-field-model-validators-guard_coremodelspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cross-field model validators (guard_core/models.py)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#protocols-guard_coreprotocols-8-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Protocols (guard_core/protocols/, 8 files)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utils-guard_core_utils-21-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Utils (guard_core/_utils/, 21 files)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#idiom-mappings-behavior-preserving-recorded-per-house-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Idiom mappings (behavior-preserving, recorded per house convention)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-coverage-the-gates-check-suite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test coverage (the gate's check suite)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="w1-config-parity-gate-guard-core-jvm">W1 config parity gate (guard-core-jvm)</h1>
+<p>Wave 1 proof: SecurityConfig, its field registry, the protocol interfaces and
+the util layer ported from the guard-core Python reference (4.3.2). Every row
+carries the python file:line and the Kotlin file:line, per the wave gate.</p>
+<p>Reference commit: Python/guard-core @ master (4.3.2). JVM branch:
+chore/w1-foundation.</p>
+<h2 id="field-by-field-parity-securityconfig">Field-by-field parity (SecurityConfig)</h2>
+<p>129 of 129 python fields ported, no TODO cells. Column notes:</p>
+<ul>
+<li>python file:line points at the field declaration in
+  <code>guard_core/_security_config_fields.py</code>.</li>
+<li>validation lists the pydantic <code>Field</code> bounds, the <code>models.py</code> field
+  validator (with its line), and whether the field is a key of
+  <code>_FIELD_REVALIDATORS</code> (assignment-time revalidation,
+  <code>_security_config_field_validators.py:364-478</code>).</li>
+<li>kotlin file:line points at the property KDoc (<code>python_name:</code> marker) in
+  <code>guard-core/src/main/kotlin/com/guardcore/config/SecurityConfig.kt</code>; the
+  registry row points at the <code>FieldMeta</code> entry in <code>ConfigFieldRegistry.kt</code>,
+  the ported <code>_security_config_fields.py</code> table.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>python field</th>
+<th>python file:line</th>
+<th>default</th>
+<th>validation</th>
+<th>kotlin prop</th>
+<th>registry</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>trusted_proxies</code></td>
+<td>_security_config_fields.py:22</td>
+<td><code>factory tuple</code></td>
+<td>models.py:159 validate_trusted_proxies; revalidated on assignment</td>
+<td>SecurityConfig.kt:94</td>
+<td>ConfigFieldRegistry.kt:68</td>
+</tr>
+<tr>
+<td><code>trusted_proxy_depth</code></td>
+<td>_security_config_fields.py:27</td>
+<td><code>1</code></td>
+<td>models.py:165 validate_proxy_depth</td>
+<td>SecurityConfig.kt:106</td>
+<td>ConfigFieldRegistry.kt:76</td>
+</tr>
+<tr>
+<td><code>trust_x_forwarded_proto</code></td>
+<td>_security_config_fields.py:32</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:117</td>
+<td>ConfigFieldRegistry.kt:77</td>
+</tr>
+<tr>
+<td><code>passive_mode</code></td>
+<td>_security_config_fields.py:37</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:128</td>
+<td>ConfigFieldRegistry.kt:78</td>
+</tr>
+<tr>
+<td><code>geo_ip_handler</code></td>
+<td>_security_config_fields.py:42</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:139</td>
+<td>ConfigFieldRegistry.kt:79</td>
+</tr>
+<tr>
+<td><code>enable_redis</code></td>
+<td>_security_config_fields.py:47</td>
+<td><code>True</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:152</td>
+<td>ConfigFieldRegistry.kt:86</td>
+</tr>
+<tr>
+<td><code>redis_url</code></td>
+<td>_security_config_fields.py:52</td>
+<td><code>"redis://localhost:6379"</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:163</td>
+<td>ConfigFieldRegistry.kt:87</td>
+</tr>
+<tr>
+<td><code>redis_prefix</code></td>
+<td>_security_config_fields.py:57</td>
+<td><code>"guard_core:"</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:174</td>
+<td>ConfigFieldRegistry.kt:88</td>
+</tr>
+<tr>
+<td><code>redis_socket_connect_timeout</code></td>
+<td>_security_config_fields.py:62</td>
+<td><code>2.0</code></td>
+<td>Field(gt=0.0)</td>
+<td>SecurityConfig.kt:185</td>
+<td>ConfigFieldRegistry.kt:89</td>
+</tr>
+<tr>
+<td><code>redis_socket_timeout</code></td>
+<td>_security_config_fields.py:74</td>
+<td><code>2.0</code></td>
+<td>Field(gt=0.0)</td>
+<td>SecurityConfig.kt:196</td>
+<td>ConfigFieldRegistry.kt:96</td>
+</tr>
+<tr>
+<td><code>redis_health_check_interval</code></td>
+<td>_security_config_fields.py:85</td>
+<td><code>30</code></td>
+<td>Field(ge=0)</td>
+<td>SecurityConfig.kt:207</td>
+<td>ConfigFieldRegistry.kt:103</td>
+</tr>
+<tr>
+<td><code>redis_max_connections</code></td>
+<td>_security_config_fields.py:95</td>
+<td><code>None</code></td>
+<td>Field(ge=1)</td>
+<td>SecurityConfig.kt:218</td>
+<td>ConfigFieldRegistry.kt:110</td>
+</tr>
+<tr>
+<td><code>redis_retries</code></td>
+<td>_security_config_fields.py:103</td>
+<td><code>1</code></td>
+<td>Field(ge=0)</td>
+<td>SecurityConfig.kt:229</td>
+<td>ConfigFieldRegistry.kt:117</td>
+</tr>
+<tr>
+<td><code>whitelist</code></td>
+<td>_security_config_fields.py:112</td>
+<td><code>None</code></td>
+<td>models.py:155 validate_ip_lists; revalidated on assignment</td>
+<td>SecurityConfig.kt:240</td>
+<td>ConfigFieldRegistry.kt:118</td>
+</tr>
+<tr>
+<td><code>blacklist</code></td>
+<td>_security_config_fields.py:121</td>
+<td><code>factory tuple</code></td>
+<td>models.py:155 validate_ip_lists; revalidated on assignment</td>
+<td>SecurityConfig.kt:253</td>
+<td>ConfigFieldRegistry.kt:125</td>
+</tr>
+<tr>
+<td><code>exempt_ips</code></td>
+<td>_security_config_fields.py:129</td>
+<td><code>factory tuple</code></td>
+<td>models.py:155 validate_ip_lists; revalidated on assignment</td>
+<td>SecurityConfig.kt:265</td>
+<td>ConfigFieldRegistry.kt:126</td>
+</tr>
+<tr>
+<td><code>whitelist_countries</code></td>
+<td>_security_config_fields.py:139</td>
+<td><code>factory frozenset</code></td>
+<td>models.py:171 coerce_country_set; revalidated on assignment</td>
+<td>SecurityConfig.kt:282</td>
+<td>ConfigFieldRegistry.kt:127</td>
+</tr>
+<tr>
+<td><code>blocked_countries</code></td>
+<td>_security_config_fields.py:149</td>
+<td><code>factory frozenset</code></td>
+<td>models.py:171 coerce_country_set; revalidated on assignment</td>
+<td>SecurityConfig.kt:296</td>
+<td>ConfigFieldRegistry.kt:135</td>
+</tr>
+<tr>
+<td><code>blocked_user_agents</code></td>
+<td>_security_config_fields.py:154</td>
+<td><code>factory list</code></td>
+<td>models.py:179 validate_blocked_user_agents; revalidated on assignment</td>
+<td>SecurityConfig.kt:310</td>
+<td>ConfigFieldRegistry.kt:143</td>
+</tr>
+<tr>
+<td><code>auto_ban_threshold</code></td>
+<td>_security_config_fields.py:158</td>
+<td><code>10</code></td>
+<td>Field(ge=1); revalidated on assignment</td>
+<td>SecurityConfig.kt:322</td>
+<td>ConfigFieldRegistry.kt:150</td>
+</tr>
+<tr>
+<td><code>auto_ban_duration</code></td>
+<td>_security_config_fields.py:164</td>
+<td><code>3600</code></td>
+<td>Field(ge=1); revalidated on assignment</td>
+<td>SecurityConfig.kt:334</td>
+<td>ConfigFieldRegistry.kt:158</td>
+</tr>
+<tr>
+<td><code>threat_ban_config</code></td>
+<td>_security_config_fields.py:170</td>
+<td><code>factory lambda</code></td>
+<td>models.py:290 validate_threat_ban_config; revalidated on assignment</td>
+<td>SecurityConfig.kt:346</td>
+<td>ConfigFieldRegistry.kt:166</td>
+</tr>
+<tr>
+<td><code>enable_rate_limit_auto_ban</code></td>
+<td>_security_config_fields.py:180</td>
+<td><code>False</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:358</td>
+<td>ConfigFieldRegistry.kt:173</td>
+</tr>
+<tr>
+<td><code>global_behavior_rules</code></td>
+<td>_security_config_fields.py:193</td>
+<td><code>factory tuple</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:371</td>
+<td>ConfigFieldRegistry.kt:180</td>
+</tr>
+<tr>
+<td><code>behavior_scan_response_body</code></td>
+<td>_security_config_fields.py:201</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:389</td>
+<td>ConfigFieldRegistry.kt:187</td>
+</tr>
+<tr>
+<td><code>behavior_max_response_body_inspect_bytes</code></td>
+<td>_security_config_fields.py:220</td>
+<td><code>262144</code></td>
+<td>Field(ge=1024,le=10485760)</td>
+<td>SecurityConfig.kt:401</td>
+<td>ConfigFieldRegistry.kt:194</td>
+</tr>
+<tr>
+<td><code>body_read_timeout</code></td>
+<td>_security_config_fields.py:241</td>
+<td><code>3.0</code></td>
+<td>Field(gt=0.0,le=30.0)</td>
+<td>SecurityConfig.kt:412</td>
+<td>ConfigFieldRegistry.kt:202</td>
+</tr>
+<tr>
+<td><code>sync_body_read_max_concurrent</code></td>
+<td>_security_config_fields.py:266</td>
+<td><code>64</code></td>
+<td>Field(ge=1,le=10000)</td>
+<td>SecurityConfig.kt:423</td>
+<td>ConfigFieldRegistry.kt:210</td>
+</tr>
+<tr>
+<td><code>custom_log_file</code></td>
+<td>_security_config_fields.py:282</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:434</td>
+<td>ConfigFieldRegistry.kt:218</td>
+</tr>
+<tr>
+<td><code>log_suspicious_level</code></td>
+<td>_security_config_fields.py:287</td>
+<td><code>"WARNING"</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:445</td>
+<td>ConfigFieldRegistry.kt:219</td>
+</tr>
+<tr>
+<td><code>log_request_level</code></td>
+<td>_security_config_fields.py:291</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:456</td>
+<td>ConfigFieldRegistry.kt:220</td>
+</tr>
+<tr>
+<td><code>log_country_check_level</code></td>
+<td>_security_config_fields.py:295</td>
+<td><code>"INFO"</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:467</td>
+<td>ConfigFieldRegistry.kt:221</td>
+</tr>
+<tr>
+<td><code>log_format</code></td>
+<td>_security_config_fields.py:307</td>
+<td><code>"text"</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:478</td>
+<td>ConfigFieldRegistry.kt:227</td>
+</tr>
+<tr>
+<td><code>custom_error_responses</code></td>
+<td>_security_config_fields.py:312</td>
+<td><code>factory dict</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:489</td>
+<td>ConfigFieldRegistry.kt:228</td>
+</tr>
+<tr>
+<td><code>rate_limit</code></td>
+<td>_security_config_fields.py:316</td>
+<td><code>10</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:501</td>
+<td>ConfigFieldRegistry.kt:235</td>
+</tr>
+<tr>
+<td><code>rate_limit_window</code></td>
+<td>_security_config_fields.py:320</td>
+<td><code>60</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:513</td>
+<td>ConfigFieldRegistry.kt:236</td>
+</tr>
+<tr>
+<td><code>enforce_https</code></td>
+<td>_security_config_fields.py:324</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:525</td>
+<td>ConfigFieldRegistry.kt:243</td>
+</tr>
+<tr>
+<td><code>security_headers</code></td>
+<td>_security_config_fields.py:328</td>
+<td><code>factory lambda</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:536</td>
+<td>ConfigFieldRegistry.kt:244</td>
+</tr>
+<tr>
+<td><code>custom_request_check</code></td>
+<td>_security_config_fields.py:347</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:548</td>
+<td>ConfigFieldRegistry.kt:251</td>
+</tr>
+<tr>
+<td><code>auth_verifier</code></td>
+<td>_security_config_fields.py:351</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:559</td>
+<td>ConfigFieldRegistry.kt:252</td>
+</tr>
+<tr>
+<td><code>custom_response_modifier</code></td>
+<td>_security_config_fields.py:361</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:570</td>
+<td>ConfigFieldRegistry.kt:253</td>
+</tr>
+<tr>
+<td><code>enable_cors</code></td>
+<td>_security_config_fields.py:368</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:581</td>
+<td>ConfigFieldRegistry.kt:259</td>
+</tr>
+<tr>
+<td><code>cors_allow_origins</code></td>
+<td>_security_config_fields.py:370</td>
+<td><code>factory lambda</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:592</td>
+<td>ConfigFieldRegistry.kt:260</td>
+</tr>
+<tr>
+<td><code>cors_allow_methods</code></td>
+<td>_security_config_fields.py:374</td>
+<td><code>factory lambda</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:605</td>
+<td>ConfigFieldRegistry.kt:267</td>
+</tr>
+<tr>
+<td><code>cors_allow_headers</code></td>
+<td>_security_config_fields.py:379</td>
+<td><code>factory lambda</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:617</td>
+<td>ConfigFieldRegistry.kt:274</td>
+</tr>
+<tr>
+<td><code>cors_allow_credentials</code></td>
+<td>_security_config_fields.py:383</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:629</td>
+<td>ConfigFieldRegistry.kt:281</td>
+</tr>
+<tr>
+<td><code>cors_expose_headers</code></td>
+<td>_security_config_fields.py:387</td>
+<td><code>factory list</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:640</td>
+<td>ConfigFieldRegistry.kt:282</td>
+</tr>
+<tr>
+<td><code>cors_max_age</code></td>
+<td>_security_config_fields.py:391</td>
+<td><code>600</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:652</td>
+<td>ConfigFieldRegistry.kt:289</td>
+</tr>
+<tr>
+<td><code>block_cloud_providers</code></td>
+<td>_security_config_fields.py:395</td>
+<td><code>None</code></td>
+<td>models.py:175 validate_cloud_providers; revalidated on assignment</td>
+<td>SecurityConfig.kt:663</td>
+<td>ConfigFieldRegistry.kt:290</td>
+</tr>
+<tr>
+<td><code>cloud_ip_refresh_interval</code></td>
+<td>_security_config_fields.py:408</td>
+<td><code>3600</code></td>
+<td>Field(ge=60,le=86400)</td>
+<td>SecurityConfig.kt:675</td>
+<td>ConfigFieldRegistry.kt:297</td>
+</tr>
+<tr>
+<td><code>lazy_init</code></td>
+<td>_security_config_fields.py:415</td>
+<td><code>True</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:686</td>
+<td>ConfigFieldRegistry.kt:305</td>
+</tr>
+<tr>
+<td><code>geo_ip_db_max_age</code></td>
+<td>_security_config_fields.py:434</td>
+<td><code>86400</code></td>
+<td>Field(ge=3600,le=604800)</td>
+<td>SecurityConfig.kt:697</td>
+<td>ConfigFieldRegistry.kt:306</td>
+</tr>
+<tr>
+<td><code>cloud_ip_store</code></td>
+<td>_security_config_fields.py:441</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:709</td>
+<td>ConfigFieldRegistry.kt:314</td>
+</tr>
+<tr>
+<td><code>exclude_paths</code></td>
+<td>_security_config_fields.py:452</td>
+<td><code>factory lambda</code></td>
+<td>models.py:310 validate_exclude_paths; revalidated on assignment</td>
+<td>SecurityConfig.kt:723</td>
+<td>ConfigFieldRegistry.kt:315</td>
+</tr>
+<tr>
+<td><code>enable_ip_banning</code></td>
+<td>_security_config_fields.py:464</td>
+<td><code>True</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:735</td>
+<td>ConfigFieldRegistry.kt:322</td>
+</tr>
+<tr>
+<td><code>enable_rate_limiting</code></td>
+<td>_security_config_fields.py:468</td>
+<td><code>True</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:747</td>
+<td>ConfigFieldRegistry.kt:329</td>
+</tr>
+<tr>
+<td><code>enable_penetration_detection</code></td>
+<td>_security_config_fields.py:472</td>
+<td><code>True</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:759</td>
+<td>ConfigFieldRegistry.kt:336</td>
+</tr>
+<tr>
+<td><code>fail_secure</code></td>
+<td>_security_config_fields.py:476</td>
+<td><code>True</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:771</td>
+<td>ConfigFieldRegistry.kt:343</td>
+</tr>
+<tr>
+<td><code>redis_fail_open</code></td>
+<td>_security_config_fields.py:486</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:782</td>
+<td>ConfigFieldRegistry.kt:344</td>
+</tr>
+<tr>
+<td><code>route_resolution_strict</code></td>
+<td>_security_config_fields.py:498</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:793</td>
+<td>ConfigFieldRegistry.kt:345</td>
+</tr>
+<tr>
+<td><code>ipinfo_token</code></td>
+<td>_security_config_fields.py:513</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:804</td>
+<td>ConfigFieldRegistry.kt:346</td>
+</tr>
+<tr>
+<td><code>ipinfo_db_path</code></td>
+<td>_security_config_fields.py:519</td>
+<td><code>Path("data/ipinfo/country_asn.mmdb"</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:815</td>
+<td>ConfigFieldRegistry.kt:347</td>
+</tr>
+<tr>
+<td><code>enable_agent</code></td>
+<td>_security_config_fields.py:525</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:826</td>
+<td>ConfigFieldRegistry.kt:353</td>
+</tr>
+<tr>
+<td><code>agent_api_key</code></td>
+<td>_security_config_fields.py:529</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:837</td>
+<td>ConfigFieldRegistry.kt:354</td>
+</tr>
+<tr>
+<td><code>agent_strict</code></td>
+<td>_security_config_fields.py:533</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:848</td>
+<td>ConfigFieldRegistry.kt:355</td>
+</tr>
+<tr>
+<td><code>on_error</code></td>
+<td>_security_config_fields.py:542</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:859</td>
+<td>ConfigFieldRegistry.kt:356</td>
+</tr>
+<tr>
+<td><code>on_block</code></td>
+<td>_security_config_fields.py:552</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:870</td>
+<td>ConfigFieldRegistry.kt:357</td>
+</tr>
+<tr>
+<td><code>agent_endpoint</code></td>
+<td>_security_config_fields.py:569</td>
+<td><code>"https://api.guard-core.com"</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:881</td>
+<td>ConfigFieldRegistry.kt:358</td>
+</tr>
+<tr>
+<td><code>agent_project_id</code></td>
+<td>_security_config_fields.py:574</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:892</td>
+<td>ConfigFieldRegistry.kt:359</td>
+</tr>
+<tr>
+<td><code>agent_buffer_size</code></td>
+<td>_security_config_fields.py:578</td>
+<td><code>100</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:903</td>
+<td>ConfigFieldRegistry.kt:360</td>
+</tr>
+<tr>
+<td><code>agent_flush_interval</code></td>
+<td>_security_config_fields.py:582</td>
+<td><code>30</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:914</td>
+<td>ConfigFieldRegistry.kt:361</td>
+</tr>
+<tr>
+<td><code>agent_enable_events</code></td>
+<td>_security_config_fields.py:586</td>
+<td><code>True</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:925</td>
+<td>ConfigFieldRegistry.kt:362</td>
+</tr>
+<tr>
+<td><code>agent_enable_metrics</code></td>
+<td>_security_config_fields.py:590</td>
+<td><code>True</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:936</td>
+<td>ConfigFieldRegistry.kt:363</td>
+</tr>
+<tr>
+<td><code>agent_timeout</code></td>
+<td>_security_config_fields.py:594</td>
+<td><code>30</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:947</td>
+<td>ConfigFieldRegistry.kt:364</td>
+</tr>
+<tr>
+<td><code>agent_retry_attempts</code></td>
+<td>_security_config_fields.py:598</td>
+<td><code>3</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:958</td>
+<td>ConfigFieldRegistry.kt:365</td>
+</tr>
+<tr>
+<td><code>agent_project_encryption_key</code></td>
+<td>_security_config_fields.py:602</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:969</td>
+<td>ConfigFieldRegistry.kt:366</td>
+</tr>
+<tr>
+<td><code>agent_guard_version</code></td>
+<td>_security_config_fields.py:612</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:980</td>
+<td>ConfigFieldRegistry.kt:372</td>
+</tr>
+<tr>
+<td><code>agent_high_watermark_ratio</code></td>
+<td>_security_config_fields.py:622</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:991</td>
+<td>ConfigFieldRegistry.kt:373</td>
+</tr>
+<tr>
+<td><code>agent_max_concurrent_flushes</code></td>
+<td>_security_config_fields.py:630</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1002</td>
+<td>ConfigFieldRegistry.kt:379</td>
+</tr>
+<tr>
+<td><code>agent_buffer_overflow_policy</code></td>
+<td>_security_config_fields.py:638</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1013</td>
+<td>ConfigFieldRegistry.kt:385</td>
+</tr>
+<tr>
+<td><code>agent_backoff_factor</code></td>
+<td>_security_config_fields.py:649</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1024</td>
+<td>ConfigFieldRegistry.kt:391</td>
+</tr>
+<tr>
+<td><code>agent_sensitive_headers</code></td>
+<td>_security_config_fields.py:657</td>
+<td><code>None</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:1035</td>
+<td>ConfigFieldRegistry.kt:392</td>
+</tr>
+<tr>
+<td><code>agent_max_payload_size</code></td>
+<td>_security_config_fields.py:665</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1047</td>
+<td>ConfigFieldRegistry.kt:399</td>
+</tr>
+<tr>
+<td><code>agent_compression_enabled</code></td>
+<td>_security_config_fields.py:673</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1058</td>
+<td>ConfigFieldRegistry.kt:400</td>
+</tr>
+<tr>
+<td><code>agent_compression_threshold</code></td>
+<td>_security_config_fields.py:682</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1069</td>
+<td>ConfigFieldRegistry.kt:406</td>
+</tr>
+<tr>
+<td><code>agent_install_id</code></td>
+<td>_security_config_fields.py:690</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1080</td>
+<td>ConfigFieldRegistry.kt:412</td>
+</tr>
+<tr>
+<td><code>agent_payload_signing_secret</code></td>
+<td>_security_config_fields.py:698</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1091</td>
+<td>ConfigFieldRegistry.kt:413</td>
+</tr>
+<tr>
+<td><code>enable_dynamic_rules</code></td>
+<td>_security_config_fields.py:703</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1102</td>
+<td>ConfigFieldRegistry.kt:419</td>
+</tr>
+<tr>
+<td><code>dynamic_rule_interval</code></td>
+<td>_security_config_fields.py:707</td>
+<td><code>300</code></td>
+<td>Field(ge=60)</td>
+<td>SecurityConfig.kt:1113</td>
+<td>ConfigFieldRegistry.kt:420</td>
+</tr>
+<tr>
+<td><code>dynamic_rules_cache_path</code></td>
+<td>_security_config_fields.py:713</td>
+<td><code>None</code></td>
+<td>models.py:314 validate_dynamic_rules_cache_path; revalidated on assignment</td>
+<td>SecurityConfig.kt:1124</td>
+<td>ConfigFieldRegistry.kt:421</td>
+</tr>
+<tr>
+<td><code>agent_status_interval</code></td>
+<td>_security_config_fields.py:722</td>
+<td><code>300</code></td>
+<td>Field(ge=60,le=86400)</td>
+<td>SecurityConfig.kt:1136</td>
+<td>ConfigFieldRegistry.kt:428</td>
+</tr>
+<tr>
+<td><code>emergency_mode</code></td>
+<td>_security_config_fields.py:729</td>
+<td><code>False</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:1147</td>
+<td>ConfigFieldRegistry.kt:436</td>
+</tr>
+<tr>
+<td><code>emergency_whitelist</code></td>
+<td>_security_config_fields.py:733</td>
+<td><code>factory list</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:1159</td>
+<td>ConfigFieldRegistry.kt:443</td>
+</tr>
+<tr>
+<td><code>endpoint_rate_limits</code></td>
+<td>_security_config_fields.py:738</td>
+<td><code>factory dict</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:1171</td>
+<td>ConfigFieldRegistry.kt:450</td>
+</tr>
+<tr>
+<td><code>detection_compiler_timeout</code></td>
+<td>_security_config_fields.py:743</td>
+<td><code>2.0</code></td>
+<td>Field(ge=0.1,le=10.0)</td>
+<td>SecurityConfig.kt:1183</td>
+<td>ConfigFieldRegistry.kt:457</td>
+</tr>
+<tr>
+<td><code>detection_pattern_validation_cache_path</code></td>
+<td>_security_config_fields.py:750</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1194</td>
+<td>ConfigFieldRegistry.kt:465</td>
+</tr>
+<tr>
+<td><code>detection_max_content_length</code></td>
+<td>_security_config_fields.py:768</td>
+<td><code>10000</code></td>
+<td>Field(ge=1000,le=100000)</td>
+<td>SecurityConfig.kt:1205</td>
+<td>ConfigFieldRegistry.kt:471</td>
+</tr>
+<tr>
+<td><code>detection_max_body_inspect_bytes</code></td>
+<td>_security_config_fields.py:783</td>
+<td><code>262144</code></td>
+<td>Field(ge=1024,le=10485760)</td>
+<td>SecurityConfig.kt:1216</td>
+<td>ConfigFieldRegistry.kt:479</td>
+</tr>
+<tr>
+<td><code>detection_max_scan_values</code></td>
+<td>_security_config_fields.py:814</td>
+<td><code>512</code></td>
+<td>Field(ge=2,le=100_000)</td>
+<td>SecurityConfig.kt:1227</td>
+<td>ConfigFieldRegistry.kt:487</td>
+</tr>
+<tr>
+<td><code>detection_max_scan_chars</code></td>
+<td>_security_config_fields.py:833</td>
+<td><code>65536</code></td>
+<td>Field(ge=1024,le=262144)</td>
+<td>SecurityConfig.kt:1238</td>
+<td>ConfigFieldRegistry.kt:495</td>
+</tr>
+<tr>
+<td><code>detection_max_json_depth</code></td>
+<td>_security_config_fields.py:853</td>
+<td><code>32</code></td>
+<td>Field(ge=1,le=1000)</td>
+<td>SecurityConfig.kt:1249</td>
+<td>ConfigFieldRegistry.kt:503</td>
+</tr>
+<tr>
+<td><code>detection_binary_min_run_length</code></td>
+<td>_security_config_fields.py:871</td>
+<td><code>16</code></td>
+<td>Field(ge=4,le=1024)</td>
+<td>SecurityConfig.kt:1260</td>
+<td>ConfigFieldRegistry.kt:511</td>
+</tr>
+<tr>
+<td><code>detection_preserve_attack_patterns</code></td>
+<td>_security_config_fields.py:899</td>
+<td><code>True</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1271</td>
+<td>ConfigFieldRegistry.kt:519</td>
+</tr>
+<tr>
+<td><code>detection_semantic_threshold</code></td>
+<td>_security_config_fields.py:904</td>
+<td><code>0.7</code></td>
+<td>Field(ge=0.0,le=1.0)</td>
+<td>SecurityConfig.kt:1282</td>
+<td>ConfigFieldRegistry.kt:525</td>
+</tr>
+<tr>
+<td><code>detection_anomaly_threshold</code></td>
+<td>_security_config_fields.py:911</td>
+<td><code>3.0</code></td>
+<td>Field(ge=1.0,le=10.0)</td>
+<td>SecurityConfig.kt:1293</td>
+<td>ConfigFieldRegistry.kt:533</td>
+</tr>
+<tr>
+<td><code>detection_slow_pattern_threshold</code></td>
+<td>_security_config_fields.py:918</td>
+<td><code>0.1</code></td>
+<td>Field(ge=0.01,le=1.0)</td>
+<td>SecurityConfig.kt:1304</td>
+<td>ConfigFieldRegistry.kt:541</td>
+</tr>
+<tr>
+<td><code>detection_monitor_history_size</code></td>
+<td>_security_config_fields.py:925</td>
+<td><code>1000</code></td>
+<td>Field(ge=100,le=10000)</td>
+<td>SecurityConfig.kt:1315</td>
+<td>ConfigFieldRegistry.kt:549</td>
+</tr>
+<tr>
+<td><code>detection_max_tracked_patterns</code></td>
+<td>_security_config_fields.py:932</td>
+<td><code>1000</code></td>
+<td>Field(ge=100,le=5000)</td>
+<td>SecurityConfig.kt:1326</td>
+<td>ConfigFieldRegistry.kt:557</td>
+</tr>
+<tr>
+<td><code>detection_anomaly_emission_cooldown</code></td>
+<td>_security_config_fields.py:939</td>
+<td><code>60.0</code></td>
+<td>Field(ge=1.0,le=3600.0)</td>
+<td>SecurityConfig.kt:1337</td>
+<td>ConfigFieldRegistry.kt:565</td>
+</tr>
+<tr>
+<td><code>detection_min_samples_for_anomaly</code></td>
+<td>_security_config_fields.py:949</td>
+<td><code>30</code></td>
+<td>Field(ge=10,le=1000)</td>
+<td>SecurityConfig.kt:1348</td>
+<td>ConfigFieldRegistry.kt:573</td>
+</tr>
+<tr>
+<td><code>detection_threat_score_threshold</code></td>
+<td>_security_config_fields.py:959</td>
+<td><code>1.0</code></td>
+<td>Field(ge=0.0,le=10.0)</td>
+<td>SecurityConfig.kt:1359</td>
+<td>ConfigFieldRegistry.kt:581</td>
+</tr>
+<tr>
+<td><code>muted_event_types</code></td>
+<td>_security_config_fields.py:966</td>
+<td><code>factory frozenset</code></td>
+<td>models.py:278 validate_muted_event_types; revalidated on assignment</td>
+<td>SecurityConfig.kt:1370</td>
+<td>ConfigFieldRegistry.kt:589</td>
+</tr>
+<tr>
+<td><code>muted_metric_types</code></td>
+<td>_security_config_fields.py:971</td>
+<td><code>factory frozenset</code></td>
+<td>models.py:282 validate_muted_metric_types; revalidated on assignment</td>
+<td>SecurityConfig.kt:1382</td>
+<td>ConfigFieldRegistry.kt:596</td>
+</tr>
+<tr>
+<td><code>muted_check_logs</code></td>
+<td>_security_config_fields.py:976</td>
+<td><code>factory frozenset</code></td>
+<td>models.py:294 validate_muted_check_logs; revalidated on assignment</td>
+<td>SecurityConfig.kt:1394</td>
+<td>ConfigFieldRegistry.kt:603</td>
+</tr>
+<tr>
+<td><code>log_sensitive_headers</code></td>
+<td>_security_config_fields.py:981</td>
+<td><code>factory frozenset</code></td>
+<td>models.py:298 validate_log_sensitive_headers; revalidated on assignment</td>
+<td>SecurityConfig.kt:1406</td>
+<td>ConfigFieldRegistry.kt:610</td>
+</tr>
+<tr>
+<td><code>log_sensitive_params</code></td>
+<td>_security_config_fields.py:989</td>
+<td><code>factory frozenset</code></td>
+<td>models.py:302 validate_log_sensitive_params; revalidated on assignment</td>
+<td>SecurityConfig.kt:1418</td>
+<td>ConfigFieldRegistry.kt:617</td>
+</tr>
+<tr>
+<td><code>log_sensitive_body_fields</code></td>
+<td>_security_config_fields.py:998</td>
+<td><code>factory frozenset</code></td>
+<td>models.py:306 validate_log_sensitive_body_fields; revalidated on assignment</td>
+<td>SecurityConfig.kt:1430</td>
+<td>ConfigFieldRegistry.kt:624</td>
+</tr>
+<tr>
+<td><code>enable_otel</code></td>
+<td>_security_config_fields.py:1008</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1443</td>
+<td>ConfigFieldRegistry.kt:631</td>
+</tr>
+<tr>
+<td><code>otel_service_name</code></td>
+<td>_security_config_fields.py:1013</td>
+<td><code>"guard-core"</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1454</td>
+<td>ConfigFieldRegistry.kt:632</td>
+</tr>
+<tr>
+<td><code>otel_exporter_endpoint</code></td>
+<td>_security_config_fields.py:1018</td>
+<td><code>None</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1465</td>
+<td>ConfigFieldRegistry.kt:633</td>
+</tr>
+<tr>
+<td><code>otel_resource_attributes</code></td>
+<td>_security_config_fields.py:1023</td>
+<td><code>factory dict</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:1476</td>
+<td>ConfigFieldRegistry.kt:634</td>
+</tr>
+<tr>
+<td><code>enable_logfire</code></td>
+<td>_security_config_fields.py:1031</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1488</td>
+<td>ConfigFieldRegistry.kt:641</td>
+</tr>
+<tr>
+<td><code>logfire_service_name</code></td>
+<td>_security_config_fields.py:1036</td>
+<td><code>"guard-core"</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1499</td>
+<td>ConfigFieldRegistry.kt:642</td>
+</tr>
+<tr>
+<td><code>enable_enrichment</code></td>
+<td>_security_config_fields.py:1041</td>
+<td><code>False</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1510</td>
+<td>ConfigFieldRegistry.kt:643</td>
+</tr>
+<tr>
+<td><code>excluded_detection_headers</code></td>
+<td>_security_config_fields.py:1052</td>
+<td><code>factory set</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:1521</td>
+<td>ConfigFieldRegistry.kt:644</td>
+</tr>
+<tr>
+<td><code>excluded_detection_params</code></td>
+<td>_security_config_fields.py:1061</td>
+<td><code>factory set</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:1533</td>
+<td>ConfigFieldRegistry.kt:651</td>
+</tr>
+<tr>
+<td><code>excluded_detection_body_fields</code></td>
+<td>_security_config_fields.py:1067</td>
+<td><code>factory set</code></td>
+<td>revalidated on assignment</td>
+<td>SecurityConfig.kt:1545</td>
+<td>ConfigFieldRegistry.kt:658</td>
+</tr>
+<tr>
+<td><code>detection_scan_body</code></td>
+<td>_security_config_fields.py:1075</td>
+<td><code>True</code></td>
+<td>typed</td>
+<td>SecurityConfig.kt:1557</td>
+<td>ConfigFieldRegistry.kt:665</td>
+</tr>
+<tr>
+<td><code>enabled_detection_categories</code></td>
+<td>_security_config_fields.py:1083</td>
+<td><code>factory lambda</code></td>
+<td>models.py:286 validate_enabled_detection_categories; revalidated on assignment</td>
+<td>SecurityConfig.kt:1569</td>
+<td>ConfigFieldRegistry.kt:666</td>
+</tr>
+</tbody>
+</table>
+<p>Registry statistics: 129 FieldMeta entries, one per python field, in python
+declaration order; <code>ConfigFieldRegistry.revalidatedFieldNames</code> mirrors
+<code>_FIELD_REVALIDATORS</code> keys; <code>geoStateFieldNames</code> mirrors <code>_GEO_STATE_FIELDS</code>
+(geo_validators.py:53); <code>globalBehaviorRuleFieldNames</code> mirrors
+<code>_GLOBAL_BEHAVIOR_RULE_FIELDS</code> (field_validators.py:40).</p>
+<h2 id="cross-field-model-validators-guard_coremodelspy">Cross-field model validators (guard_core/models.py)</h2>
+<table>
+<thead>
+<tr>
+<th>python validator</th>
+<th>python file:line</th>
+<th>kotlin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>validate_optional_extras_installed</td>
+<td>models.py:182</td>
+<td>SecurityConfig.kt (runModelValidators); inert on JVM: pip extras (redis/aiohttp/maxminddb) have no JVM packaging gate - documented below</td>
+</tr>
+<tr>
+<td>validate_geo_ip_handler_exists</td>
+<td>models.py:206</td>
+<td>SecurityConfig.kt resolveGeoIpHandler + ConfigSeams.geoIpHandlerFactory (W3 registers IPInfoManager)</td>
+</tr>
+<tr>
+<td>warn_country_allowlist_shadows_blocklist</td>
+<td>models.py:221</td>
+<td>SecurityConfig.kt (runModelValidators step 3 + setter hook)</td>
+</tr>
+<tr>
+<td>validate_agent_config</td>
+<td>models.py:227</td>
+<td>SecurityConfig.kt (runModelValidators step 4)</td>
+</tr>
+<tr>
+<td>validate_global_return_pattern_body_scan</td>
+<td>models.py:246</td>
+<td>SecurityConfig.kt (runModelValidators step 5)</td>
+</tr>
+<tr>
+<td>warn_trusted_proxies_prefix_zero</td>
+<td>models.py:254</td>
+<td>SecurityConfig.kt (runModelValidators step 6)</td>
+</tr>
+<tr>
+<td>warn_whitelist_prefix_zero</td>
+<td>models.py:260</td>
+<td>SecurityConfig.kt (runModelValidators step 7)</td>
+</tr>
+<tr>
+<td>warn_exempt_ips_prefix_zero</td>
+<td>models.py:266</td>
+<td>SecurityConfig.kt (runModelValidators step 8)</td>
+</tr>
+<tr>
+<td>warn_empty_enabled_detection_categories</td>
+<td>models.py:271</td>
+<td>SecurityConfig.kt (runModelValidators step 9)</td>
+</tr>
+<tr>
+<td>warn_unknown_fields (kwargs warning with difflib hint)</td>
+<td>models.py:133</td>
+<td>SecurityConfigBuilder.fromMap (PyDiffLib.getCloseMatches port)</td>
+</tr>
+<tr>
+<td><strong>setattr</strong> revalidation pipeline</td>
+<td>models.py:98</td>
+<td>SecurityConfig.kt property setters (geo hook -&gt; revalidator -&gt; global-rules -&gt; shadow warn -&gt; assign -&gt; revision)</td>
+</tr>
+<tr>
+<td>revision counter</td>
+<td>models.py:90-123</td>
+<td>SecurityConfig.kt revision + setPrevalidated/rawAssign</td>
+</tr>
+<tr>
+<td>model_copy(update, deep) revalidation</td>
+<td>models.py:125</td>
+<td>SecurityConfig.kt copyWith + revalidateCopiedConfig (_security_config_validators.py:153)</td>
+</tr>
+<tr>
+<td>to_agent_config</td>
+<td>models.py:317</td>
+<td>SecurityConfig.kt toAgentConfig + ConfigSeams.agentConfigFactory (W7)</td>
+</tr>
+</tbody>
+</table>
+<p>Field validators ported (guard_core/_security_config_field_validators.py,
+_config_field_revalidators.py, _security_config_typed_validators.py,
+_security_config_geo_validators.py): ConfigValidators.kt. Shared constants:
+ALL_DETECTION_CATEGORIES (DetectionCategories.kt,
+_suspatterns_sources.py:89), VALID_CLOUD_PROVIDERS (CloudProviders.kt,
+field_validators.py:37), EVENT/METRIC/CHECK value sets (EventTypes.kt,
+event_types.py:46/94/102). normalize_url_path (path_matching.py:51) ported as
+util/PathMatching.kt for the exclude_paths validator.</p>
+<h2 id="protocols-guard_coreprotocols-8-files">Protocols (guard_core/protocols/, 8 files)</h2>
+<table>
+<thead>
+<tr>
+<th>python file</th>
+<th>python lines</th>
+<th>kotlin file</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>protocols/<strong>init</strong>.py</td>
+<td>22</td>
+<td>protocols/Protocols.kt (re-export map in KDoc)</td>
+</tr>
+<tr>
+<td>protocols/agent_protocol.py</td>
+<td>48</td>
+<td>protocols/AgentProtocol.kt</td>
+</tr>
+<tr>
+<td>protocols/cloud_ip_store_protocol.py</td>
+<td>35</td>
+<td>protocols/CloudIpStoreProtocol.kt (+ CloudIpStoreFactory typealias)</td>
+</tr>
+<tr>
+<td>protocols/geo_ip_protocol.py</td>
+<td>47</td>
+<td>protocols/GeoIpProtocol.kt</td>
+</tr>
+<tr>
+<td>protocols/middleware_protocol.py</td>
+<td>80</td>
+<td>protocols/MiddlewareProtocol.kt</td>
+</tr>
+<tr>
+<td>protocols/redis_protocol.py</td>
+<td>47</td>
+<td>protocols/RedisProtocol.kt (+ GuardRedisConnection for the AsyncContextManager yield)</td>
+</tr>
+<tr>
+<td>protocols/request_protocol.py</td>
+<td>106</td>
+<td>protocols/RequestProtocol.kt (+ RequestState, asBoundedBodyReader)</td>
+</tr>
+<tr>
+<td>protocols/response_protocol.py</td>
+<td>116</td>
+<td>protocols/ResponseProtocol.kt</td>
+</tr>
+</tbody>
+</table>
+<p>Async python methods map to Kotlin suspend functions; Python properties map
+to Kotlin val members; <code>request.state</code> attribute bag maps to the RequestState
+interface (getAttr/setAttr), preserving the dynamic-attribute contract.</p>
+<h2 id="utils-guard_core_utils-21-files">Utils (guard_core/_utils/, 21 files)</h2>
+<p>Landed in W1 (12 modules, dependency closure complete):</p>
+<table>
+<thead>
+<tr>
+<th>python file</th>
+<th>python lines</th>
+<th>kotlin file</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_utils/identity_hash.py</td>
+<td>5</td>
+<td>util/IdentityHash.kt</td>
+</tr>
+<tr>
+<td>_utils/lru_store.py</td>
+<td>16</td>
+<td>util/LruStore.kt</td>
+</tr>
+<tr>
+<td>_utils/pair_value_scan.py</td>
+<td>213</td>
+<td>util/PairValueScan.kt</td>
+</tr>
+<tr>
+<td>_utils/pair_hidden_assign.py</td>
+<td>254</td>
+<td>util/PairHiddenAssign.kt</td>
+</tr>
+<tr>
+<td>_utils/pair_redaction.py</td>
+<td>167</td>
+<td>util/PairRedaction.kt</td>
+</tr>
+<tr>
+<td>_utils/logging_utils.py</td>
+<td>238</td>
+<td>util/LoggingUtils.kt</td>
+</tr>
+<tr>
+<td>_utils/request_logging.py</td>
+<td>482</td>
+<td>util/RequestLogging.kt</td>
+</tr>
+<tr>
+<td>_utils/ip_extraction.py</td>
+<td>368</td>
+<td>util/IpExtraction.kt</td>
+</tr>
+<tr>
+<td>_utils/agent_events.py</td>
+<td>94</td>
+<td>util/AgentEvents.kt</td>
+</tr>
+<tr>
+<td>_utils/block_events.py</td>
+<td>91</td>
+<td>util/BlockEvents.kt</td>
+</tr>
+<tr>
+<td>_utils/body_reader.py</td>
+<td>186</td>
+<td>util/BodyReader.kt</td>
+</tr>
+<tr>
+<td>_utils/access_control.py</td>
+<td>299</td>
+<td>util/AccessControl.kt</td>
+</tr>
+</tbody>
+</table>
+<p>Support ports (python stdlib the reference gets for free; JVM has none):</p>
+<table>
+<thead>
+<tr>
+<th>surface</th>
+<th>python source</th>
+<th>kotlin file</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>json.loads/dumps subset</td>
+<td>CPython Lib/json</td>
+<td>util/py/PyJson.kt</td>
+</tr>
+<tr>
+<td>urllib.parse subset (unquote/quote/urlsplit/urlunsplit)</td>
+<td>CPython Lib/urllib/parse.py</td>
+<td>util/py/PyUrllib.kt</td>
+</tr>
+<tr>
+<td>ipaddress subset (ip_address/ip_network/is_* /ipv4_mapped)</td>
+<td>CPython Lib/ipaddress.py</td>
+<td>util/py/PyIp.kt</td>
+</tr>
+<tr>
+<td>difflib.get_close_matches + SequenceMatcher</td>
+<td>CPython Lib/difflib.py</td>
+<td>util/py/PyDiffLib.kt</td>
+</tr>
+<tr>
+<td>str.isspace + unicodedata.lookup (gap-char set)</td>
+<td>CPython</td>
+<td>util/py/PyUnicode.kt</td>
+</tr>
+<tr>
+<td>warnings.warn channel</td>
+<td>warnings module</td>
+<td>config/ConfigWarnings.kt (JUL "guard_core.models" logger)</td>
+</tr>
+<tr>
+<td>scan-budget context var (_json_depth_cap_value)</td>
+<td>detection_scan.py:46-116</td>
+<td>util/DetectionScanContext.kt (W2 wires live budgets)</td>
+</tr>
+</tbody>
+</table>
+<p>Deferred to the detection-engine wave (W2) with reasons - each is a module
+whose dependency closure sits inside the pattern engine, so landing it now
+would be dead code rather than a port:</p>
+<table>
+<thead>
+<tr>
+<th>python file</th>
+<th>python lines</th>
+<th>blocker</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_utils/detection_config.py</td>
+<td>234</td>
+<td>RouteConfig (decorators, W2) + engine categories resolution</td>
+</tr>
+<tr>
+<td>_utils/detection_scan.py</td>
+<td>442</td>
+<td>sus_patterns_handler / PatternCompiler (W2)</td>
+</tr>
+<tr>
+<td>_utils/body_json_scan.py</td>
+<td>291</td>
+<td>detection_scan._scan_value (W2)</td>
+</tr>
+<tr>
+<td>_utils/body_form_scan.py</td>
+<td>201</td>
+<td>binary_islands + _scan_body_field (W2)</td>
+</tr>
+<tr>
+<td>_utils/body_content_scan.py</td>
+<td>478</td>
+<td>_scan_component_name / _scan_blob_body (W2)</td>
+</tr>
+<tr>
+<td>_utils/embedded_json_scan.py</td>
+<td>77</td>
+<td>body_json_scan (W2)</td>
+</tr>
+<tr>
+<td>_utils/detection_result_builders.py</td>
+<td>43</td>
+<td>DetectionResult (engine model, W2)</td>
+</tr>
+<tr>
+<td>_utils/penetration_detection.py</td>
+<td>224</td>
+<td>orchestrates the six modules above</td>
+</tr>
+</tbody>
+</table>
+<p>Seam inventory (registered by their owning wave; W1 defaults preserve the
+engine-absent behavior):</p>
+<ul>
+<li>ConfigSeams.blockedUserAgentsPatternGate: ReDoS gate for
+  blocked_user_agents (field_validators.py:324-340 uses PatternCompiler).</li>
+<li>ConfigSeams.geoIpHandlerFactory: IPInfoManager construction
+  (geo_validators.py:86-92).</li>
+<li>ConfigSeams.agentConfigFactory: guard-agent AgentConfig (models.py:317-365).</li>
+<li>BodyReader.straddleOverlapBytesProvider: longest-pattern overlap
+  (body_reader.py:46-58; python failure path returns 0, which is the W1
+  default).</li>
+<li>AccessControl.userAgentBlockedPatternMatcher: _user_agent_matches_blocked_pattern
+  (access_control.py:16).</li>
+<li>AccessControl.cloudIpChecker: cloud_handler is_cloud_ip/details
+  (access_control.py:197-215).</li>
+</ul>
+<h2 id="idiom-mappings-behavior-preserving-recorded-per-house-convention">Idiom mappings (behavior-preserving, recorded per house convention)</h2>
+<ul>
+<li>ValueError inside validators -&gt; ConfigValidationError (message text is the
+  python validator's own message, asserted by the ported tests).</li>
+<li>warnings.warn(UserWarning) -&gt; JUL logger "guard_core.models" at WARNING.</li>
+<li>logging levels: python CRITICAL -&gt; java.util.logging SEVERE.</li>
+<li>Literal[...] -&gt; Kotlin enums carrying pythonName (LogLevel, LogFormat,
+  BufferOverflowPolicy, RuleType, RuleAction).</li>
+<li>tuples/frozensets/MappingProxy -&gt; read-only Kotlin List/Set/Map copies.</li>
+<li>contextvars in synchronous redaction paths -&gt; ThreadLocal
+  (LoggingUtils.jsonDepthCapHit, DetectionScanContext budget).</li>
+<li>time.monotonic -&gt; System.nanoTime in AgentEvents pipeline timing.</li>
+<li>unasync sync-tree knobs (body_read_timeout sync thread budget) are config
+  values only in W1; the sync mirror is a Python packaging artifact.</li>
+<li>asyncio.wait_for -&gt; kotlinx.coroutines.withTimeout (BodyReader.safeRead).</li>
+</ul>
+<h2 id="test-coverage-the-gates-check-suite">Test coverage (the gate's check suite)</h2>
+<p>97 JUnit 5 tests in guard-core/src/test/kotlin, ported from
+tests/test_models/, tests/test_protocols/, tests/test_utils/ and
+tests/test_public_redaction_helpers.py plus the CPython-behavior probes,
+covering: defaults for all 129 fields, registry consistency, every field
+validator rejection (messages byte-matched), ge/le bounds, cross-field model
+validators, mutation/revalidation/revision, copyWith, fromMap with the
+difflib unknown-field hint, ipaddress canonicalization/containment/
+classification tables, urllib/json/difflib probe tables, pair-grammar
+redaction (public helper gate cases), trusted-proxy IP resolution, access
+control verdicts, body-reader capping, LRU/identity-hash/path-matching.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

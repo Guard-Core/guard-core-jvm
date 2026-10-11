@@ -1,0 +1,1132 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Kotlin/JVM port of the guard-core engine - detection, rate limiting, IP banning, and cloud provider blocking for the JVM">
+      
+      
+        <meta name="author" content="Renn F">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>W4a Pipeline Parity (guard-core-jvm) - guard-core-jvm</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#w4a-pipeline-parity-guard-core-jvm" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="guard-core-jvm" class="md-header__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            guard-core-jvm
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              W4a Pipeline Parity (guard-core-jvm)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="guard-core-jvm" class="md-nav__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    guard-core-jvm
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adapters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adapters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#suite-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Suite results
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-mapping-python-kotlin-reference-line-anchors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Module mapping (python -&gt; kotlin, reference line anchors)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module mapping (python -&gt; kotlin, reference line anchors)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#checks-fixed-order-preserved-factorypy30-48-is-the-order-authority" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        checks/ (fixed order preserved; factory.py:30-48 is the order authority)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#core-support-modules-context-object-di-preserved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core support modules (context-object DI preserved)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#events-slice-the-w4a-real-minimum-bus-remainder-is-g-11w4b" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Events slice (the W4a real-minimum bus; remainder is G-11/W4b)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#g-7ag-7d-closure-the-8-_utils-scan-caller-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        G-7a..G-7d closure (the 8 _utils scan-caller modules)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decorators-surface-the-checks-require" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decorators surface the checks require
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conformance-runner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conformance runner
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#semantics-pinned-during-the-port" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Semantics pinned during the port
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-surface-this-wave" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Test surface (this wave)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="w4a-pipeline-parity-guard-core-jvm">W4a Pipeline Parity (guard-core-jvm)</h1>
+<p>Wave gate: the 17 pipeline checks in the reference's fixed order plus the core support modules,
+gated by the vendored pipeline conformance suites (35 cases) in
+<code>conformance/guard-core-spec-4.1.0/cases/</code>. Result: <strong>35/35 GREEN</strong>
+(<code>PipelineConformanceTest.pipelineSuitesMatchCorpus</code>, no xfails), plus a 32-test core unit
+surface. The runner is the JVM port of <code>specs/fixtures/tools/pipeline_harness.py</code>
+(<code>guard-core-conformance/src/main/kotlin/com/guardcore/conformance/PipelineHarness.kt</code>),
+driving the real fixed-order pipeline and the real response factory in-process over harness
+stubs, comparing per the index.json <code>pipeline_records</code> rule (only the keys present in each
+expected record; the recording bus observes <code>(event_type, action_taken)</code> pairs exactly like the
+reference harness).</p>
+<h2 id="suite-results">Suite results</h2>
+<table>
+<thead>
+<tr>
+<th>suite</th>
+<th>cases</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pipeline_detection_response</td>
+<td>8</td>
+<td>GREEN</td>
+</tr>
+<tr>
+<td>pipeline_ip_control</td>
+<td>12</td>
+<td>GREEN</td>
+</tr>
+<tr>
+<td>pipeline_rate_limits</td>
+<td>5</td>
+<td>GREEN</td>
+</tr>
+<tr>
+<td>pipeline_headers_cors</td>
+<td>7</td>
+<td>GREEN</td>
+</tr>
+<tr>
+<td>pipeline_behavior_rules</td>
+<td>3</td>
+<td>GREEN</td>
+</tr>
+<tr>
+<td><strong>total</strong></td>
+<td><strong>35</strong></td>
+<td><strong>GREEN (0 xfails)</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="module-mapping-python-kotlin-reference-line-anchors">Module mapping (python -&gt; kotlin, reference line anchors)</h2>
+<h3 id="checks-fixed-order-preserved-factorypy30-48-is-the-order-authority">checks/ (fixed order preserved; factory.py:30-48 is the order authority)</h3>
+<table>
+<thead>
+<tr>
+<th>python</th>
+<th>kotlin</th>
+<th>py LOC</th>
+<th>kt LOC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core/checks/base.py</code> (SecurityCheck base.py:14)</td>
+<td><code>core/checks/SecurityCheck.kt</code></td>
+<td>88</td>
+<td>85</td>
+</tr>
+<tr>
+<td><code>core/checks/pipeline.py</code> (SecurityCheckPipeline pipeline.py:16)</td>
+<td><code>core/checks/SecurityCheckPipeline.kt</code></td>
+<td>221</td>
+<td>245</td>
+</tr>
+<tr>
+<td><code>core/checks/helpers.py</code> (helpers.py:32-544)</td>
+<td><code>core/checks/ChecksHelpers.kt</code> (G-9 fold: ThresholdBans.kt deleted; resolveAndApplyThresholdBan = helpers.py:375)</td>
+<td>544</td>
+<td>642</td>
+</tr>
+<tr>
+<td><code>core/checks/factory.py</code> (DEFAULT_CHECK_CLASSES factory.py:30, build_default_pipeline factory.py:86)</td>
+<td><code>core/checks/ChecksFactory.kt</code></td>
+<td>97</td>
+<td>110</td>
+</tr>
+<tr>
+<td><code>core/checks/_verifier.py</code> (resolve_verifier_result _verifier.py:7)</td>
+<td><code>core/checks/Verifier.kt</code></td>
+<td>8</td>
+<td>29</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/route_config.py</code> (:12)</td>
+<td><code>core/checks/implementations/RouteConfigCheck.kt</code></td>
+<td>61</td>
+<td>75</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/emergency_mode.py</code> (:13)</td>
+<td><code>core/checks/implementations/EmergencyModeCheck.kt</code></td>
+<td>93</td>
+<td>106</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/https_enforcement.py</code> (:11)</td>
+<td><code>core/checks/implementations/HttpsEnforcementCheck.kt</code></td>
+<td>77</td>
+<td>99</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/request_logging.py</code> (:11)</td>
+<td><code>core/checks/implementations/RequestLoggingCheck.kt</code></td>
+<td>35</td>
+<td>46</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/request_size_content.py</code> (:14)</td>
+<td><code>core/checks/implementations/RequestSizeContentCheck.kt</code></td>
+<td>141</td>
+<td>153</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/required_headers.py</code> (:26; _classify_header_violation :16)</td>
+<td><code>core/checks/implementations/RequiredHeadersCheck.kt</code></td>
+<td>111</td>
+<td>122</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/authentication.py</code> (:19)</td>
+<td><code>core/checks/implementations/AuthenticationCheck.kt</code></td>
+<td>155</td>
+<td>159</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/referrer.py</code> (:18)</td>
+<td><code>core/checks/implementations/ReferrerCheck.kt</code></td>
+<td>125</td>
+<td>141</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/custom_validators.py</code> (:13)</td>
+<td><code>core/checks/implementations/CustomValidatorsCheck.kt</code></td>
+<td>67</td>
+<td>92</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/time_window.py</code> (:18)</td>
+<td><code>core/checks/implementations/TimeWindowCheck.kt</code></td>
+<td>92</td>
+<td>109</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/cloud_ip_refresh.py</code> (:16)</td>
+<td><code>core/checks/implementations/CloudIpRefreshCheck.kt</code></td>
+<td>61</td>
+<td>72</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/ip_security.py</code> (:78; helpers :24-75)</td>
+<td><code>core/checks/implementations/IpSecurityCheck.kt</code></td>
+<td>323</td>
+<td>337</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/cloud_provider.py</code> (:20)</td>
+<td><code>core/checks/implementations/CloudProviderCheck.kt</code></td>
+<td>125</td>
+<td>135</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/user_agent.py</code> (:26)</td>
+<td><code>core/checks/implementations/UserAgentCheck.kt</code></td>
+<td>129</td>
+<td>129</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/rate_limit.py</code> (:42; module fns :26-39)</td>
+<td><code>core/checks/implementations/RateLimitCheck.kt</code></td>
+<td>322</td>
+<td>338</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/suspicious_activity.py</code> (:25)</td>
+<td><code>core/checks/implementations/SuspiciousActivityCheck.kt</code></td>
+<td>182</td>
+<td>187</td>
+</tr>
+<tr>
+<td><code>core/checks/implementations/custom_request.py</code> (:11)</td>
+<td><code>core/checks/implementations/CustomRequestCheck.kt</code></td>
+<td>52</td>
+<td>64</td>
+</tr>
+</tbody>
+</table>
+<p>Check-name values are byte-exact against <code>core/events/event_types.py:102-122</code>
+(<code>EventTypes.CHECK_NAME_VALUES</code>).</p>
+<h3 id="core-support-modules-context-object-di-preserved">Core support modules (context-object DI preserved)</h3>
+<table>
+<thead>
+<tr>
+<th>python</th>
+<th>kotlin</th>
+<th>py LOC</th>
+<th>kt LOC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core/responses/context.py</code> (:10) + <code>core/responses/factory.py</code> (:13)</td>
+<td><code>core/responses/ErrorResponseFactory.kt</code> (ResponseContext + ErrorResponseFactory)</td>
+<td>179</td>
+<td>179</td>
+</tr>
+<tr>
+<td><code>core/routing/context.py</code> (:7) + <code>core/routing/resolver.py</code> (:6)</td>
+<td><code>core/routing/RouteConfigResolver.kt</code> (RoutingContext + RouteConfigResolver)</td>
+<td>53</td>
+<td>62</td>
+</tr>
+<tr>
+<td><code>core/validation/context.py</code> (:7) + <code>core/validation/validator.py</code> (:18)</td>
+<td><code>core/validation/RequestValidator.kt</code> (ValidationContext + RequestValidator; path_matching.py already landed as W1 <code>util/PathMatching.kt</code>)</td>
+<td>101</td>
+<td>147</td>
+</tr>
+<tr>
+<td><code>core/bypass/context.py</code> (:9) + <code>core/bypass/handler.py</code> (:36)</td>
+<td><code>core/bypass/BypassHandler.kt</code> (BypassContext + BypassHandler)</td>
+<td>125</td>
+<td>138</td>
+</tr>
+<tr>
+<td><code>core/behavioral/context.py</code> (:10) + <code>core/behavioral/processor.py</code> (:12)</td>
+<td><code>core/behavioral/BehavioralProcessor.kt</code> (BehavioralContext + BehavioralProcessor)</td>
+<td>240</td>
+<td>286</td>
+</tr>
+<tr>
+<td><code>core/initialization/handler_initializer.py</code> (:15) + <code>_handler_initializer_steps.py</code> (:12)</td>
+<td><code>core/initialization/HandlerInitializer.kt</code></td>
+<td>385</td>
+<td>494</td>
+</tr>
+<tr>
+<td><code>detection_result.py</code> (:5)</td>
+<td><code>DetectionResult.kt</code></td>
+<td>13</td>
+<td>13</td>
+</tr>
+</tbody>
+</table>
+<h3 id="events-slice-the-w4a-real-minimum-bus-remainder-is-g-11w4b">Events slice (the W4a real-minimum bus; remainder is G-11/W4b)</h3>
+<table>
+<thead>
+<tr>
+<th>python</th>
+<th>kotlin</th>
+<th>py LOC</th>
+<th>kt LOC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core/events/event_types.py</code> (constants :5-43, EventFilter :135)</td>
+<td><code>core/events/EventTypes.kt</code> (EventTypes + EventFilter; vocab sets/enrichment keys close with W4b)</td>
+<td>144</td>
+<td>87</td>
+</tr>
+<tr>
+<td><code>core/events/middleware_events.py</code> (:26)</td>
+<td><code>core/events/SecurityEventBus.kt</code></td>
+<td>198</td>
+<td>212</td>
+</tr>
+<tr>
+<td><code>core/events/metrics.py</code> (:16)</td>
+<td><code>core/events/MetricsCollector.kt</code></td>
+<td>78</td>
+<td>101</td>
+</tr>
+<tr>
+<td><code>core/events/composite_handler.py</code> (:11)</td>
+<td><code>core/events/CompositeAgentHandler.kt</code> (+ AgentTelemetryMember/SinkTelemetryMember)</td>
+<td>112</td>
+<td>172</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g-7ag-7d-closure-the-8-_utils-scan-caller-modules">G-7a..G-7d closure (the 8 _utils scan-caller modules)</h3>
+<table>
+<thead>
+<tr>
+<th>python</th>
+<th>kotlin</th>
+<th>py LOC</th>
+<th>kt LOC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_utils/detection_config.py</code> (:14-234) [G-7a]</td>
+<td><code>util/DetectionConfig.kt</code></td>
+<td>234</td>
+<td>216</td>
+</tr>
+<tr>
+<td><code>_utils/detection_scan.py</code> (:19-442) [G-7b; budget contextvars]</td>
+<td><code>util/DetectionScan.kt</code> + <code>util/DetectionScanBudget.kt</code> (extends the W1 <code>util/DetectionScanContext.kt</code> depth-cap seam)</td>
+<td>442</td>
+<td>295 + 168</td>
+</tr>
+<tr>
+<td><code>_utils/body_json_scan.py</code> (:15-291) [G-7c]</td>
+<td><code>util/BodyJsonScan.kt</code></td>
+<td>291</td>
+<td>334</td>
+</tr>
+<tr>
+<td><code>_utils/body_form_scan.py</code> (:12-201) [G-7c]</td>
+<td><code>util/BodyFormScan.kt</code> (multipart reader = focused email.parser port)</td>
+<td>201</td>
+<td>327</td>
+</tr>
+<tr>
+<td><code>_utils/body_content_scan.py</code> (:56-478) [G-7c]</td>
+<td><code>util/BodyContentScan.kt</code></td>
+<td>478</td>
+<td>492</td>
+</tr>
+<tr>
+<td><code>_utils/embedded_json_scan.py</code> (:11-77) [G-7c]</td>
+<td><code>util/EmbeddedJsonScan.kt</code></td>
+<td>77</td>
+<td>81</td>
+</tr>
+<tr>
+<td><code>_utils/detection_result_builders.py</code> (:5-43) [G-7d]</td>
+<td><code>util/DetectionResultBuilders.kt</code></td>
+<td>43</td>
+<td>57</td>
+</tr>
+<tr>
+<td><code>_utils/penetration_detection.py</code> (:46-224) [G-7d]</td>
+<td><code>util/PenetrationDetection.kt</code></td>
+<td>224</td>
+<td>324</td>
+</tr>
+</tbody>
+</table>
+<h3 id="decorators-surface-the-checks-require">Decorators surface the checks require</h3>
+<table>
+<thead>
+<tr>
+<th>python</th>
+<th>kotlin</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>decorators/route_config.py</code> (:13-291)</td>
+<td><code>decorators/RouteConfig.kt</code> (RouteConfigRevision :17, TrackedList/Map/Set :33/:100/:147, RouteConfig :241)</td>
+<td>revision bumps: container mutations bump through the tracked wrappers; scalar writes bump via <code>touch()</code> (the Kotlin idiom for <code>__setattr__</code>, route_config.py:280-291)</td>
+</tr>
+<tr>
+<td><code>decorators/base.py</code> (:61-247)</td>
+<td><code>decorators/BaseSecurityDecorator.kt</code> + <code>decorators/RouteConfigProvider.kt</code></td>
+<td><code>_get_route_id</code> (base.py:84): the <code>__wrapped__</code> owner chain collapses to the JVM route key (method identity is naturally strong); capability comparison recorded in KNOWN_GAPS.md G-11 notes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="conformance-runner">Conformance runner</h3>
+<table>
+<thead>
+<tr>
+<th>python</th>
+<th>kotlin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>specs/fixtures/tools/pipeline_harness.py</code> (harness:116-502)</td>
+<td><code>guard-core-conformance/.../PipelineHarness.kt</code> + <code>PipelineConformanceTest.kt</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="semantics-pinned-during-the-port">Semantics pinned during the port</h2>
+<ul>
+<li>Escalation checks read <code>request.state</code> attributes through the same names python uses
+  (<code>route_config</code>, <code>client_ip</code>, <code>is_whitelisted</code>, <code>is_exempt</code>, <code>guard_exclusion_scoped</code>,
+  <code>_guard_block_stash</code>, <code>_guard_detection_result_cache</code>); the state bag is
+  <code>RequestState.getAttr/setAttr</code> (protocols/RequestProtocol.kt).</li>
+<li><code>pipeline.execute</code> stamps <code>_guard_pipeline_start</code> with the monotonic clock and
+  <code>AgentEvents.getPipelineResponseTime</code> reads it (agent_events.py:29 analog).</li>
+<li>The pipeline rebuild contract (pipeline.py:56-81): config revision + watched container sizes
+  (<code>block_cloud_providers</code>, <code>blocked_user_agents</code>, <code>endpoint_rate_limits</code> = factory.py:50-54) +
+  route-config revision token.</li>
+<li><code>check_route_ip_access</code> (helpers.py:219) catches the invalid-IP <code>ValueError</code> as
+  <code>ConfigValidationError</code> (the port's ValueError class); unknown identity with a whitelist
+  configured denies (helpers.py:222-223).</li>
+<li>Suspicious-count increments run under a lock with the 10,000-IP LRU bound
+  (helpers.py:27, :352-372).</li>
+<li>The harness stubs mirror pipeline_harness.py exactly: <code>_CaseInsensitiveHeaders</code> (:352) is the
+  JVM <code>CaseInsensitiveHeaders</code>; <code>create_harness_error_response</code> (:295) applies the security
+  headers through the real manager; the rate-limit singleton resets per case (:443-457).</li>
+</ul>
+<h2 id="test-surface-this-wave">Test surface (this wave)</h2>
+<ul>
+<li><code>guard-core/src/test/kotlin/com/guardcore/core/</code> (32 tests):</li>
+<li>PipelineTest: fixed order (factory.py:30), add/insert/remove/get_check_names/len
+    (test_pipeline.py:155-219), first-block-wins, fail-open/fail-secure split
+    (test_pipeline_fail_secure.py), exclusion-scoped enforcement
+    (test_enforced_on_excluded_paths_attribute.py).</li>
+<li>ChecksHelpersTest: ip list membership / country access / route ip access / credential
+    extraction / referrer matching (test_helpers.py), threshold-ban resolution via the G-9 fold.</li>
+<li>BypassRoutingValidatorTest: resolver (test_routing_resolver.py), route-config revision
+    bumps, bypass passthrough + security bypass (test_bypass_handler.py), validator path
+    exclusion event-once + trusted-proxy https (test_validator.py).</li>
+<li>ResponseFactoryTest: test_response_factory.py including the W3-deferred response-factory
+    halves of the rate-limit (429 custom body + Retry-After) and security-headers per-config
+    tests.</li>
+<li>RateLimitCheckHalvesTest: the W3-deferred RateLimitCheck halves - singleton isolation
+    (test_rate_limit_singleton_isolation.py:42-86), autoban wiring (knob off / threshold crossing
+    / passive mode / loopback refusal / enable_ip_banning off,
+    test_rate_limit_autoban_wiring.py:56-190), endpoint-tier edge case.</li>
+<li>Conformance: PipelineConformanceTest (35 pipeline cases) + the W2 detect suites + redis_interop
+  remain green.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
