@@ -8,7 +8,9 @@ import java.util.logging.Logger
  * surface handlers and checks call back into.
  *
  * Python property members map to Kotlin val members; the handler properties may return null when a
- * feature is disabled, mirroring the Python contract.
+ * feature is disabled, mirroring the Python contract. The duck-typed members (event_bus,
+ * route_resolver, response_factory) are typed against the W4a surface protocols
+ * (MiddlewareSurfaceProtocols.kt).
  */
 public interface GuardMiddlewareProtocol {
   /** Python attribute `config` (middleware_protocol.py:33). */
@@ -17,20 +19,20 @@ public interface GuardMiddlewareProtocol {
   /** Python attribute `logger` (middleware_protocol.py:34). */
   public val logger: Logger
 
-  /** Python attribute `last_cloud_ip_refresh` (middleware_protocol.py:35). */
-  public val lastCloudIpRefresh: Int
+  /** Python attribute `last_cloud_ip_refresh` (middleware_protocol.py:35); check-mutable. */
+  public var lastCloudIpRefresh: Int
 
   /** Python attribute `suspicious_request_counts` (middleware_protocol.py:36). */
   public val suspiciousRequestCounts: MutableMap<String, MutableMap<String, Int>>
 
   /** Python property `event_bus` (middleware_protocol.py:39). */
-  public val eventBus: Any?
+  public val eventBus: MiddlewareEventBusProtocol?
 
   /** Python property `route_resolver` (middleware_protocol.py:43). */
-  public val routeResolver: Any?
+  public val routeResolver: RouteConfigResolverProtocol?
 
   /** Python property `response_factory` (middleware_protocol.py:47). */
-  public val responseFactory: Any?
+  public val responseFactory: MiddlewareResponseFactoryProtocol?
 
   /** Python property `rate_limit_handler` (middleware_protocol.py:51). */
   public val rateLimitHandler: Any?
@@ -43,6 +45,13 @@ public interface GuardMiddlewareProtocol {
 
   /** Python property `guard_response_factory` (middleware_protocol.py:63). */
   public val guardResponseFactory: GuardResponseFactory?
+
+  /**
+   * Python optional attribute `guard_decorator` (read by core/checks/factory.py:60 through
+   * getattr): the route decorator owning per-route configs; null when the host has none.
+   */
+  public val guardDecorator: Any?
+    get() = null
 
   /** Python async method `create_error_response` (middleware_protocol.py:67). */
   public suspend fun createErrorResponse(statusCode: Int, defaultMessage: String): GuardResponse

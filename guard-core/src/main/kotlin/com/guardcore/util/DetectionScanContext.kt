@@ -25,6 +25,11 @@ public object DetectionScanContext {
   /** Port of `_json_depth_cap_value` (detection_scan.py:116). */
   public fun jsonDepthCapValue(): Int = jsonDepthCap.get()
 
+  /** Budget setter used by the G-7a scan-budget scope (DetectionScanBudget.withScanBudget). */
+  internal fun setJsonDepthCap(value: Int) {
+    jsonDepthCap.set(value)
+  }
+
   /**
    * Port of the `_scan_value_budget` context manager (detection_scan.py:46), restricted to the
    * fields the W1 modules consume. The full value/char accounting lands with the W2 detection
