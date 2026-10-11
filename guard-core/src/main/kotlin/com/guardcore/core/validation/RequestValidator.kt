@@ -2,8 +2,8 @@ package com.guardcore.core.validation
 
 import com.guardcore.config.SecurityConfig
 import com.guardcore.core.events.EventTypes
-import com.guardcore.core.events.SecurityEventBus
 import com.guardcore.protocols.GuardRequest
+import com.guardcore.protocols.MiddlewareEventBusProtocol
 import com.guardcore.util.PathMatching
 import com.guardcore.util.RequestLogging
 import com.guardcore.util.py.IpNetwork
@@ -20,7 +20,7 @@ import java.util.logging.Logger
 public class ValidationContext(
     public val config: SecurityConfig,
     public val logger: Logger,
-    public val eventBus: SecurityEventBus,
+    public val eventBus: MiddlewareEventBusProtocol,
 )
 
 /**

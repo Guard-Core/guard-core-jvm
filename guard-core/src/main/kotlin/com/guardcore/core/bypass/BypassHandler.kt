@@ -2,13 +2,13 @@ package com.guardcore.core.bypass
 
 import com.guardcore.config.SecurityConfig
 import com.guardcore.core.events.EventTypes
-import com.guardcore.core.events.SecurityEventBus
 import com.guardcore.core.responses.ErrorResponseFactory
 import com.guardcore.core.routing.RouteConfigResolver
 import com.guardcore.core.validation.RequestValidator
 import com.guardcore.decorators.RouteConfig
 import com.guardcore.protocols.GuardRequest
 import com.guardcore.protocols.GuardResponse
+import com.guardcore.protocols.MiddlewareEventBusProtocol
 import com.guardcore.util.BlockEvents
 import com.guardcore.util.IpExtraction
 import com.guardcore.util.RequestLogging
@@ -21,7 +21,7 @@ import java.util.logging.Logger
 public class BypassContext(
     public val config: SecurityConfig,
     public val logger: Logger,
-    public val eventBus: SecurityEventBus,
+    public val eventBus: MiddlewareEventBusProtocol,
     public val routeResolver: RouteConfigResolver,
     public val responseFactory: ErrorResponseFactory,
     public val validator: RequestValidator,

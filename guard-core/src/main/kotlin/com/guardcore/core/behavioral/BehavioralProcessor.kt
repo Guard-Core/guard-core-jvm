@@ -2,7 +2,6 @@ package com.guardcore.core.behavioral
 
 import com.guardcore.config.SecurityConfig
 import com.guardcore.core.events.EventTypes
-import com.guardcore.core.events.SecurityEventBus
 import com.guardcore.decorators.BaseSecurityDecorator
 import com.guardcore.decorators.RouteConfig
 import com.guardcore.handlers.BehaviorRule
@@ -10,6 +9,7 @@ import com.guardcore.handlers.BehaviorTracker
 import com.guardcore.handlers.applyAction
 import com.guardcore.protocols.GuardRequest
 import com.guardcore.protocols.GuardResponse
+import com.guardcore.protocols.MiddlewareEventBusProtocol
 import com.guardcore.util.RequestLogging
 import java.util.logging.Logger
 
@@ -20,7 +20,7 @@ import java.util.logging.Logger
 public class BehavioralContext(
     public val config: SecurityConfig,
     public val logger: Logger,
-    public val eventBus: SecurityEventBus,
+    public val eventBus: MiddlewareEventBusProtocol,
     public val guardDecorator: BaseSecurityDecorator?,
     public val behaviorTracker: BehaviorTracker? = null,
     public val middleware: Any? = null,
