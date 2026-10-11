@@ -91,6 +91,7 @@ class RedisInteropTest {
         "redis_interop needs a live Redis on REDIS_URL (localhost:6379)",
     )
     val failures = runAll()
+    println("RIO_FAILURES: " + failures.joinToString(" || "))
     assertTrue(failures.isEmpty(), "redis_interop failures:\n" + failures.joinToString("\n"))
   }
 
