@@ -155,6 +155,30 @@ public object PyRe {
             }
           }
         }
+        c == '(' && !inClass && i + 3 < n && pattern[i + 1] == '?' && pattern[i + 2] == 'P' &&
+            (pattern[i + 3] == '<' || pattern[i + 3] == '=') -> {
+          if (pattern[i + 3] == '<') {
+            // (?P<name> -> (?<name>: java's named-group spelling.
+            val close = pattern.indexOf('>', i + 4)
+            if (close < 0) {
+              sb.append(c)
+              i++
+            } else {
+              sb.append("(?<").append(pattern.substring(i + 4, close)).append('>')
+              i = close + 1
+            }
+          } else {
+            // (?P=name) -> \k<name>: the whole atom including its closing paren.
+            val close = pattern.indexOf(')', i + 4)
+            if (close < 0) {
+              sb.append(c)
+              i++
+            } else {
+              sb.append("\\k<").append(pattern.substring(i + 4, close)).append('>')
+              i = close + 1
+            }
+          }
+        }
         c == '[' -> {
           inClass = true
           sb.append(c)

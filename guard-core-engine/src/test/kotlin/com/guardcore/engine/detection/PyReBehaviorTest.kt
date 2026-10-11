@@ -35,6 +35,32 @@ class PyReBehaviorTest {
   }
 
   @Test
+  fun pythonNamedGroupsTranslateToJavaSpelling() {
+    // python (?P<name>...) compiles; java needs (?<name>...). The safety_gates corpus uses the
+    // python spelling (W5 regression: the verbatim translator skipped it and java rejected the
+    // source with "Unknown inline modifier" before the structural checks could classify).
+    val p = PyRe.compile("(?P<year>\\d{4})-(?P<day>\\d\\d)", 0)
+    assertTrue(p.search("2026-10-10", 0, Long.MAX_VALUE) != null)
+    assertTrue(p.search("20-1010", 0, Long.MAX_VALUE) == null)
+    val named = PyRe.compile("(?P<a>ab)+c", 0)
+    val m = named.search("ababc", 0, Long.MAX_VALUE)
+    assertTrue(m != null)
+    assertEquals("ab", m!!.group(1))
+    // (?P=name) backreference -> \k<name>.
+    val ref = PyRe.compile("(?P<x>\\w)\\1", 0)
+    assertEquals(2, ref.groups) // 1 group + the initial sre counter
+    assertTrue(ref.search("aa", 0, Long.MAX_VALUE) != null)
+    assertTrue(ref.search("aA", 0, Long.MAX_VALUE) == null)
+    val namedRef = PyRe.compile("(?P<w>\\w)(?P=w)", 0)
+    assertTrue(namedRef.search("zz", 0, Long.MAX_VALUE) != null)
+    assertTrue(namedRef.search("zx", 0, Long.MAX_VALUE) == null)
+    // Inside a char class the (?P< spelling is literal text (python behavior).
+    val inClass = PyRe.compile("[(?P<a>]", 0)
+    assertTrue(inClass.search("P", 0, Long.MAX_VALUE) != null)
+    assertTrue(inClass.search("a", 0, Long.MAX_VALUE) != null)
+  }
+
+  @Test
   fun pythonGrammarRejectsFailClosed() {
     val rejected =
         listOf(

@@ -37,7 +37,7 @@ public fun isBroadCharClassInner(inner: String): Boolean {
     val excluded = inner.substring(1)
     return ALREADY_BROAD_SHORTHAND.find(excluded) == null
   }
-  return inner == "\\\\s\\\\S" || inner == "\\\\S\\\\s"
+  return inner == "\\s\\S" || inner == "\\S\\s"
 }
 
 /** (end index, is broad) for the atom starting at [i]. */
