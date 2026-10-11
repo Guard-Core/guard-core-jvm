@@ -2,9 +2,7 @@ package com.guardcore.core
 
 import com.guardcore.config.EventFilter
 import com.guardcore.core.events.AgentTelemetryMember
-import com.guardcore.core.events.CompositeAgentHandler
 import com.guardcore.core.initialization.HandlerInitializer
-import com.guardcore.decorators.BaseSecurityDecorator
 import com.guardcore.handlers.CloudManager
 import com.guardcore.handlers.RecordingAgent
 import com.guardcore.handlers.resetIpBanGlobalState
@@ -44,14 +42,18 @@ class HandlerInitializerArmsTest {
     override fun getConnection(): GuardRedisConnection =
         object : GuardRedisConnection {
           override val client: Any? = null
+
           override fun close() {}
         }
   }
 
   private class FailingRedis : RedisHandlerProtocol {
     override suspend fun getKey(namespace: String, key: String): Any? = null
+
     override suspend fun setKey(namespace: String, key: String, value: Any?, ttl: Int?) = true
+
     override suspend fun delete(namespace: String, key: String): Int? = 0
+
     override suspend fun keys(pattern: String): List<String>? = emptyList()
 
     override suspend fun initialize() {
@@ -61,6 +63,7 @@ class HandlerInitializerArmsTest {
     override fun getConnection(): GuardRedisConnection =
         object : GuardRedisConnection {
           override val client: Any? = null
+
           override fun close() {}
         }
   }
@@ -80,7 +83,9 @@ class HandlerInitializerArmsTest {
       initializeRedisCalls += 1
     }
 
-    override suspend fun initializeAgent(agentHandler: com.guardcore.protocols.AgentHandlerProtocol) {
+    override suspend fun initializeAgent(
+        agentHandler: com.guardcore.protocols.AgentHandlerProtocol,
+    ) {
       initializeAgentCalls += 1
     }
 
@@ -105,12 +110,12 @@ class HandlerInitializerArmsTest {
   @Test
   fun testGetInitializationStatusWithForeignGeoObject() {
     CloudManager.resetInstance()
-    val foreign = object {
-      @Suppress("unused")
-      fun getStatus(): Map<String, Any?> = mapOf("ready" to true, "entries" to 5)
-    }
-    val initializer =
-        HandlerInitializer(config = securityConfig(), geoIpHandler = foreign)
+    val foreign =
+        object {
+          @Suppress("unused")
+          fun getStatus(): Map<String, Any?> = mapOf("ready" to true, "entries" to 5)
+        }
+    val initializer = HandlerInitializer(config = securityConfig(), geoIpHandler = foreign)
     val status = initializer.getInitializationStatus()
     assertEquals(true, (status["geo_ip"] as Map<*, *>)["ready"])
     assertEquals(5, (status["geo_ip"] as Map<*, *>)["entries"])
@@ -135,7 +140,12 @@ class HandlerInitializerArmsTest {
   fun testBuildEnricherEnabled() {
     val initializer =
         HandlerInitializer(
-            config = securityConfig { enableEnrichment = true; enableAgent = true; agentApiKey = "k" },
+            config =
+                securityConfig {
+                  enableEnrichment = true
+                  enableAgent = true
+                  agentApiKey = "k"
+                },
             agentHandler = RecordingAgent(),
         )
     val enricher = initializer.buildEnricher()
@@ -147,12 +157,13 @@ class HandlerInitializerArmsTest {
   fun testBuildEnricherEnabledWithDynamicRules() {
     val initializer =
         HandlerInitializer(
-            config = securityConfig {
-              enableEnrichment = true
-              enableAgent = true
-              agentApiKey = "k"
-              enableDynamicRules = true
-            },
+            config =
+                securityConfig {
+                  enableEnrichment = true
+                  enableAgent = true
+                  agentApiKey = "k"
+                  enableDynamicRules = true
+                },
             agentHandler = RecordingAgent(),
         )
     assertNotNull(initializer.buildEnricher())
@@ -168,7 +179,10 @@ class HandlerInitializerArmsTest {
           e
         }
     assertNotNull(error)
-    assertTrue(error!!.message!!.contains("enable_enrichment requires enable_agent=True"), error.message)
+    assertTrue(
+        error!!.message!!.contains("enable_enrichment requires enable_agent=True"),
+        error.message,
+    )
   }
 
   /** The composite member factory seam + event bus/metrics/filter builders. */
@@ -181,9 +195,10 @@ class HandlerInitializerArmsTest {
               config = securityConfig { enableOtel = true },
               agentHandler = RecordingAgent(),
           )
-      val customMember = object : AgentTelemetryMember {
-        override suspend fun sendEvent(event: Map<String, Any?>) {}
-      }
+      val customMember =
+          object : AgentTelemetryMember {
+            override suspend fun sendEvent(event: Map<String, Any?>) {}
+          }
       initializer.compositeMemberFactory = { members, _ -> members + customMember }
       val composite = initializer.buildCompositeHandler()
       assertTrue(
@@ -283,10 +298,11 @@ class HandlerInitializerArmsTest {
           }
       val initializer =
           HandlerInitializer(
-              config = securityConfig {
-                lazyInit = true
-                blockCloudProviders = setOf("AWS")
-              },
+              config =
+                  securityConfig {
+                    lazyInit = true
+                    blockCloudProviders = setOf("AWS")
+                  },
               redisHandler = redisManager,
               geoIpHandler = geo,
           )
@@ -307,11 +323,12 @@ class HandlerInitializerArmsTest {
       try {
         val initializer =
             HandlerInitializer(
-                config = securityConfig {
-                  lazyInit = true
-                  enableRedis = true
-                  redisUrl = null
-                },
+                config =
+                    securityConfig {
+                      lazyInit = true
+                      enableRedis = true
+                      redisUrl = null
+                    },
                 redisHandler = null,
                 geoIpHandler = CountingGeo(),
             )
@@ -403,11 +420,12 @@ class HandlerInitializerArmsTest {
       com.guardcore.handlers.DynamicRuleManager.resetInstance()
       val initializer =
           HandlerInitializer(
-              config = securityConfig {
-                enableDynamicRules = true
-                enableAgent = true
-                agentApiKey = "test-key"
-              },
+              config =
+                  securityConfig {
+                    enableDynamicRules = true
+                    enableAgent = true
+                    agentApiKey = "test-key"
+                  },
               redisHandler = CountingRedis(),
               agentHandler = RecordingAgent(),
           )

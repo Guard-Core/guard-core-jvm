@@ -2,10 +2,10 @@ package com.guardcore.util
 
 import com.guardcore.config.SecurityConfig
 import com.guardcore.config.SecurityConfigBuilder
-import com.guardcore.util.py.PyJson
-import com.guardcore.util.py.PyUrllib
 import com.guardcore.protocols.GuardRequest
 import com.guardcore.protocols.RequestState
+import com.guardcore.util.py.PyJson
+import com.guardcore.util.py.PyUrllib
 import java.util.logging.Level
 import java.util.logging.LogRecord
 import java.util.logging.Logger
@@ -17,9 +17,9 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 
 /**
- * Ports of the body-scan surface tests: test_structured_json_nosql.py,
- * test_json_body_depth_cap.py, test_body_form_scan.py, test_form_value_embedded_json.py,
- * test_non_utf8_body_scan.py, and the multipart entries helpers.
+ * Ports of the body-scan surface tests: test_structured_json_nosql.py, test_json_body_depth_cap.py,
+ * test_body_form_scan.py, test_form_value_embedded_json.py, test_non_utf8_body_scan.py, and the
+ * multipart entries helpers.
  */
 
 /** MockGuardRequest analog with full body/header/query-param control. */
@@ -38,24 +38,36 @@ public class ScanRequest(
   override val headers: Map<String, String> =
       object : Map<String, String> {
         private val backing = headers.mapKeys { it.key.lowercase() }
-        override val size: Int get() = backing.size
-        override val keys: Set<String> get() = backing.keys
-        override val values: Collection<String> get() = backing.values
-        override val entries: Set<Map.Entry<String, String>> get() = backing.entries
+        override val size: Int
+          get() = backing.size
+
+        override val keys: Set<String>
+          get() = backing.keys
+
+        override val values: Collection<String>
+          get() = backing.values
+
+        override val entries: Set<Map.Entry<String, String>>
+          get() = backing.entries
+
         override fun isEmpty(): Boolean = backing.isEmpty()
+
         override fun containsKey(key: String): Boolean = backing.containsKey(key.lowercase())
+
         override fun containsValue(value: String): Boolean = backing.containsValue(value)
+
         override fun get(key: String): String? = backing[key.lowercase()]
       }
-  override val state: RequestState = object : RequestState {
-    private val attrs: MutableMap<String, Any?> = linkedMapOf()
+  override val state: RequestState =
+      object : RequestState {
+        private val attrs: MutableMap<String, Any?> = linkedMapOf()
 
-    override fun getAttr(name: String): Any? = attrs[name]
+        override fun getAttr(name: String): Any? = attrs[name]
 
-    override fun setAttr(name: String, value: Any?) {
-      attrs[name] = value
-    }
-  }
+        override fun setAttr(name: String, value: Any?) {
+          attrs[name] = value
+        }
+      }
   override val scope: Map<String, Any?> = emptyMap()
 
   override fun urlReplaceScheme(scheme: String): String = "$scheme://example.com$urlPath"
@@ -118,7 +130,10 @@ private const val SQLI: String = "' OR 1=1--"
 private const val XSS: String = "<script>alert(1)</script>"
 private const val MULTIPART_CONTENT_TYPE: String = "multipart/form-data; boundary=B0"
 
-private fun jsonBodyRequest(payload: String, config: SecurityConfig = defaultScanConfig()): ScanRequest {
+private fun jsonBodyRequest(
+    payload: String,
+    config: SecurityConfig = defaultScanConfig(),
+): ScanRequest {
   val body = payload.encodeToByteArray()
   return ScanRequest(
       method = "POST",
@@ -146,8 +161,7 @@ private fun formBodyRequest(payload: String): ScanRequest {
 
 private fun multipartBodyRequest(payload: String): ScanRequest {
   val body =
-      ("--B0\r\nContent-Disposition: form-data; name=\"note\"\r\n\r\n" +
-              "$payload\r\n--B0--\r\n")
+      ("--B0\r\nContent-Disposition: form-data; name=\"note\"\r\n\r\n" + "$payload\r\n--B0--\r\n")
           .encodeToByteArray()
   return ScanRequest(
       method = "POST",
@@ -166,8 +180,7 @@ private fun filePartBody(filename: String, content: String = "binary-file-payloa
         .encodeToByteArray()
 
 private fun textPartBody(name: String, value: String): ByteArray =
-    ("--B0\r\nContent-Disposition: form-data; name=\"$name\"\r\n\r\n" +
-            "$value\r\n--B0--\r\n")
+    ("--B0\r\nContent-Disposition: form-data; name=\"$name\"\r\n\r\n" + "$value\r\n--B0--\r\n")
         .encodeToByteArray()
 
 private fun multipartRequest(body: ByteArray): ScanRequest =
@@ -202,7 +215,11 @@ class JsonNosqlScanTest {
 
   private fun assertNosql(payload: String) {
     scanRunTest {
-      val result = PenetrationDetection.detectPenetrationAttempt(jsonBodyRequest(payload), defaultScanConfig())
+      val result =
+          PenetrationDetection.detectPenetrationAttempt(
+              jsonBodyRequest(payload),
+              defaultScanConfig(),
+          )
       assertTrue(result.isThreat, payload)
       assertEquals(listOf("nosql"), result.threatCategories)
     }
@@ -226,7 +243,11 @@ class JsonNosqlScanTest {
             """{"a": {"b": {"c": {"d": 1}}}}""",
         )) {
       scanRunTest {
-        val result = PenetrationDetection.detectPenetrationAttempt(jsonBodyRequest(payload), defaultScanConfig())
+        val result =
+            PenetrationDetection.detectPenetrationAttempt(
+                jsonBodyRequest(payload),
+                defaultScanConfig(),
+            )
         assertFalse(result.isThreat, payload)
       }
     }
@@ -264,7 +285,8 @@ class JsonNosqlScanTest {
     scanRunTest {
       val hit =
           BodyJsonScan.scanJsonValue(
-              value = linkedMapOf<String, Any?>("username" to linkedMapOf<String, Any?>("\$ne" to 1)),
+              value =
+                  linkedMapOf<String, Any?>("username" to linkedMapOf<String, Any?>("\$ne" to 1)),
               keyLabel = "",
               excludedBodyFields = setOf("\$ne"),
               enabledCategories = null,
@@ -291,7 +313,10 @@ class JsonDepthCapTest {
       scanRunTest {
         val body = nestedJsonBody(depth, "benign")
         val result =
-            PenetrationDetection.detectPenetrationAttempt(jsonBodyRequest(body), defaultScanConfig())
+            PenetrationDetection.detectPenetrationAttempt(
+                jsonBodyRequest(body),
+                defaultScanConfig(),
+            )
         assertFalse(result.isThreat, "depth=$depth")
       }
     }
@@ -306,7 +331,10 @@ class JsonDepthCapTest {
       scanRunTest {
         val body = nestedJsonBody(depth, SQLI)
         val result =
-            PenetrationDetection.detectPenetrationAttempt(jsonBodyRequest(body), defaultScanConfig())
+            PenetrationDetection.detectPenetrationAttempt(
+                jsonBodyRequest(body),
+                defaultScanConfig(),
+            )
         assertTrue(result.isThreat, "depth=$depth")
         assertTrue(result.triggerInfo.startsWith("Request body: "), result.triggerInfo)
       }
@@ -357,7 +385,10 @@ class JsonDepthCapTest {
       try {
         val body = nestedJsonBody(40, SQLI)
         val result =
-            PenetrationDetection.detectPenetrationAttempt(jsonBodyRequest(body), defaultScanConfig())
+            PenetrationDetection.detectPenetrationAttempt(
+                jsonBodyRequest(body),
+                defaultScanConfig(),
+            )
         assertTrue(result.isThreat)
         assertEquals(listOf("sqli"), result.threatCategories)
         assertTrue(capture.text().contains("detection_max_json_depth (32) reached"), capture.text())
@@ -376,14 +407,17 @@ class JsonDepthCapTest {
               linkedMapOf<String, Any?>(
                   "branch1" to nestedJsonValue(10, "benign"),
                   "branch2" to nestedJsonValue(10, "benign"),
-              )
+              ),
           )
       val capture = LogCapture()
       capture.attach(GUARD_LOGGER, Level.WARNING)
       try {
         val result = PenetrationDetection.detectPenetrationAttempt(jsonBodyRequest(body), config)
         assertFalse(result.isThreat)
-        assertEquals(1, Regex("detection_max_json_depth \\(5\\) reached").findAll(capture.text()).count())
+        assertEquals(
+            1,
+            Regex("detection_max_json_depth \\(5\\) reached").findAll(capture.text()).count(),
+        )
       } finally {
         capture.detach(GUARD_LOGGER)
       }
@@ -401,7 +435,10 @@ class JsonDepthCapTest {
       try {
         PenetrationDetection.detectPenetrationAttempt(request, config)
         PenetrationDetection.detectPenetrationAttempt(request, config)
-        assertEquals(2, Regex("detection_max_json_depth \\(5\\) reached").findAll(capture.text()).count())
+        assertEquals(
+            2,
+            Regex("detection_max_json_depth \\(5\\) reached").findAll(capture.text()).count(),
+        )
       } finally {
         capture.detach(GUARD_LOGGER)
       }
@@ -422,8 +459,7 @@ class JsonDepthCapTest {
   @Test
   fun testOrderingAndFirstHitParityAcrossDictAndNestedList() {
     scanRunTest {
-      val config =
-          defaultScanConfig { excludedDetectionBodyFields = setOf("excluded_field") }
+      val config = defaultScanConfig { excludedDetectionBodyFields = setOf("excluded_field") }
       val body =
           PyJson.dumps(
               linkedMapOf<String, Any?>(
@@ -436,11 +472,14 @@ class JsonDepthCapTest {
                       ),
                   "\$ne" to "operator_value",
                   "trailing_scalar" to XSS,
-              )
+              ),
           )
       val result = PenetrationDetection.detectPenetrationAttempt(jsonBodyRequest(body), config)
       assertTrue(result.isThreat)
-      assertTrue(result.triggerInfo.startsWith("Request body field 'inner_scalar': "), result.triggerInfo)
+      assertTrue(
+          result.triggerInfo.startsWith("Request body field 'inner_scalar': "),
+          result.triggerInfo,
+      )
       assertFalse(result.triggerInfo.contains("\$ne"))
       assertFalse(result.triggerInfo.contains("trailing_scalar"))
     }
@@ -454,24 +493,33 @@ class JsonDepthCapTest {
               linkedMapOf<String, Any?>(
                   "excluded_field" to SQLI,
                   "nested_list" to listOf(linkedMapOf<String, Any?>("inner_scalar" to SQLI)),
-              )
+              ),
           )
       val result =
           PenetrationDetection.detectPenetrationAttempt(jsonBodyRequest(body), defaultScanConfig())
       assertTrue(result.isThreat)
-      assertTrue(result.triggerInfo.startsWith("Request body field 'excluded_field': "), result.triggerInfo)
+      assertTrue(
+          result.triggerInfo.startsWith("Request body field 'excluded_field': "),
+          result.triggerInfo,
+      )
     }
   }
 
   @Test
   fun testDefaultCapNeverTripsOnShallowJsonBody() {
     scanRunTest {
-      val body = PyJson.dumps(linkedMapOf("query" to linkedMapOf("filter" to linkedMapOf("active" to true))))
+      val body =
+          PyJson.dumps(
+              linkedMapOf("query" to linkedMapOf("filter" to linkedMapOf("active" to true))),
+          )
       val capture = LogCapture()
       capture.attach(GUARD_LOGGER, Level.WARNING)
       try {
         val result =
-            PenetrationDetection.detectPenetrationAttempt(jsonBodyRequest(body), defaultScanConfig())
+            PenetrationDetection.detectPenetrationAttempt(
+                jsonBodyRequest(body),
+                defaultScanConfig(),
+            )
         assertFalse(result.isThreat)
         assertFalse(capture.text().contains("detection_max_json_depth"))
       } finally {
@@ -526,7 +574,17 @@ class FormValueEmbeddedJsonTest {
   }
 
   private fun nestedArrayNosqlPayload(): String =
-      PyJson.dumps(linkedMapOf<String, Any?>("a" to linkedMapOf<String, Any?>("b" to linkedMapOf<String, Any?>("c" to listOf(linkedMapOf<String, Any?>("\$gt" to 100))))))
+      PyJson.dumps(
+          linkedMapOf<String, Any?>(
+              "a" to
+                  linkedMapOf<String, Any?>(
+                      "b" to
+                          linkedMapOf<String, Any?>(
+                              "c" to listOf(linkedMapOf<String, Any?>("\$gt" to 100)),
+                          ),
+                  ),
+          ),
+      )
 
   @Test
   fun testNestedArrayNosqlOperatorDetectedOnEverySurface() {
@@ -560,7 +618,9 @@ class FormValueEmbeddedJsonTest {
           val result = PenetrationDetection.detectPenetrationAttempt(request, defaultScanConfig())
           assertTrue(result.isThreat)
           val lines =
-              capture.records.map { it.message ?: "" }.filter { it.contains("Potential attack detected") }
+              capture.records
+                  .map { it.message ?: "" }
+                  .filter { it.contains("Potential attack detected") }
           assertTrue(lines.isNotEmpty(), "no detection log line captured")
           assertTrue(lines[0].contains("[REDACTED]"), lines[0])
           assertTrue(lines[0].contains(XSS), lines[0])
@@ -602,7 +662,8 @@ class NonUtf8BodyScanTest {
   @Test
   fun testInvalidUtf8PrefixBeforeXssIsDetected() {
     scanRunTest {
-      val (isThreat, _) = detect(byteArrayOf(0xff.toByte(), 0xfe.toByte()) + XSS.encodeToByteArray())
+      val (isThreat, _) =
+          detect(byteArrayOf(0xff.toByte(), 0xfe.toByte()) + XSS.encodeToByteArray())
       assertTrue(isThreat)
     }
   }
@@ -663,14 +724,37 @@ class NonUtf8BodyScanTest {
     scanRunTest {
       val body =
           byteArrayOf(
-              0x08, 0x96.toByte(), 0x01,
-              0x12, 0x07, 'e'.code.toByte(), 'x'.code.toByte(), 'a'.code.toByte(),
-              'm'.code.toByte(), 'p'.code.toByte(), 'l'.code.toByte(), 'e'.code.toByte(),
-              0x1a, 0x03, 'f'.code.toByte(), 'o'.code.toByte(), 'o'.code.toByte(),
-              0x22, 0x04, 'u'.code.toByte(), 's'.code.toByte(), 'e'.code.toByte(),
+              0x08,
+              0x96.toByte(),
+              0x01,
+              0x12,
+              0x07,
+              'e'.code.toByte(),
+              'x'.code.toByte(),
+              'a'.code.toByte(),
+              'm'.code.toByte(),
+              'p'.code.toByte(),
+              'l'.code.toByte(),
+              'e'.code.toByte(),
+              0x1a,
+              0x03,
+              'f'.code.toByte(),
+              'o'.code.toByte(),
+              'o'.code.toByte(),
+              0x22,
+              0x04,
+              'u'.code.toByte(),
+              's'.code.toByte(),
+              'e'.code.toByte(),
               'r'.code.toByte(),
-              0x28, 0x01,
-              0xff.toByte(), 0xfe.toByte(), 0x00, 0x01, 0x02, 0x03,
+              0x28,
+              0x01,
+              0xff.toByte(),
+              0xfe.toByte(),
+              0x00,
+              0x01,
+              0x02,
+              0x03,
           )
       val (isThreat, _) = detect(body)
       assertFalse(isThreat)
@@ -681,13 +765,16 @@ class NonUtf8BodyScanTest {
   fun testDeterministicPseudoRandomBinaryBlobStaysClean() {
     scanRunTest {
       val md = java.security.MessageDigest.getInstance("SHA-256")
-      val body = StringBuilder().let { sb ->
-        for (i in 0 until 8) {
-          val digest = md.digest(i.toString().encodeToByteArray())
-          sb.append(String(digest, Charsets.ISO_8859_1))
-        }
-        sb.toString()
-      }.iso8859_1Bytes()
+      val body =
+          StringBuilder()
+              .let { sb ->
+                for (i in 0 until 8) {
+                  val digest = md.digest(i.toString().encodeToByteArray())
+                  sb.append(String(digest, Charsets.ISO_8859_1))
+                }
+                sb.toString()
+              }
+              .iso8859_1Bytes()
       val (isThreat, _) = detect(body)
       assertFalse(isThreat)
     }
@@ -695,7 +782,11 @@ class NonUtf8BodyScanTest {
 }
 
 /** Latin-1 (python latin-1 encode) helper. */
-private fun String.iso8859_1Bytes(): ByteArray = map { it.code and 0xFF }.map { it.toByte() }.toByteArray()
+private fun String.iso8859_1Bytes(): ByteArray = map {
+  it.code and 0xFF
+}
+    .map { it.toByte() }
+    .toByteArray()
 
 /** test_body_form_scan.py: the multipart entries helpers and scan dispatch. */
 class MultipartScanTest {
@@ -819,15 +910,18 @@ class MultipartScanTest {
 
   /**
    * test_body_form_scan.py:147 (_multipart_part_entries with no extra headers). The python fake
-   * part synthesizes get_param results without headers; the JVM part derives name/filename from
-   * its header list (the email.parser always supplies Content-Disposition when get_param hits),
-   * so the reachable same-path state is disposition-only: filename entry + disposition + payload.
+   * part synthesizes get_param results without headers; the JVM part derives name/filename from its
+   * header list (the email.parser always supplies Content-Disposition when get_param hits), so the
+   * reachable same-path state is disposition-only: filename entry + disposition + payload.
    */
   @Test
   fun testMultipartPartEntriesSkipsRawLinesWhenPartHasNoHeaders() {
     val part =
         BodyFormScan.MultipartPart(
-            headers = listOf("Content-Disposition" to "form-data; name=\"upload\"; filename=\"report.pdf\""),
+            headers =
+                listOf(
+                    "Content-Disposition" to "form-data; name=\"upload\"; filename=\"report.pdf\"",
+                ),
             payload = "payload-text-sample",
         )
     val entries = BodyFormScan.multipartPartEntries(part)
@@ -864,8 +958,7 @@ class MultipartScanTest {
         BodyFormScan.MultipartPart(
             headers =
                 listOf(
-                    "Content-Disposition" to
-                        "form-data; name=\"upload\"; filename=\"report.pdf\"",
+                    "Content-Disposition" to "form-data; name=\"upload\"; filename=\"report.pdf\"",
                     "Custom-Secret-Field" to "' OR 1=1--",
                 ),
             payload = "payload-text-sample",

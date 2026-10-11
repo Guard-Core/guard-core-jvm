@@ -540,8 +540,8 @@ public object ConfigValidators {
   /**
    * Port of `_validate_typed_collection_field_value` with `_GLOBAL_BEHAVIOR_RULES_ADAPTER`
    * (_security_config_typed_validators.py:6-12): the assignment-time revalidator coerces dict
-   * entries to BehaviorRuleConfig exactly like pydantic's TypeAdapter (the construction-time
-   * map applier shares the same semantics); anything else rejects with the python-shaped message.
+   * entries to BehaviorRuleConfig exactly like pydantic's TypeAdapter (the construction-time map
+   * applier shares the same semantics); anything else rejects with the python-shaped message.
    */
   internal fun validateGlobalBehaviorRulesFieldValue(
       value: Any?,
@@ -578,11 +578,12 @@ public object ConfigValidators {
                 "$fieldName is invalid: $key is required " +
                     "[type=missing, input_value=$map, input_type=dict]",
             )
-    val ruleTypeRaw = require("rule_type") as? String
-        ?: throw ConfigValidationError(
-            "$fieldName is invalid: Input should be a valid string " +
-                "[type=string_type, input_value=${map["rule_type"]}]",
-        )
+    val ruleTypeRaw =
+        require("rule_type") as? String
+            ?: throw ConfigValidationError(
+                "$fieldName is invalid: Input should be a valid string " +
+                    "[type=string_type, input_value=${map["rule_type"]}]",
+            )
     val ruleType =
         RuleType.entries.firstOrNull { it.pythonName == ruleTypeRaw }
             ?: throw ConfigValidationError(

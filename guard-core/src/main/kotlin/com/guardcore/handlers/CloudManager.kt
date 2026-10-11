@@ -428,8 +428,8 @@ public open class CloudManager {
  */
 /**
  * Test seam mirroring the python tests' `patch("...cloud_handler.fetch_aws_ip_ranges")` pins
- * (test_nonblocking_refresh.py, test_cloud_ips.py): when set, every provider fetch resolves
- * through it; production never sets it.
+ * (test_nonblocking_refresh.py, test_cloud_ips.py): when set, every provider fetch resolves through
+ * it; production never sets it.
  */
 @Volatile
 public var fetchProviderRangesOverride:

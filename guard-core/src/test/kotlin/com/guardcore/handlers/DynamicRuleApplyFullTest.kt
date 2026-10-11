@@ -1,7 +1,6 @@
 package com.guardcore.handlers
 
 import com.guardcore.config.SecurityConfigBuilder
-import com.guardcore.config.DetectionCategories
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -11,18 +10,28 @@ import kotlinx.coroutines.runBlocking
 /**
  * W9a closure: the dynamic-rule application bodies (applyIpBans/applyIpWhitelist/
  * applyCountryRules/applyRateLimitRules/applyCloudProviderRules/applyUserAgentRules/
- * applyPatternRules/applyFeatureToggles) driven through applyRules with a fully populated
- * payload (_dynamic_rule_application.py), plus the tracked RouteConfig container revisions
+ * applyPatternRules/applyFeatureToggles) driven through applyRules with a fully populated payload
+ * (_dynamic_rule_application.py), plus the tracked RouteConfig container revisions
  * (route_config.py:265-302) and the ReDoS validator rejection sweeps.
  */
 class DynamicRuleApplyFullTest {
   private class StubGeo : com.guardcore.protocols.GeoIPHandler {
     override val isInitialized: Boolean = true
+
     override suspend fun initialize() {}
-    override suspend fun initializeRedis(redisHandler: com.guardcore.protocols.RedisHandlerProtocol) {}
-    override suspend fun initializeAgent(agentHandler: com.guardcore.protocols.AgentHandlerProtocol) {}
+
+    override suspend fun initializeRedis(
+        redisHandler: com.guardcore.protocols.RedisHandlerProtocol,
+    ) {}
+
+    override suspend fun initializeAgent(
+        agentHandler: com.guardcore.protocols.AgentHandlerProtocol,
+    ) {}
+
     override fun getCountry(ip: String): String? = "ZZ"
+
     override suspend fun refresh() {}
+
     override fun close() {}
   }
 
@@ -145,10 +154,13 @@ class DynamicRuleApplyFullTest {
     DynamicRuleManager.resetInstance()
     runBlocking {
       val manager = DynamicRuleManager.getInstance(config())
-      manager.initializeAgent(object : DynamicRuleManager.AgentDynamicRulesSource {
-        override suspend fun getDynamicRules(): DynamicRules? = null
-        override suspend fun sendEvent(event: Map<String, Any?>) {}
-      })
+      manager.initializeAgent(
+          object : DynamicRuleManager.AgentDynamicRulesSource {
+            override suspend fun getDynamicRules(): DynamicRules? = null
+
+            override suspend fun sendEvent(event: Map<String, Any?>) {}
+          },
+      )
       assertNotNull(manager.updateTask)
       delayShort()
       manager.stop()
@@ -245,5 +257,4 @@ class PatternValidationSweepTest {
       runBlocking { SusPatternsRegistry.reset() }
     }
   }
-
 }

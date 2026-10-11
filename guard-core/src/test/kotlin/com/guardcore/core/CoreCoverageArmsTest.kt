@@ -14,7 +14,6 @@ import com.guardcore.decorators.RouteConfig
 import com.guardcore.handlers.BehaviorRule
 import com.guardcore.handlers.BehaviorTracker
 import com.guardcore.java.JavaBridges
-import com.guardcore.protocols.GuardRequest
 import com.guardcore.protocols.GuardResponse
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -28,8 +27,8 @@ import kotlinx.coroutines.runBlocking
 
 /**
  * W9a core-arm coverage: ports of the check-implementation flows (referrer, time window), the
- * behavioral usage/return rule paths, the composite telemetry member dispatch, and the Java
- * bridge surface (the python decorator/check implementation test families).
+ * behavioral usage/return rule paths, the composite telemetry member dispatch, and the Java bridge
+ * surface (the python decorator/check implementation test families).
  */
 class ReferrerCheckFlowTest {
   private fun middleware(passive: Boolean = false): TestMiddleware =
@@ -40,7 +39,10 @@ class ReferrerCheckFlowTest {
           },
       )
 
-  private fun request(headers: Map<String, String> = emptyMap(), route: RouteConfig? = null): TestRequest {
+  private fun request(
+      headers: Map<String, String> = emptyMap(),
+      route: RouteConfig? = null,
+  ): TestRequest {
     val request = TestRequest(method = "GET", urlPath = "/x", headers = headers)
     if (route != null) request.state.setAttr("route_config", route)
     return request
@@ -74,7 +76,8 @@ class ReferrerCheckFlowTest {
   fun testMissingReferrerBlocks() {
     runBlocking {
       val mw = middleware()
-      val result = ReferrerCheck(mw).check(request(route = routeWithReferrer(listOf("example.com"))))
+      val result =
+          ReferrerCheck(mw).check(request(route = routeWithReferrer(listOf("example.com"))))
       assertNotNull(result)
       assertEquals(403, result.statusCode)
       assertEquals(1, mw.bus.events.size)
@@ -88,12 +91,13 @@ class ReferrerCheckFlowTest {
     runBlocking {
       val mw = middleware()
       val result =
-          ReferrerCheck(mw).check(
-              request(
-                  headers = mapOf("referer" to "https://evil.com/page"),
-                  route = routeWithReferrer(listOf("example.com")),
-              ),
-          )
+          ReferrerCheck(mw)
+              .check(
+                  request(
+                      headers = mapOf("referer" to "https://evil.com/page"),
+                      route = routeWithReferrer(listOf("example.com")),
+                  ),
+              )
       assertNotNull(result)
       assertEquals(403, result.statusCode)
       assertTrue(
@@ -109,12 +113,13 @@ class ReferrerCheckFlowTest {
     runBlocking {
       val mw = middleware()
       val result =
-          ReferrerCheck(mw).check(
-              request(
-                  headers = mapOf("referer" to "https://example.com/page"),
-                  route = routeWithReferrer(listOf("example.com")),
-              ),
-          )
+          ReferrerCheck(mw)
+              .check(
+                  request(
+                      headers = mapOf("referer" to "https://example.com/page"),
+                      route = routeWithReferrer(listOf("example.com")),
+                  ),
+              )
       assertNull(result)
       assertEquals(0, mw.bus.events.size)
     }
@@ -145,12 +150,13 @@ class ReferrerCheckFlowTest {
     runBlocking {
       val mw = middleware()
       val result =
-          ReferrerCheck(mw).check(
-              request(
-                  headers = mapOf("referer" to "https://www.example.com/page"),
-                  route = routeWithReferrer(listOf("example.com")),
-              ),
-          )
+          ReferrerCheck(mw)
+              .check(
+                  request(
+                      headers = mapOf("referer" to "https://www.example.com/page"),
+                      route = routeWithReferrer(listOf("example.com")),
+                  ),
+              )
       assertNull(result)
     }
   }
@@ -195,9 +201,10 @@ class TimeWindowCheckFlowTest {
     runBlocking {
       val mw = TestMiddleware(coreTestConfig())
       val result =
-          TimeWindowCheck(mw).check(
-              request(mapOf("start" to "99:99", "end" to "99:99")),
-          )
+          TimeWindowCheck(mw)
+              .check(
+                  request(mapOf("start" to "99:99", "end" to "99:99")),
+              )
       assertNotNull(result)
       assertEquals(403, result.statusCode)
       assertEquals(1, mw.bus.events.size)
@@ -299,8 +306,7 @@ class BehavioralUsageAndReturnTest {
   fun testFrequencyRuleTakesUsagePath() {
     coreRunTest {
       val (processor, bus, _) = build(withDecorator = false)
-      val rule =
-          BehaviorRule(ruleType = "frequency", threshold = 1, window = 60, action = "log")
+      val rule = BehaviorRule(ruleType = "frequency", threshold = 1, window = 60, action = "log")
       val route = RouteConfig().apply { behaviorRules = mutableListOf(rule) }
       val request = request()
       processor.processUsageRules(request, "1.2.3.4", route)
@@ -315,7 +321,12 @@ class BehavioralUsageAndReturnTest {
     coreRunTest {
       val (processor, bus, _) = build(withDecorator = false)
       val rule =
-          BehaviorRule(ruleType = "return_pattern", threshold = 2, pattern = "status:404", action = "log")
+          BehaviorRule(
+              ruleType = "return_pattern",
+              threshold = 2,
+              pattern = "status:404",
+              action = "log",
+          )
       val route = RouteConfig().apply { behaviorRules = mutableListOf(rule) }
       val request = request()
       val response = TestResponse(404, "nope".encodeToByteArray())
@@ -428,7 +439,16 @@ class CompositeAgentHandlerArmsTest {
       composite.stop()
       for (member in listOf(a, b)) {
         assertEquals(
-            listOf("initializeRedis", "sendEvent", "sendMetric", "start", "flushBuffer", "getDynamicRules", "healthCheck", "stop"),
+            listOf(
+                "initializeRedis",
+                "sendEvent",
+                "sendMetric",
+                "start",
+                "flushBuffer",
+                "getDynamicRules",
+                "healthCheck",
+                "stop",
+            ),
             member.calls,
             member.calls.toString(),
         )
@@ -483,7 +503,8 @@ class CompositeAgentHandlerArmsTest {
       val composite =
           CompositeAgentHandler(
               listOf(member),
-              eventFilter = com.guardcore.core.events.EventFilter(mutedEventTypes = setOf("rate_limited")),
+              eventFilter =
+                  com.guardcore.core.events.EventFilter(mutedEventTypes = setOf("rate_limited")),
           )
       composite.sendEvent(mapOf("event_type" to "rate_limited"))
       assertEquals(0, member.calls.size)
@@ -534,7 +555,8 @@ class JavaBridgesFullTest {
       val future = JavaBridges.detect("<script>alert(1)</script>", "1.2.3.4", "request_body")
       val result = future.get(30, TimeUnit.SECONDS)
       assertTrue(result.isThreat)
-      val blocking = JavaBridges.detectBlocking("<script>alert(1)</script>", "1.2.3.4", "request_body")
+      val blocking =
+          JavaBridges.detectBlocking("<script>alert(1)</script>", "1.2.3.4", "request_body")
       assertTrue(blocking.isThreat)
     }
   }
@@ -542,8 +564,7 @@ class JavaBridgesFullTest {
   @Test
   fun testHandlerManagerBridges() {
     runBlocking {
-      val config =
-          SecurityConfigBuilder().apply { enableRedis = false }.build()
+      val config = SecurityConfigBuilder().apply { enableRedis = false }.build()
       val banManager = com.guardcore.handlers.IpBanManager.getInstance()
       val banFuture: CompletableFuture<Boolean> =
           JavaBridges.banIp(banManager, "203.0.113.99", 60, "bridge-test")
@@ -558,10 +579,15 @@ class JavaBridgesFullTest {
       val factory: suspend (Int, String) -> GuardResponse = { status, msg ->
         TestResponse(status, msg.encodeToByteArray())
       }
-      assertNull(JavaBridges.checkRateLimit(rateManager, request, "1.2.3.4", factory).get(30, TimeUnit.SECONDS))
+      assertNull(
+          JavaBridges.checkRateLimit(rateManager, request, "1.2.3.4", factory)
+              .get(30, TimeUnit.SECONDS),
+      )
       assertNull(JavaBridges.checkRateLimitBlocking(rateManager, request, "1.2.3.4", factory))
 
-      val headersManager = runBlocking { com.guardcore.handlers.SecurityHeadersManager.getInstance() }
+      val headersManager = runBlocking {
+        com.guardcore.handlers.SecurityHeadersManager.getInstance()
+      }
       val headers = JavaBridges.getSecurityHeaders(headersManager, "/x")
       assertNotNull(headers.get(30, TimeUnit.SECONDS))
       assertNotNull(JavaBridges.getSecurityHeadersBlocking(headersManager, "/x"))
@@ -574,7 +600,8 @@ class JavaBridgesFullTest {
               window = 60,
               action = "log",
           )
-      JavaBridges.applyBehaviorAction(tracker, rule, "1.2.3.4", "/x", "details").get(30, TimeUnit.SECONDS)
+      JavaBridges.applyBehaviorAction(tracker, rule, "1.2.3.4", "/x", "details")
+          .get(30, TimeUnit.SECONDS)
       JavaBridges.applyBehaviorActionBlocking(tracker, rule, "1.2.3.4", "/x", "details")
 
       // initializeRedis bridges a RedisManager; without redis configured the arm is a safe no-op
@@ -648,15 +675,19 @@ class TelemetrySurfacesTest {
     val infos = mutableListOf<String>()
 
     override fun isConfigured(): Boolean = configured
+
     override fun configure(serviceName: String) {
       configured = true
     }
+
     override fun shutdown() {
       configured = false
     }
+
     override fun span(name: String, attributes: Map<String, Any?>) {
       spans.add(name)
     }
+
     override fun info(message: String, attributes: Map<String, Any?>) {
       infos.add(message)
     }

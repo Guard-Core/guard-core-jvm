@@ -109,7 +109,18 @@ class PairGrammarRedactionTest {
           ) as Map<*, *>
       return result["note"].toString()
     }
-    val pair = makePair(name, wsPre, wsPost, assignChar, quoting, marker, encRounds, encTarget, nameQuoting)
+    val pair =
+        makePair(
+            name,
+            wsPre,
+            wsPost,
+            assignChar,
+            quoting,
+            marker,
+            encRounds,
+            encTarget,
+            nameQuoting,
+        )
     val body = wrap(wrapper, pair)
     val sepText = makeSeparator(separator, encRounds, encTarget)
     val text = "$body$sepText$tail"
@@ -159,7 +170,20 @@ class PairGrammarRedactionTest {
         target: String = "whole",
         nameQuoting: String = "none",
     ) {
-      cases.add(Case(name, wsPre, wsPost, assignChar, separator, quoting, wrapper, rounds, target, nameQuoting))
+      cases.add(
+          Case(
+              name,
+              wsPre,
+              wsPost,
+              assignChar,
+              separator,
+              quoting,
+              wrapper,
+              rounds,
+              target,
+              nameQuoting,
+          ),
+      )
     }
     for (value in nameCasings) add(name = value)
     for ((pre, post) in wsCombos) {
@@ -235,9 +259,17 @@ class PairGrammarRedactionTest {
       val text = "$body$sepText$tail"
       if (eligibleForUrlDisplay(case.wsPre, case.wsPost, case.separator, case.wrapper)) {
         val url = "/r?$text"
-        assertEquals(url, RequestLogging.redactUrlForDisplay(url, emptySet(), emptySet()), "case $case")
+        assertEquals(
+            url,
+            RequestLogging.redactUrlForDisplay(url, emptySet(), emptySet()),
+            "case $case",
+        )
       } else {
-        assertEquals(text, RequestLogging.redactBlobForDisplay(text, emptySet(), emptySet()), "case $case")
+        assertEquals(
+            text,
+            RequestLogging.redactBlobForDisplay(text, emptySet(), emptySet()),
+            "case $case",
+        )
       }
     }
   }
@@ -350,8 +382,7 @@ class PairGrammarRedactionTest {
             index++
             val secret = "SECRET-hw-$index"
             val text = hiddenWrapperPairText(outerRounds, spec, quoting, separator, secret)
-            val result =
-                RequestLogging.redactBlobForDisplay(text, setOf("password"), emptySet())
+            val result = RequestLogging.redactBlobForDisplay(text, setOf("password"), emptySet())
             assertTrue(
                 secret !in result,
                 "secret leaked for outer=$outerRounds spec=$spec quoting=$quoting sep=$separator: $result",
@@ -369,7 +400,14 @@ class PairGrammarRedactionTest {
         for (quoting in hiddenQuotings) {
           for (separator in hiddenSeparators) {
             val text =
-                hiddenWrapperPairText(outerRounds, spec, quoting, separator, "benignvalue", innerName = benignName)
+                hiddenWrapperPairText(
+                    outerRounds,
+                    spec,
+                    quoting,
+                    separator,
+                    "benignvalue",
+                    innerName = benignName,
+                )
             assertEquals(
                 text,
                 RequestLogging.redactBlobForDisplay(text, emptySet(), emptySet()),
@@ -385,8 +423,20 @@ class PairGrammarRedactionTest {
 
   private val escapedGaps =
       listOf(
-          "\\t", "\\n", "\\r", "\\f", "\\x09", "\\X09", "\\u0020", "\\u{9}", "\\U00000009",
-          "\\N{TAB}", "\\0", "\\011", "\\\"", "\\'",
+          "\\t",
+          "\\n",
+          "\\r",
+          "\\f",
+          "\\x09",
+          "\\X09",
+          "\\u0020",
+          "\\u{9}",
+          "\\U00000009",
+          "\\N{TAB}",
+          "\\0",
+          "\\011",
+          "\\\"",
+          "\\'",
       )
   private val jsonLeafWsCombos: List<Pair<String, String>> =
       listOf("" to "", "\t" to "", "" to "\t", "\t" to "\t") +
@@ -437,7 +487,16 @@ class PairGrammarRedactionTest {
       for (assignChar in listOf("=", ":")) {
         for (quoting in listOf("double", "single")) {
           for (position in listOf("path", "matrix")) {
-            val url = jsonLeafSplitUrl(benignName, wsPre, wsPost, assignChar, quoting, "benignvalue", position)
+            val url =
+                jsonLeafSplitUrl(
+                    benignName,
+                    wsPre,
+                    wsPost,
+                    assignChar,
+                    quoting,
+                    "benignvalue",
+                    position,
+                )
             assertEquals(url, RequestLogging.redactUrlForDisplay(url, emptySet(), emptySet()))
           }
         }
@@ -460,7 +519,8 @@ class PairGrammarRedactionTest {
               when (surface) {
                 "header" -> "Mozilla/5.0 $pair x=1"
                 "matrix" -> "https://test/orders;$pair/x"
-                else -> "https://test/resource;${PyJson.dumps(linkedMapOf<String, Any?>("note" to pair))}"
+                else ->
+                    "https://test/resource;${PyJson.dumps(linkedMapOf<String, Any?>("note" to pair))}"
               }
           val result =
               if (surface == "header") {
@@ -484,7 +544,8 @@ class PairGrammarRedactionTest {
               when (surface) {
                 "header" -> "Mozilla/5.0 $pair x=1"
                 "matrix" -> "https://test/orders;$pair/x"
-                else -> "https://test/resource;${PyJson.dumps(linkedMapOf<String, Any?>("note" to pair))}"
+                else ->
+                    "https://test/resource;${PyJson.dumps(linkedMapOf<String, Any?>("note" to pair))}"
               }
           val result =
               if (surface == "header") {

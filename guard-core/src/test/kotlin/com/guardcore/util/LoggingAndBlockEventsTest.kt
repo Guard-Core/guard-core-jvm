@@ -2,7 +2,6 @@ package com.guardcore.util
 
 import com.guardcore.config.BlockHook
 import com.guardcore.config.SecurityConfig
-import com.guardcore.protocols.GuardRequest
 import com.guardcore.util.py.PyJson
 import com.guardcore.util.py.PyUrllib
 import java.nio.file.Files
@@ -48,7 +47,10 @@ class SetupCustomLoggingTest {
     val logFile = Files.createTempDirectory("gclog").resolve("security.log").toString()
     val logger = LoggingUtils.setupCustomLogging(logFile)
     try {
-      val count = logger.handlers.count { it is java.util.logging.FileHandler || it is java.util.logging.StreamHandler }
+      val count =
+          logger.handlers.count {
+            it is java.util.logging.FileHandler || it is java.util.logging.StreamHandler
+          }
       assertEquals(2, count)
       assertEquals(Level.INFO, logger.level)
       assertFalse(logger.useParentHandlers)
@@ -78,13 +80,14 @@ class SetupCustomLoggingTest {
   @Test
   fun testSetupCustomLoggingKeepsForeignHandler() {
     val logger = LoggingUtils.setupCustomLogging(null, "text")
-    val foreign = object : java.util.logging.Handler() {
-      override fun publish(record: java.util.logging.LogRecord) {}
+    val foreign =
+        object : java.util.logging.Handler() {
+          override fun publish(record: java.util.logging.LogRecord) {}
 
-      override fun flush() {}
+          override fun flush() {}
 
-      override fun close() {}
-    }
+          override fun close() {}
+        }
     logger.addHandler(foreign)
     LoggingUtils.setupCustomLogging(null, "text")
     try {
@@ -170,7 +173,8 @@ class SetupCustomLoggingTest {
         assertEquals(1, capture.records.size, level)
         val expected =
             when (level) {
-              "ERROR", "CRITICAL" -> Level.SEVERE
+              "ERROR",
+              "CRITICAL" -> Level.SEVERE
               "WARNING" -> Level.WARNING
               "INFO" -> Level.INFO
               else -> Level.FINE
@@ -196,7 +200,10 @@ class SetupCustomLoggingTest {
   fun testSanitizeForReportingLoneSurrogate() {
     val loneHigh = String(Character.toChars(0xD800))
     assertEquals("\\ud800", LoggingUtils.sanitizeForReporting(loneHigh))
-    assertEquals("ab\\udcff", LoggingUtils.sanitizeForReporting("ab" + String(Character.toChars(0xDCFF))))
+    assertEquals(
+        "ab\\udcff",
+        LoggingUtils.sanitizeForReporting("ab" + String(Character.toChars(0xDCFF))),
+    )
     // Paired surrogates pass through untouched.
     assertEquals("\uD83D\uDE00", LoggingUtils.sanitizeForReporting("\uD83D\uDE00"))
   }
@@ -208,7 +215,8 @@ class SetupCustomLoggingTest {
     val encoded = PyUrllib.quote(inner, safe = "")
     val parsed = linkedMapOf<String, Any?>("q" to encoded)
     LoggingUtils.jsonDepthCapHit.set(false)
-    val redacted = LoggingUtils.redactSensitiveJson(parsed, setOf("token"), emptySet(), 32) as Map<*, *>
+    val redacted =
+        LoggingUtils.redactSensitiveJson(parsed, setOf("token"), emptySet(), 32) as Map<*, *>
     assertTrue("abc" !in (redacted["q"] as String), redacted["q"].toString())
   }
 
@@ -216,7 +224,8 @@ class SetupCustomLoggingTest {
   @Test
   fun testRedactSensitiveJsonListContainerAndDepthCap() {
     val parsed = listOf<Any?>(linkedMapOf<String, Any?>("password" to "x"), listOf<Any?>("a", "b"))
-    val redacted = LoggingUtils.redactSensitiveJson(parsed, emptySet(), setOf("password"), 32) as List<*>
+    val redacted =
+        LoggingUtils.redactSensitiveJson(parsed, emptySet(), setOf("password"), 32) as List<*>
     assertEquals("[REDACTED]", (redacted[0] as Map<*, *>)["password"])
     // Depth 2 cap redacts the inner list container.
     LoggingUtils.jsonDepthCapHit.set(false)
@@ -233,10 +242,15 @@ class SetupCustomLoggingTest {
   }
 }
 
-/** test_utils/test_logging.py:597-735 (dispatch_block_hook + log_activity) + test_block_events.py. */
+/**
+ * test_utils/test_logging.py:597-735 (dispatch_block_hook + log_activity) + test_block_events.py.
+ */
 class BlockHookAndLogActivityTest {
   private fun recordingHook(calls: MutableList<Map<String, Any?>>): BlockHook =
-      BlockHook { _, payload -> calls.add(payload); null }
+      BlockHook { _, payload ->
+        calls.add(payload)
+        null
+      }
 
   /** test_block_events.py:11. */
   @Test
@@ -254,7 +268,9 @@ class BlockHookAndLogActivityTest {
 
   @Test
   fun testFireBlockHookWithNoHookIsNoOp() {
-    scanRunTest { BlockEvents.fireBlockHook(null, ScanRequest(), "ip_security", "banned", "", false, 403) }
+    scanRunTest {
+      BlockEvents.fireBlockHook(null, ScanRequest(), "ip_security", "banned", "", false, 403)
+    }
   }
 
   @Test
@@ -262,7 +278,15 @@ class BlockHookAndLogActivityTest {
     for (checkName in BlockEvents.ON_BLOCK_EXCLUDED_CHECK_NAMES.sorted()) {
       scanRunTest {
         val calls = mutableListOf<Map<String, Any?>>()
-        BlockEvents.fireBlockHook(recordingHook(calls), ScanRequest(), checkName, "reason", "", false, 403)
+        BlockEvents.fireBlockHook(
+            recordingHook(calls),
+            ScanRequest(),
+            checkName,
+            "reason",
+            "",
+            false,
+            403,
+        )
         assertTrue(calls.isEmpty(), checkName)
       }
     }
@@ -304,21 +328,30 @@ class BlockHookAndLogActivityTest {
     assertEquals("IPMatch", payload["trigger_info"])
     assertEquals(false, payload["passive_mode"])
     assertEquals("203.0.113.9", payload["client_ip"])
-    assertEquals("/" , payload["path"])
+    assertEquals("/", payload["path"])
     assertEquals("POST", payload["method"])
     assertEquals(403, payload["status_code"])
   }
 
   @Test
   fun testBuildBlockPayloadCanonicalizesClientHost() {
-    val payload = BlockEvents.buildBlockPayload(ScanRequest(clientHost = "10.0.0.1"), "c", "r", "", false, null)
+    val payload =
+        BlockEvents.buildBlockPayload(
+            ScanRequest(clientHost = "10.0.0.1"),
+            "c",
+            "r",
+            "",
+            false,
+            null,
+        )
     assertEquals("10.0.0.1", payload["client_ip"])
     assertEquals(null, payload["status_code"])
   }
 
   @Test
   fun testBuildBlockPayloadUnknownIdentity() {
-    val payload = BlockEvents.buildBlockPayload(ScanRequest(clientHost = null), "c", "r", "", false, null)
+    val payload =
+        BlockEvents.buildBlockPayload(ScanRequest(clientHost = null), "c", "r", "", false, null)
     assertEquals(IpExtraction.UNKNOWN_CLIENT_IDENTITY, payload["client_ip"])
   }
 
@@ -398,7 +431,12 @@ class BlockHookAndLogActivityTest {
     scanRunTest {
       val calls = mutableListOf<Map<String, Any?>>()
       val logger = Logger.getLogger("test.blockactivity")
-      val request = ScanRequest(method = "POST", clientHost = "127.0.0.1", headers = mapOf("user-agent" to "t"))
+      val request =
+          ScanRequest(
+              method = "POST",
+              clientHost = "127.0.0.1",
+              headers = mapOf("user-agent" to "t"),
+          )
       RequestLogging.logActivity(
           request,
           logger,
@@ -425,7 +463,11 @@ class BlockHookAndLogActivityTest {
         capture.attach(logger, Level.ALL)
         try {
           RequestLogging.logActivity(
-              ScanRequest(method = "GET", clientHost = "127.0.0.1", headers = mapOf("user-agent" to "test-agent")),
+              ScanRequest(
+                  method = "GET",
+                  clientHost = "127.0.0.1",
+                  headers = mapOf("user-agent" to "test-agent"),
+              ),
               logger,
               level = level,
           )
@@ -630,7 +672,11 @@ class BlockHookAndLogActivityTest {
     scanRunTest {
       val logger = Logger.getLogger("test.shapes")
       val request =
-          ScanRequest(method = "GET", clientHost = "127.0.0.1", headers = mapOf("user-agent" to "test-agent"))
+          ScanRequest(
+              method = "GET",
+              clientHost = "127.0.0.1",
+              headers = mapOf("user-agent" to "test-agent"),
+          )
       val capture = LogCapture()
       capture.attach(logger, Level.ALL)
       try {
@@ -639,7 +685,12 @@ class BlockHookAndLogActivityTest {
         assertTrue(reqLine.startsWith("Request from 127.0.0.1: GET "), reqLine)
         assertTrue(reqLine.contains("Headers: "), reqLine)
         capture.records.clear()
-        RequestLogging.logActivity(request, logger, logType = "suspicious", reason = "pattern match")
+        RequestLogging.logActivity(
+            request,
+            logger,
+            logType = "suspicious",
+            reason = "pattern match",
+        )
         val susLine = capture.records.single().message ?: ""
         assertTrue(susLine.startsWith("Suspicious activity detected from 127.0.0.1"), susLine)
         assertTrue(susLine.contains("Reason: pattern match - Headers: "), susLine)

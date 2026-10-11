@@ -27,15 +27,17 @@ class CloudFetchersTest {
   /** test_cloud_ips.py:77 AWS payload parse with the AMAZON service filter + regions. */
   @Test
   fun testFetchAwsIpRangesParsesAmazonPrefixes() {
-    withHttp({ url ->
-      assertEquals(awsUrl, url)
-      200 to
-          """{"prefixes": [
+    withHttp(
+        { url ->
+          assertEquals(awsUrl, url)
+          200 to
+              """{"prefixes": [
         {"ip_prefix": "52.94.76.0/22", "region": "us-east-1", "service": "AMAZON"},
         {"ip_prefix": "52.119.128.0/17", "region": "eu-west-1", "service": "CLOUDFRONT"},
         {"ip_prefix": "13.248.128.0/17", "region": "us-west-2", "service": "AMAZON"}
       ]}"""
-    }) {
+        },
+    ) {
       val (networks, regions) = CloudFetchers.fetchAwsIpRanges()
       assertEquals(2, networks.size)
       assertEquals("us-west-2", regions["13.248.128.0/17"])
@@ -45,13 +47,15 @@ class CloudFetchersTest {
   /** Malformed entries are skipped, not fatal (the continue arms). */
   @Test
   fun testFetchAwsIpRangesSkipsIncompleteEntries() {
-    withHttp({ _ ->
-      200 to
-          """{"prefixes": [
+    withHttp(
+        { _ ->
+          200 to
+              """{"prefixes": [
         {"region": "us-east-1", "service": "AMAZON"},
         {"ip_prefix": "1.2.3.0/24", "service": "AMAZON"}
       ]}"""
-    }) {
+        },
+    ) {
       val (networks, _) = CloudFetchers.fetchAwsIpRanges()
       assertEquals(1, networks.size)
     }
@@ -78,14 +82,16 @@ class CloudFetchersTest {
   /** test_cloud_ips.py GCP: ipv4Prefix and ipv6Prefix with scopes. */
   @Test
   fun testFetchGcpIpRangesParsesBothFamilies() {
-    withHttp({ _ ->
-      200 to
-          """{"prefixes": [
+    withHttp(
+        { _ ->
+          200 to
+              """{"prefixes": [
         {"ipv4Prefix": "34.0.0.0/8", "scope": "us-east1"},
         {"ipv6Prefix": "2600:1900::/28", "scope": "europe-west1"},
         {"scope": "no-prefix"}
       ]}"""
-    }) {
+        },
+    ) {
       val (networks, regions) = CloudFetchers.fetchGcpIpRanges()
       assertEquals(2, networks.size)
       assertEquals("us-east1", regions["34.0.0.0/8"])
@@ -104,9 +110,11 @@ class CloudFetchersTest {
   /** _fetch_csv_prefix_networks: comments, blanks and unparsable lines skipped. */
   @Test
   fun testFetchDigitalOceanIpRangesParsesCsv() {
-    withHttp({ _ ->
-      200 to "# header comment\n\n10.0.0.0/8,us-east1\nnot-a-prefix,xx\n192.168.1.0/24,eu1\n"
-    }) {
+    withHttp(
+        { _ ->
+          200 to "# header comment\n\n10.0.0.0/8,us-east1\nnot-a-prefix,xx\n192.168.1.0/24,eu1\n"
+        },
+    ) {
       val networks = CloudFetchers.fetchDigitalOceanIpRanges()
       assertEquals(2, networks.size)
     }
@@ -130,9 +138,11 @@ class CloudFetchersTest {
   /** Vultr: subnets json with unparsable entries skipped. */
   @Test
   fun testFetchVultrIpRangesParsesSubnets() {
-    withHttp({ _ ->
-      200 to """{"subnets": [{"ip_prefix": "45.63.0.0/16"}, {"ip_prefix": "bogus"}, {}]}"""
-    }) {
+    withHttp(
+        { _ ->
+          200 to """{"subnets": [{"ip_prefix": "45.63.0.0/16"}, {"ip_prefix": "bogus"}, {}]}"""
+        },
+    ) {
       val networks = CloudFetchers.fetchVultrIpRanges()
       assertEquals(1, networks.size)
     }
@@ -148,9 +158,12 @@ class CloudFetchersTest {
   /** _fetch_provider_ranges: pair-normalizing for AWS/GCP, set-normalizing for the CSV ones. */
   @Test
   fun testFetchProviderRangesDispatchAndNormalization() {
-    withHttp({ _ ->
-      200 to """{"prefixes": [{"ip_prefix": "1.2.3.0/24", "region": "r1", "service": "AMAZON"}]}"""
-    }) {
+    withHttp(
+        { _ ->
+          200 to
+              """{"prefixes": [{"ip_prefix": "1.2.3.0/24", "region": "r1", "service": "AMAZON"}]}"""
+        },
+    ) {
       val (awsRanges, awsRegions) = fetchProviderRanges("AWS")
       assertEquals(1, awsRanges.size)
       assertEquals("r1", awsRegions["1.2.3.0/24"])
@@ -202,9 +215,12 @@ class CloudAzureFetchTest {
   /** The discovery chain: page scrape -> trusted URL extraction -> newest ServiceTags JSON. */
   @Test
   fun testFetchAzureIpRangesDiscoveryChain() {
-    withHttp({ url ->
-      if (url.startsWith("https://www.microsoft.com/")) 200 to pageHtml else 200 to serviceTagsJson
-    }) {
+    withHttp(
+        { url ->
+          if (url.startsWith("https://www.microsoft.com/")) 200 to pageHtml
+          else 200 to serviceTagsJson
+        },
+    ) {
       val networks = CloudAzureFetch.fetchAzureIpRanges()
       assertEquals(2, networks.size)
     }
@@ -246,10 +262,12 @@ class CloudAzureFetchTest {
   @Test
   fun testDownloadAzureServiceTagsRetriesThenPropagates() {
     var calls = 0
-    withHttp({ _ ->
-      calls++
-      throw java.net.ConnectException("down")
-    }) {
+    withHttp(
+        { _ ->
+          calls++
+          throw java.net.ConnectException("down")
+        },
+    ) {
       val error =
           try {
             CloudAzureFetch.downloadAzureServiceTags("https://download.microsoft.com/x.json")
@@ -269,7 +287,10 @@ class CloudAzureFetchTest {
             "https://download.microsoft.com/x/ServiceTags.json",
         ),
     )
-    assertEquals(false, CloudAzureFetch.isTrustedAzureDownloadUrl("http://download.microsoft.com/x"))
+    assertEquals(
+        false,
+        CloudAzureFetch.isTrustedAzureDownloadUrl("http://download.microsoft.com/x"),
+    )
     assertEquals(false, CloudAzureFetch.isTrustedAzureDownloadUrl("https://evil.example/x.json"))
     assertEquals(false, CloudAzureFetch.isTrustedAzureDownloadUrl("::::"))
   }
@@ -282,7 +303,10 @@ class CloudAzureFetchTest {
             "https://download.microsoft.com/ServiceTags_Public_20260101.json",
         ),
     )
-    assertEquals(null, CloudAzureFetch.parseServiceTagsDate("https://download.microsoft.com/x.json"))
+    assertEquals(
+        null,
+        CloudAzureFetch.parseServiceTagsDate("https://download.microsoft.com/x.json"),
+    )
     assertEquals(
         null,
         CloudAzureFetch.parseServiceTagsDate(
@@ -308,10 +332,12 @@ class CloudAzureFetchTest {
 
   @Test
   fun testFetchAzureIpRangesNoDownloadUrlYieldsEmpty() {
-    withHttp({ url ->
-      if (url.startsWith("https://www.microsoft.com/")) 200 to "<html>no links</html>"
-      else 200 to serviceTagsJson
-    }) {
+    withHttp(
+        { url ->
+          if (url.startsWith("https://www.microsoft.com/")) 200 to "<html>no links</html>"
+          else 200 to serviceTagsJson
+        },
+    ) {
       assertTrue(CloudAzureFetch.fetchAzureIpRanges().isEmpty())
     }
   }
@@ -326,13 +352,22 @@ class CloudManagerRefreshTest {
   private fun awsRanges(): Set<IpNetwork> = setOf(IpNetwork.parse("52.94.76.0/22"))
 
   private class ThrowingAgentHandler : com.guardcore.protocols.AgentHandlerProtocol {
-    override suspend fun initializeRedis(redisHandler: com.guardcore.protocols.RedisHandlerProtocol) {}
+    override suspend fun initializeRedis(
+        redisHandler: com.guardcore.protocols.RedisHandlerProtocol,
+    ) {}
+
     override suspend fun sendEvent(event: Any?) = throw IllegalStateException("nope")
+
     override suspend fun sendMetric(metric: Any?) {}
+
     override suspend fun start() {}
+
     override suspend fun stop() {}
+
     override suspend fun flushBuffer() {}
+
     override suspend fun getDynamicRules(): Any? = null
+
     override suspend fun healthCheck(): Boolean = true
   }
 
@@ -420,8 +455,7 @@ class CloudManagerRefreshTest {
       assertEquals(1, agent.events.size)
       assertEquals("cloud", agent.events[0]["handler_name"])
       // A throwing sink is swallowed (sendCloudEvent catch arm).
-      manager.agentHandler =
-          HandlerAgentSink.of(ThrowingAgentHandler())
+      manager.agentHandler = HandlerAgentSink.of(ThrowingAgentHandler())
       manager.sendCloudEvent("cloud_detected", "1.2.3.4", "blocked", "aws ip")
       manager.agentHandler = null
       CloudManager.resetInstance()

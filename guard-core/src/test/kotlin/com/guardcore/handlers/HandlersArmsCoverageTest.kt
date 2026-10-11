@@ -5,7 +5,6 @@ import java.nio.file.Files
 import java.time.OffsetDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -33,7 +32,8 @@ class DynamicRuleManagerLifecycleTest {
           }
           .build()
 
-  private class FakeAgentSource(var rules: DynamicRules?) : DynamicRuleManager.AgentDynamicRulesSource {
+  private class FakeAgentSource(var rules: DynamicRules?) :
+      DynamicRuleManager.AgentDynamicRulesSource {
     val events: MutableList<Map<String, Any?>> = mutableListOf()
     var failWith: Exception? = null
 
@@ -265,11 +265,19 @@ class DynamicRuleManagerLifecycleTest {
         assertNull(manager.matchEvent(DynamicRuleTestEvent("1.2.3.4", "CN", "penetration_attempt")))
         manager.currentRules =
             testRules(
-                overrides = listOf("ip_blacklist" to listOf("1.2.3.4"), "blocked_countries" to listOf("CN")),
+                overrides =
+                    listOf(
+                        "ip_blacklist" to listOf("1.2.3.4"),
+                        "blocked_countries" to listOf("CN"),
+                    ),
             )
         // The match result carries the rule id + ban duration, not a reason string.
-        assertNotNull(manager.matchEvent(DynamicRuleTestEvent("1.2.3.4", "US", "penetration_attempt")))
-        assertNotNull(manager.matchEvent(DynamicRuleTestEvent("5.6.7.8", "CN", "penetration_attempt")))
+        assertNotNull(
+            manager.matchEvent(DynamicRuleTestEvent("1.2.3.4", "US", "penetration_attempt")),
+        )
+        assertNotNull(
+            manager.matchEvent(DynamicRuleTestEvent("5.6.7.8", "CN", "penetration_attempt")),
+        )
         assertNull(manager.matchEvent(DynamicRuleTestEvent("5.6.7.8", "US", "penetration_attempt")))
       } finally {
         DynamicRuleManager.resetInstance()
@@ -444,7 +452,6 @@ class RedisOperationsSweepTest {
       }
     }
   }
-
 }
 
 /** RateLimitManager arms: events, exceeded handling and reset. */
@@ -460,8 +467,7 @@ class RateLimitManagerArmsTest {
   @Test
   fun testSendRateLimitEventWithAgent() {
     runBlocking {
-      val config =
-          SecurityConfigBuilder().apply { enableRedis = false }.build()
+      val config = SecurityConfigBuilder().apply { enableRedis = false }.build()
       val manager = RateLimitManager.getInstance(config)
       RateLimitManager.resetInstance()
       val sink = Sink()
@@ -485,8 +491,7 @@ class RateLimitManagerArmsTest {
   @Test
   fun testEmitScriptReloadedEventWithoutAgentIsSafe() {
     runBlocking {
-      val config =
-          SecurityConfigBuilder().apply { enableRedis = false }.build()
+      val config = SecurityConfigBuilder().apply { enableRedis = false }.build()
       RateLimitManager.resetInstance()
       val manager = RateLimitManager.getInstance(config)
       manager.emitScriptReloadedEvent()
@@ -497,7 +502,12 @@ class RateLimitManagerArmsTest {
   @Test
   fun testGetInstanceKeepsSameInstanceAndConfig() {
     val config =
-        SecurityConfigBuilder().apply { enableRedis = false; redisUrl = null }.build()
+        SecurityConfigBuilder()
+            .apply {
+              enableRedis = false
+              redisUrl = null
+            }
+            .build()
     val first = RateLimitManager.getInstance(config)
     val second = RateLimitManager.getInstance(config)
     assertTrue(first === second)

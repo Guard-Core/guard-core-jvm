@@ -208,13 +208,15 @@ class PyJsonTailTest {
     assertTrue(PyJson.loads("NaN") is Double)
     assertEquals(Double.POSITIVE_INFINITY, PyJson.loads("Infinity") as Double)
     // Big integers beyond Long range take the BigInteger arm.
-    assertEquals("123456789012345678901234567890", PyJson.loads("123456789012345678901234567890").toString())
+    assertEquals(
+        "123456789012345678901234567890",
+        PyJson.loads("123456789012345678901234567890").toString(),
+    )
   }
 
   @Test
   fun testErrorPositions() {
-    val error =
-        assertFailsWith<PyJson.JsonDecodeError> { PyJson.loads("{\n  bad}") }
+    val error = assertFailsWith<PyJson.JsonDecodeError> { PyJson.loads("{\n  bad}") }
     assertTrue(error.message?.contains("line 2") == true, error.message)
     assertTrue(error.message?.contains("(char ") == true, error.message)
     assertFailsWith<PyJson.JsonDecodeError> { PyJson.loads("\"unterminated") }

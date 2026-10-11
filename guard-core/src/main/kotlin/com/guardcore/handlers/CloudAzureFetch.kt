@@ -58,8 +58,7 @@ public object CloudAzureFetch {
    * redirect real-sockets family): when set, every GET resolves through it as (status, body);
    * production never sets it.
    */
-  @Volatile
-  internal var httpGetOverride: (suspend (url: String) -> Pair<Int, String>)? = null
+  @Volatile internal var httpGetOverride: (suspend (url: String) -> Pair<Int, String>)? = null
 
   private suspend fun httpGet(url: String, timeoutNanos: Long): HttpResponse<String> {
     httpGetOverride?.let {
@@ -83,15 +82,22 @@ public object CloudAzureFetch {
       private val uri: URI,
   ) : HttpResponse<String> {
     override fun statusCode(): Int = status
+
     override fun body(): String = content
+
     override fun uri(): URI = uri
+
     override fun headers(): java.net.http.HttpHeaders =
         java.net.http.HttpHeaders.of(mapOf(), { _, _ -> true })
+
     override fun previousResponse(): java.util.Optional<HttpResponse<String>> =
         java.util.Optional.empty()
+
     override fun request(): HttpRequest = HttpRequest.newBuilder().uri(uri).build()
+
     override fun sslSession(): java.util.Optional<javax.net.ssl.SSLSession> =
         java.util.Optional.empty()
+
     override fun version(): HttpClient.Version = HttpClient.Version.HTTP_1_1
   }
 

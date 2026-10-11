@@ -16,15 +16,26 @@ import kotlin.test.assertTrue
  * to_agent_config's arms (models.py:317-365).
  */
 class ConfigMutationSweepTest {
-  private val geoHandler = object : com.guardcore.protocols.GeoIPHandler {
-    override val isInitialized: Boolean = false
-    override suspend fun initialize() {}
-    override suspend fun initializeRedis(redisHandler: com.guardcore.protocols.RedisHandlerProtocol) {}
-    override suspend fun initializeAgent(agentHandler: com.guardcore.protocols.AgentHandlerProtocol) {}
-    override fun getCountry(ip: String): String? = "ZZ"
-    override suspend fun refresh() {}
-    override fun close() {}
-  }
+  private val geoHandler =
+      object : com.guardcore.protocols.GeoIPHandler {
+        override val isInitialized: Boolean = false
+
+        override suspend fun initialize() {}
+
+        override suspend fun initializeRedis(
+            redisHandler: com.guardcore.protocols.RedisHandlerProtocol,
+        ) {}
+
+        override suspend fun initializeAgent(
+            agentHandler: com.guardcore.protocols.AgentHandlerProtocol,
+        ) {}
+
+        override fun getCountry(ip: String): String? = "ZZ"
+
+        override suspend fun refresh() {}
+
+        override fun close() {}
+      }
 
   /** A valid assignment value per registry kind (mirrors the python field types). */
   private fun validValueFor(field: ConfigFieldRegistry.FieldMeta): Any? =
@@ -79,8 +90,8 @@ class ConfigMutationSweepTest {
           .build()
 
   /**
-   * Every registered field accepts a typed valid assignment through the public setter path
-   * (python: test_models reassignment sweeps) and every assignment bumps the revision.
+   * Every registered field accepts a typed valid assignment through the public setter path (python:
+   * test_models reassignment sweeps) and every assignment bumps the revision.
    */
   @Test
   fun testEveryFieldAcceptsTypedAssignmentAndBumpsRevision() {
@@ -91,8 +102,7 @@ class ConfigMutationSweepTest {
     val base = config.revision
     for (field in ConfigFieldRegistry.fields) {
       val before = config.revision
-      val value =
-          if (field.pythonName == "geo_ip_handler") geoHandler else validValueFor(field)
+      val value = if (field.pythonName == "geo_ip_handler") geoHandler else validValueFor(field)
       config.setPrevalidated(field.pythonName, value)
       assertTrue(
           config.revision > before || field.pythonName == "revision",
@@ -218,8 +228,8 @@ class ConfigMutationSweepTest {
 
   /**
    * Regression (port of test_global_behavior_rules_reassignment_coerces_dicts_to_model): the
-   * assignment-time revalidator must coerce dict entries to models, not reject them as a
-   * str-list. Found by the W9a coverage sweep: the setter used the wrong validator.
+   * assignment-time revalidator must coerce dict entries to models, not reject them as a str-list.
+   * Found by the W9a coverage sweep: the setter used the wrong validator.
    */
   @Test
   fun testGlobalBehaviorRulesReassignmentCoercesDictsToModels() {
@@ -247,8 +257,11 @@ class ConfigMutationSweepTest {
         }
     assertNotNull(error)
     assertTrue(
-        error!!.message!!.contains("Input should be a valid dictionary or instance of " +
-            "BehaviorRuleConfig"),
+        error!!
+            .message!!
+            .contains(
+                "Input should be a valid dictionary or instance of " + "BehaviorRuleConfig",
+            ),
         error.message,
     )
   }
@@ -257,13 +270,16 @@ class ConfigMutationSweepTest {
   @Test
   fun testFromMapUnknownFieldWarns() {
     val messages = mutableListOf<String>()
-    val handler = object : java.util.logging.Handler() {
-      override fun publish(record: java.util.logging.LogRecord) {
-        messages.add(record.message ?: "")
-      }
-      override fun flush() {}
-      override fun close() {}
-    }
+    val handler =
+        object : java.util.logging.Handler() {
+          override fun publish(record: java.util.logging.LogRecord) {
+            messages.add(record.message ?: "")
+          }
+
+          override fun flush() {}
+
+          override fun close() {}
+        }
     val logger = ConfigWarnings.logger
     logger.addHandler(handler)
     try {
@@ -343,12 +359,13 @@ class ConfigFromMapSweepTest {
   fun testFromMapCoversEveryFieldName() {
     val values = linkedMapOf<String, Any?>()
     for (field in ConfigFieldRegistry.fields) {
-      if (field.kind in
-          setOf(
-              ConfigFieldRegistry.Kind.CALLABLE_NULLABLE,
-              ConfigFieldRegistry.Kind.HANDLER_NULLABLE,
-              ConfigFieldRegistry.Kind.CLOUD_IP_STORE_NULLABLE,
-          )
+      if (
+          field.kind in
+              setOf(
+                  ConfigFieldRegistry.Kind.CALLABLE_NULLABLE,
+                  ConfigFieldRegistry.Kind.HANDLER_NULLABLE,
+                  ConfigFieldRegistry.Kind.CLOUD_IP_STORE_NULLABLE,
+              )
       ) {
         continue // callables/handlers are not map-constructible
       }
@@ -438,8 +455,7 @@ class ToAgentConfigTest {
                 agentApiKey = "k"
               }
               .build()
-      val error =
-          assertFailsWith<AgentPackageNotInstalledError> { config.toAgentConfig("4.3.2") }
+      val error = assertFailsWith<AgentPackageNotInstalledError> { config.toAgentConfig("4.3.2") }
       assertTrue(error.message!!.contains("guard-agent is not installed"), error.message)
     } finally {
       ConfigSeams.agentConfigFactory = previous

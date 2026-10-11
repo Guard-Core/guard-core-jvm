@@ -28,8 +28,7 @@ public object CloudFetchers {
    * Test seam mirroring the python tests' aiohttp session mocks (test_cloud_ips.py): when set,
    * every GET resolves through it as (status, body); production never sets it.
    */
-  @Volatile
-  internal var httpGetOverride: (suspend (url: String) -> Pair<Int, String>)? = null
+  @Volatile internal var httpGetOverride: (suspend (url: String) -> Pair<Int, String>)? = null
 
   private suspend fun httpGet(
       url: String,
@@ -40,14 +39,14 @@ public object CloudFetchers {
       return FakeHttpResponse(status, body, URI.create(url))
     }
     return withContext(Dispatchers.IO) {
-        val request =
-            HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(timeoutSeconds))
-                .GET()
-                .build()
-          client.send(request, HttpResponse.BodyHandlers.ofString())
-        }
+      val request =
+          HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .timeout(Duration.ofSeconds(timeoutSeconds))
+              .GET()
+              .build()
+      client.send(request, HttpResponse.BodyHandlers.ofString())
+    }
   }
 
   /** The status/body pair the override seam folds into the HttpClient response shape. */
@@ -57,7 +56,9 @@ public object CloudFetchers {
       private val uri: URI,
   ) : HttpResponse<String> {
     override fun statusCode(): Int = status
+
     override fun body(): String = content
+
     override fun uri(): URI = uri
 
     override fun headers(): java.net.http.HttpHeaders =
@@ -65,11 +66,14 @@ public object CloudFetchers {
 
     override fun previousResponse(): java.util.Optional<HttpResponse<String>> =
         java.util.Optional.empty()
-    override fun request(): HttpRequest =
-        HttpRequest.newBuilder().uri(uri).build()
+
+    override fun request(): HttpRequest = HttpRequest.newBuilder().uri(uri).build()
+
     override fun sslSession(): java.util.Optional<javax.net.ssl.SSLSession> =
         java.util.Optional.empty()
+
     override fun version(): HttpClient.Version = HttpClient.Version.HTTP_1_1
+
     override fun toString(): String = "FakeHttpResponse[$status]"
   }
 

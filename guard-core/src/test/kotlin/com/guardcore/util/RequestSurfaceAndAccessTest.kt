@@ -2,11 +2,11 @@ package com.guardcore.util
 
 import com.guardcore.config.SecurityConfigBuilder
 import com.guardcore.protocols.GuardRequest
-import com.guardcore.util.py.PyJson
-import java.util.logging.Logger
 import com.guardcore.util.py.IpAddress
+import com.guardcore.util.py.PyJson
 import com.guardcore.util.py.parseAddress
 import java.util.logging.Level
+import java.util.logging.Logger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -34,18 +34,19 @@ private fun proxyRequest(
 private fun proxyConfig(
     trustedProxies: List<String>,
     depth: Int = 1,
-): com.guardcore.config.SecurityConfig =
-    defaultScanConfig {
-      this.trustedProxies = trustedProxies
-      trustedProxyDepth = depth
-    }
+): com.guardcore.config.SecurityConfig = defaultScanConfig {
+  this.trustedProxies = trustedProxies
+  trustedProxyDepth = depth
+}
 
 private class RecordingAgentHandler(
     private val onSend: (Any?) -> Unit = {},
 ) : com.guardcore.protocols.AgentHandlerProtocol {
   public val events: MutableList<Any?> = mutableListOf()
 
-  override suspend fun initializeRedis(redisHandler: com.guardcore.protocols.RedisHandlerProtocol) {}
+  override suspend fun initializeRedis(
+      redisHandler: com.guardcore.protocols.RedisHandlerProtocol,
+  ) {}
 
   override suspend fun sendEvent(event: Any?) {
     onSend(event)
@@ -71,7 +72,8 @@ class IpExtractionProxyTest {
   fun testExtractClientIpWithoutTrustedProxies() {
     scanRunTest {
       IpExtraction.resetOnceFlags()
-      val ip = IpExtraction.extractClientIp(proxyRequest(forwardedFor = "1.2.3.4"), defaultScanConfig())
+      val ip =
+          IpExtraction.extractClientIp(proxyRequest(forwardedFor = "1.2.3.4"), defaultScanConfig())
       assertEquals("127.0.0.1", ip)
     }
   }
@@ -169,7 +171,11 @@ class IpExtractionProxyTest {
   @Test
   fun testExtractClientIpNoClient() {
     scanRunTest {
-      val ip = IpExtraction.extractClientIp(proxyRequest(clientHost = null), proxyConfig(listOf("127.0.0.1")))
+      val ip =
+          IpExtraction.extractClientIp(
+              proxyRequest(clientHost = null),
+              proxyConfig(listOf("127.0.0.1")),
+          )
       assertEquals("unknown", ip)
     }
   }
@@ -190,7 +196,8 @@ class IpExtractionProxyTest {
   @Test
   fun testUnixSocketWithoutHeaderStaysUnknown() {
     scanRunTest {
-      val ip = IpExtraction.extractClientIp(proxyRequest(clientHost = null), proxyConfig(listOf("unix")))
+      val ip =
+          IpExtraction.extractClientIp(proxyRequest(clientHost = null), proxyConfig(listOf("unix")))
       assertEquals("unknown", ip)
     }
   }
@@ -209,7 +216,10 @@ class IpExtractionProxyTest {
                 proxyConfig(listOf("127.0.0.1"), depth = 3),
             )
         assertEquals("127.0.0.1", ip)
-        assertTrue(capture.text().contains("X-Forwarded-For chain has only 1 entries"), capture.text())
+        assertTrue(
+            capture.text().contains("X-Forwarded-For chain has only 1 entries"),
+            capture.text(),
+        )
       } finally {
         capture.detach(GUARD_LOGGER)
       }
@@ -451,9 +461,13 @@ class AccessControlFullTest {
       initializeCalls++
     }
 
-    override suspend fun initializeRedis(redisHandler: com.guardcore.protocols.RedisHandlerProtocol) {}
+    override suspend fun initializeRedis(
+        redisHandler: com.guardcore.protocols.RedisHandlerProtocol,
+    ) {}
 
-    override suspend fun initializeAgent(agentHandler: com.guardcore.protocols.AgentHandlerProtocol) {}
+    override suspend fun initializeAgent(
+        agentHandler: com.guardcore.protocols.AgentHandlerProtocol,
+    ) {}
 
     override fun getCountry(ip: String): String? = country
 
@@ -471,8 +485,7 @@ class AccessControlFullTest {
   /** access_control.py:84 both whitelist and blacklist arms. */
   @Test
   fun testEvaluateCountryAccessArms() {
-    val whitelist =
-        config { whitelistCountries = setOf("US") }
+    val whitelist = config { whitelistCountries = setOf("US") }
     assertEquals(false to "whitelisted", AccessControl.evaluateCountryAccess("US", whitelist))
     assertEquals(true to "blocked", AccessControl.evaluateCountryAccess("CN", whitelist))
     val blacklist = config { blockedCountries = setOf("CN") }
@@ -522,7 +535,10 @@ class AccessControlFullTest {
         val text = capture.text()
         assertTrue(text.contains("IP from blocked country 203.0.113.7 - CN"), text)
         assertTrue(text.contains("IP from whitelisted country 203.0.113.7 - US"), text)
-        assertTrue(text.contains("IP not from blocked or whitelisted country 203.0.113.7 - US"), text)
+        assertTrue(
+            text.contains("IP not from blocked or whitelisted country 203.0.113.7 - US"),
+            text,
+        )
         assertTrue(text.contains("No countries blocked or whitelisted"), text)
         assertTrue(text.contains("IP not geolocated"), text)
         assertTrue(text.contains("Loopback IP exempt from country allowlist check"), text)
@@ -625,7 +641,8 @@ class AccessControlFullTest {
       }
       val blocked = AccessControl.checkIpAccess("unknown", cfg)
       assertEquals(false, blocked.allowed)
-      val allowed = AccessControl.checkIpAccess("unknown", cfg, skipIpLists = true, skipCountries = true)
+      val allowed =
+          AccessControl.checkIpAccess("unknown", cfg, skipIpLists = true, skipCountries = true)
       assertEquals(true, allowed.allowed)
     }
   }
@@ -665,7 +682,10 @@ class AccessControlFullTest {
   @Test
   fun testExtractIpFromRequestShapes() {
     assertEquals("203.0.113.7", AccessControl.extractIpFromRequest("203.0.113.7"))
-    assertEquals("203.0.113.7", AccessControl.extractIpFromRequest(ScanRequest(clientHost = "203.0.113.7")))
+    assertEquals(
+        "203.0.113.7",
+        AccessControl.extractIpFromRequest(ScanRequest(clientHost = "203.0.113.7")),
+    )
     assertEquals("unknown", AccessControl.extractIpFromRequest(ScanRequest(clientHost = null)))
     assertEquals("unknown", AccessControl.extractIpFromRequest(object {}))
   }
@@ -679,17 +699,21 @@ class AccessControlFullTest {
   }
 }
 
-/** test_utils/test_scan_value_cap.py, test_scan_char_budget.py, test_detection_scan_threat_message.py. */
+/**
+ * test_utils/test_scan_value_cap.py, test_scan_char_budget.py,
+ * test_detection_scan_threat_message.py.
+ */
 class DetectionScanTest {
-  private fun regexThreat(pattern: String = "union.*select") = com.guardcore.engine.suspatterns.Threat(
-      type = "regex",
-      pattern = pattern,
-      match = "union select",
-      position = 0,
-      executionTime = 0.0,
-      category = "sqli",
-      weight = 1.0,
-  )
+  private fun regexThreat(pattern: String = "union.*select") =
+      com.guardcore.engine.suspatterns.Threat(
+          type = "regex",
+          pattern = pattern,
+          match = "union select",
+          position = 0,
+          executionTime = 0.0,
+          category = "sqli",
+          weight = 1.0,
+      )
 
   /** test_detection_scan_threat_message.py. */
   @Test
@@ -698,40 +722,43 @@ class DetectionScanTest {
         "Value matched pattern 'union.*select'",
         DetectionScan.buildThreatMessage(regexThreat()),
     )
-    val semantic = com.guardcore.engine.suspatterns.Threat(
-        type = "semantic",
-        pattern = "",
-        match = "",
-        position = 0,
-        executionTime = 0.0,
-        category = "sqli",
-        weight = 1.0,
-        attackType = "sqli",
-        probability = 0.91234,
-    )
+    val semantic =
+        com.guardcore.engine.suspatterns.Threat(
+            type = "semantic",
+            pattern = "",
+            match = "",
+            position = 0,
+            executionTime = 0.0,
+            category = "sqli",
+            weight = 1.0,
+            attackType = "sqli",
+            probability = 0.91234,
+        )
     assertEquals("Semantic attack: sqli (score: 0.91)", DetectionScan.buildThreatMessage(semantic))
-    val timeout = com.guardcore.engine.suspatterns.Threat(
-        type = "pattern_timeout",
-        pattern = "(a+)+$",
-        match = "",
-        position = 0,
-        executionTime = 0.0,
-        category = "redos",
-        weight = 1.0,
-    )
+    val timeout =
+        com.guardcore.engine.suspatterns.Threat(
+            type = "pattern_timeout",
+            pattern = "(a+)+$",
+            match = "",
+            position = 0,
+            executionTime = 0.0,
+            category = "redos",
+            weight = 1.0,
+        )
     assertEquals(
         "Pattern exceeded scan time budget: '(a+)+$'",
         DetectionScan.buildThreatMessage(timeout),
     )
-    val unknown = com.guardcore.engine.suspatterns.Threat(
-        type = "unknown-kind",
-        pattern = "",
-        match = "",
-        position = 0,
-        executionTime = 0.0,
-        category = "x",
-        weight = 1.0,
-    )
+    val unknown =
+        com.guardcore.engine.suspatterns.Threat(
+            type = "unknown-kind",
+            pattern = "",
+            match = "",
+            position = 0,
+            executionTime = 0.0,
+            category = "x",
+            weight = 1.0,
+        )
     assertEquals("Threat detected", DetectionScan.buildThreatMessage(unknown))
   }
 
@@ -840,7 +867,12 @@ class DetectionScanTest {
   @Test
   fun testWithScanBudgetRestoresPreviousState() {
     scanRunTest {
-      DetectionScanBudget.withScanBudget(maxValues = 3, maxJsonDepth = 7, maxScanChars = 100, binaryMinRunLength = 8) {
+      DetectionScanBudget.withScanBudget(
+          maxValues = 3,
+          maxJsonDepth = 7,
+          maxScanChars = 100,
+          binaryMinRunLength = 8,
+      ) {
         assertEquals(8, DetectionScanBudget.binaryIslandMinRunLength())
         assertEquals(7, DetectionScanBudget.jsonDepthCapValue())
       }
@@ -976,7 +1008,11 @@ class DetectionScanTest {
     scanRunTest {
       PenetrationDetection.configureDetection(defaultScanConfig())
       val (detected, trigger) =
-          DetectionScan.fallbackPatternCheck("1 UNION SELECT password FROM users--", "127.0.0.1", "query")
+          DetectionScan.fallbackPatternCheck(
+              "1 UNION SELECT password FROM users--",
+              "127.0.0.1",
+              "query",
+          )
       assertTrue(detected, trigger)
       assertEquals("Value matched pattern (fallback)", trigger)
     }
@@ -1149,14 +1185,32 @@ class DetectionResultBuildersTest {
   fun testThreatCategoryAndScoreArms() {
     val regex = com.guardcore.engine.suspatterns.Threat("regex", "p", "m", 0, 0.0, "sqli", 1.0)
     assertEquals("sqli", DetectionResultBuilders.threatCategory(regex))
-    val semantic = com.guardcore.engine.suspatterns.Threat(
-        "semantic", "", "", 0, 0.0, "", 1.0, attackType = "xss", probability = null, threatScore = 0.7,
-    )
+    val semantic =
+        com.guardcore.engine.suspatterns.Threat(
+            "semantic",
+            "",
+            "",
+            0,
+            0.0,
+            "",
+            1.0,
+            attackType = "xss",
+            probability = null,
+            threatScore = 0.7,
+        )
     assertEquals("xss", DetectionResultBuilders.threatCategory(semantic))
     assertEquals(0.7, DetectionResultBuilders.threatScore(semantic))
-    val neitherProbNorScore = com.guardcore.engine.suspatterns.Threat(
-        "semantic", "", "", 0, 0.0, "", 1.0, attackType = "xss",
-    )
+    val neitherProbNorScore =
+        com.guardcore.engine.suspatterns.Threat(
+            "semantic",
+            "",
+            "",
+            0,
+            0.0,
+            "",
+            1.0,
+            attackType = "xss",
+        )
     assertEquals(1.0, DetectionResultBuilders.threatScore(neitherProbNorScore))
     val unknown = com.guardcore.engine.suspatterns.Threat("other", "", "", 0, 0.0, "c", 1.0)
     assertNull(DetectionResultBuilders.threatCategory(unknown))
@@ -1164,8 +1218,28 @@ class DetectionResultBuildersTest {
 
   @Test
   fun testBuildDetectionHitAggregatesCategoriesAndScores() {
-    val t1 = com.guardcore.engine.suspatterns.Threat("regex", "p", "m", 0, 0.0, "sqli", 1.0, threatScore = 0.4)
-    val t2 = com.guardcore.engine.suspatterns.Threat("regex", "p2", "m", 0, 0.0, "sqli", 1.0, threatScore = 0.9)
+    val t1 =
+        com.guardcore.engine.suspatterns.Threat(
+            "regex",
+            "p",
+            "m",
+            0,
+            0.0,
+            "sqli",
+            1.0,
+            threatScore = 0.4,
+        )
+    val t2 =
+        com.guardcore.engine.suspatterns.Threat(
+            "regex",
+            "p2",
+            "m",
+            0,
+            0.0,
+            "sqli",
+            1.0,
+            threatScore = 0.9,
+        )
     val t3 = com.guardcore.engine.suspatterns.Threat("other", "", "", 0, 0.0, "", 1.0)
     val result = DetectionResultBuilders.buildDetectionHit("trigger", listOf(t1, t2, t3))
     assertTrue(result.isThreat)
@@ -1205,7 +1279,15 @@ class BodyReaderFullTest {
   @Test
   fun testSafeReadTimeoutReturnsNull() {
     scanRunTest {
-      assertNull(BodyReader.safeRead({ kotlinx.coroutines.delay(5000); byteArrayOf() }, 0.05))
+      assertNull(
+          BodyReader.safeRead(
+              {
+                kotlinx.coroutines.delay(5000)
+                byteArrayOf()
+              },
+              0.05,
+          ),
+      )
       assertEquals(1, BodyReader.safeRead({ byteArrayOf(1) }, 1.0)!!.size)
     }
   }
@@ -1236,18 +1318,23 @@ class BodyReaderFullTest {
             override val urlPath = "/"
             override val urlScheme = "http"
             override val urlFull = "http://example.com/"
+
             override fun urlReplaceScheme(scheme: String) = urlFull
+
             override val method = "POST"
             override val clientHost = "127.0.0.1"
             override val headers = emptyMap<String, String>()
             override val queryParams = emptyMap<String, String>()
-            override val state = object : com.guardcore.protocols.RequestState {
-              private val attrs = mutableMapOf<String, Any?>()
-              override fun getAttr(name: String): Any? = attrs[name]
-              override fun setAttr(name: String, value: Any?) {
-                attrs[name] = value
-              }
-            }
+            override val state =
+                object : com.guardcore.protocols.RequestState {
+                  private val attrs = mutableMapOf<String, Any?>()
+
+                  override fun getAttr(name: String): Any? = attrs[name]
+
+                  override fun setAttr(name: String, value: Any?) {
+                    attrs[name] = value
+                  }
+                }
             override val scope = emptyMap<String, Any?>()
             private val payload = "0123456789abcdefghij".encodeToByteArray()
             public var reads = 0
@@ -1259,13 +1346,13 @@ class BodyReaderFullTest {
               return payload.copyOfRange(0, minOf(maxBytes, payload.size))
             }
           }
-        // detection_max_body_inspect_bytes has a 1024 floor; the payload below stays under it.
-        val config = defaultScanConfig { detectionMaxBodyInspectBytes = 1024 }
-        val first = BodyReader.readCappedBody(request, config)
-        assertEquals("0123456789abcdefghij", first!!.decodeToString())
-        // Second read serves from the prefix cache without another bounded read.
-        val second = BodyReader.readCappedBody(request, config)
-        assertEquals("0123456789abcdefghij", second!!.decodeToString())
+      // detection_max_body_inspect_bytes has a 1024 floor; the payload below stays under it.
+      val config = defaultScanConfig { detectionMaxBodyInspectBytes = 1024 }
+      val first = BodyReader.readCappedBody(request, config)
+      assertEquals("0123456789abcdefghij", first!!.decodeToString())
+      // Second read serves from the prefix cache without another bounded read.
+      val second = BodyReader.readCappedBody(request, config)
+      assertEquals("0123456789abcdefghij", second!!.decodeToString())
     }
   }
 }
