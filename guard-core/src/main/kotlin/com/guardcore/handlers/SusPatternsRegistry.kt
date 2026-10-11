@@ -46,14 +46,14 @@ public object SusPatternsRegistry {
     val handler = agentHandler ?: return
     try {
       handler.sendEvent(
-          linkedMapOf<String, Any?>(
-              "event_type" to eventType,
-              "ip_address" to ipAddress,
-              "action_taken" to actionTaken,
-              "reason" to reason,
-              "pattern_matched" to patternMatched,
-              "handler_name" to SUS_PATTERNS_HANDLER_NAME,
-              "metadata" to metadata,
+          com.guardcore.core.events.securityEventEnvelope(
+              eventType = eventType,
+              ipAddress = ipAddress,
+              actionTaken = actionTaken,
+              reason = reason,
+              patternMatched = patternMatched,
+              handlerName = SUS_PATTERNS_HANDLER_NAME,
+              metadata = metadata,
           ),
       )
     } catch (e: Exception) {
@@ -117,14 +117,15 @@ public object SusPatternsRegistry {
 
     if (agentHandler != null) {
       val details = (if (custom) "Custom" else "Default") + " pattern added"
+      // Python passes pattern= as a **kwarg, so it lands in metadata (pattern_matched stays null).
       sendPatternEvent(
           eventType = EventTypes.EVENT_PATTERN_ADDED,
           ipAddress = "system",
           actionTaken = "pattern_added",
           reason = "$details to detection system",
-          patternMatched = DetectionScanRedaction.redactPatternSource(pattern),
           metadata =
               mapOf(
+                  "pattern" to DetectionScanRedaction.redactPatternSource(pattern),
                   "pattern_type" to if (custom) "custom" else "default",
                   "total_patterns" to
                       (if (custom) engine.customPatterns.size else engine.patterns.size),
@@ -175,14 +176,15 @@ public object SusPatternsRegistry {
   /** Port of `_send_pattern_removal_event` (_suspatterns_registry.py:176). */
   public suspend fun sendPatternRemovalEvent(pattern: String, custom: Boolean, totalPatterns: Int) {
     val details = (if (custom) "Custom" else "Default") + " pattern removed"
+    // Python passes pattern= as a **kwarg, so it lands in metadata (pattern_matched stays null).
     sendPatternEvent(
         eventType = EventTypes.EVENT_PATTERN_REMOVED,
         ipAddress = "system",
         actionTaken = "pattern_removed",
         reason = "$details from detection system",
-        patternMatched = DetectionScanRedaction.redactPatternSource(pattern),
         metadata =
             mapOf(
+                "pattern" to DetectionScanRedaction.redactPatternSource(pattern),
                 "pattern_type" to if (custom) "custom" else "default",
                 "total_patterns" to totalPatterns,
             ),
@@ -220,6 +222,123 @@ public object SusPatternsRegistry {
   public suspend fun getAllPatterns(): List<String> =
       engine.patterns + engine.customPatterns.toList()
 
+  /**
+   * Port of `suspatterns_handler.detect` (suspatterns_handler.py:855): the full engine verdict plus
+   * the `overall_detection` performance record (suspatterns_handler.py:966-976) and the
+   * pattern_detected threat event on match (suspatterns_handler.py:1020-1050).
+   */
+  public suspend fun detect(
+      content: String,
+      ipAddress: String,
+      context: String = "unknown",
+      correlationId: String? = null,
+      enabledCategories: Set<String>? = null,
+      contentPreview: String? = null,
+  ): Map<String, Any?> {
+    val executionStart = System.nanoTime()
+    val result = engine.detect(content, ipAddress, context, correlationId, enabledCategories)
+    val totalExecutionTime = (System.nanoTime() - executionStart) / 1e9
+
+    engine.detectionState.performanceMonitor?.recordMetric(
+        "overall_detection",
+        totalExecutionTime,
+        content.length,
+        matched = result.isThreat,
+        timeout = false,
+        agentHandler =
+            agentHandler?.let { sink ->
+              // The engine monitor seam is synchronous; the sink handoff blocks on the dispatch.
+              com.guardcore.engine.detection.AnomalyEventSink { event ->
+                kotlinx.coroutines.runBlocking { sink.sendEvent(event) }
+              }
+            },
+        correlationId = correlationId,
+    )
+
+    if (result.isThreat) {
+      sendThreatEvent(
+          result,
+          ipAddress,
+          context,
+          content,
+          correlationId,
+          contentPreview,
+      )
+    }
+
+    return linkedMapOf(
+        "is_threat" to result.isThreat,
+        "threat_score" to result.threatScore,
+        "threats" to result.threats.map { it.toMap() },
+        "context" to result.context,
+        "original_length" to result.originalLength,
+        "processed_length" to result.processedLength,
+        "execution_time" to totalExecutionTime,
+        "detection_method" to result.detectionMethod,
+        "timeouts" to result.timeouts,
+        "correlation_id" to result.correlationId,
+    )
+  }
+
+  /**
+   * Port of `_send_threat_event` (suspatterns_handler.py:990): pattern info from the first matched
+   * pattern (semantic threats render `semantic:<attack_type>`), redacted pattern source, and the
+   * count metadata payload.
+   */
+  private suspend fun sendThreatEvent(
+      result: com.guardcore.engine.suspatterns.DetectResult,
+      ipAddress: String,
+      context: String,
+      content: String,
+      correlationId: String?,
+      contentPreview: String?,
+  ) {
+    val threats = result.threats
+    val regexThreats = threats.filter { it.type != "semantic" }
+    val semanticThreats = threats.filter { it.type == "semantic" }
+
+    val patternInfo =
+        when {
+          regexThreats.isNotEmpty() -> regexThreats.first().pattern
+          semanticThreats.isNotEmpty() ->
+              "semantic:${semanticThreats.first().attackType ?: "suspicious"}"
+          else -> "unknown"
+        }
+
+    val previewSource = contentPreview ?: content
+    val cappedPreview = if (previewSource.length > 100) previewSource.take(100) else previewSource
+
+    val threatCategories = com.guardcore.engine.suspatterns.collectThreatCategories(threats)
+
+    val patternMatched =
+        com.guardcore.handlers.DetectionScanRedaction.redactPatternSource(patternInfo)
+
+    sendPatternEvent(
+        eventType = EventTypes.EVENT_PATTERN_DETECTED,
+        ipAddress = ipAddress,
+        actionTaken = "threat_detected",
+        reason = "Threat detected in $context",
+        patternMatched = patternMatched,
+        metadata =
+            linkedMapOf(
+                "pattern" to patternMatched,
+                "context" to context,
+                "content_preview" to
+                    com.guardcore.engine.suspatterns.sanitizeForReporting(cappedPreview),
+                "threat_score" to result.threatScore,
+                "threats" to threats.size,
+                "regex_threats" to regexThreats.size,
+                "semantic_threats" to semanticThreats.size,
+                "timeouts" to result.timeouts.size,
+                "detection_method" to result.detectionMethod,
+                "execution_time_ms" to (result.executionTime * 1000).toInt(),
+                "correlation_id" to correlationId,
+                "threat_categories" to threatCategories,
+                "category" to threatCategories.firstOrNull(),
+            ),
+    )
+  }
+
   /** Port of `reset` (_suspatterns_registry.py:252). */
   public suspend fun reset() {
     engine.customPatterns.clear()
@@ -228,5 +347,29 @@ public object SusPatternsRegistry {
     agentHandler = null
     engine.detectionState.compiler?.clearCache()
     engine.detectionState.performanceMonitor?.clearStats()
+  }
+
+  /**
+   * Corpus helper mirroring the events harness's direct registry clears (events_harness.py:397-398,
+   * 410-411); production never calls it.
+   */
+  public fun clearCustomPatternsForCorpus() {
+    engine.customPatterns.clear()
+    engine.compiledCustomPatterns.clear()
+  }
+
+  /**
+   * Corpus helper seeding the registry directly so a case pins the removal event alone
+   * (events_harness.py:412-415); production never calls it.
+   */
+  public fun seedCustomPatternForCorpus(pattern: String) {
+    engine.customPatterns.clear()
+    engine.compiledCustomPatterns.clear()
+    engine.customPatterns.add(pattern)
+    val compiled =
+        PatternCompiler().compilePattern(pattern, com.guardcore.engine.py.PyReFlags.IGNORECASE)
+    engine.compiledCustomPatterns.add(
+        com.guardcore.engine.suspatterns.CompiledPatternRow(compiled, setOf(), "custom"),
+    )
   }
 }

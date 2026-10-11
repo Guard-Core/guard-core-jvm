@@ -49,6 +49,33 @@ public object PyUrllib {
   public fun unquotePlus(text: String): String =
       unquote(if ('+' in text) text.replace("+", " ") else text)
 
+  /**
+   * Port of `urllib.parse.parse_qs` with the CPython 3.10 defaults (keep_blank_values=False,
+   * strict_parsing=False, separator='&'): blank pairs and value-less pairs are skipped, blank NAMES
+   * are kept, each key maps to its value list.
+   */
+  public fun parseQs(qs: String): Map<String, List<String>> {
+    val result = LinkedHashMap<String, List<String>>()
+    for (nameValue in qs.split("&")) {
+      if (nameValue.isEmpty()) {
+        continue
+      }
+      val nv = nameValue.split("=", limit = 2)
+      val pair =
+          when (nv.size) {
+            2 -> nv[0] to nv[1]
+            else -> continue
+          }
+      if (pair.second.isEmpty()) {
+        continue
+      }
+      val name = unquote(pair.first.replace("+", " "))
+      val value = unquote(pair.second.replace("+", " "))
+      result[name] = result.getOrDefault(name, emptyList()) + value
+    }
+    return result
+  }
+
   private fun quoteSafe(ch: Char, safe: String): Boolean =
       ch in 'a'..'z' ||
           ch in 'A'..'Z' ||

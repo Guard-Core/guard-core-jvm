@@ -24,13 +24,13 @@ public suspend fun IpBanManager.initializeBanAgent(agentHandler: HandlerAgentSin
 public suspend fun IpBanManager.sendBanEvent(ip: String, duration: Int, reason: String) {
   try {
     agentHandler?.sendEvent(
-        linkedMapOf<String, Any?>(
-            "event_type" to EventTypes.EVENT_IP_BANNED,
-            "ip_address" to ip,
-            "action_taken" to "banned",
-            "reason" to reason,
-            "handler_name" to IP_BAN_HANDLER_NAME,
-            "metadata" to mapOf("duration" to duration),
+        com.guardcore.core.events.securityEventEnvelope(
+            eventType = EventTypes.EVENT_IP_BANNED,
+            ipAddress = ip,
+            actionTaken = "banned",
+            reason = reason,
+            handlerName = IP_BAN_HANDLER_NAME,
+            metadata = mapOf("duration" to duration),
         ),
     )
   } catch (e: Exception) {
@@ -42,13 +42,13 @@ public suspend fun IpBanManager.sendBanEvent(ip: String, duration: Int, reason: 
 public suspend fun IpBanManager.sendUnbanEvent(ip: String) {
   try {
     agentHandler?.sendEvent(
-        linkedMapOf<String, Any?>(
-            "event_type" to EventTypes.EVENT_IP_UNBANNED,
-            "ip_address" to ip,
-            "action_taken" to "unbanned",
-            "reason" to "dynamic_rule_whitelist",
-            "handler_name" to IP_BAN_HANDLER_NAME,
-            "metadata" to mapOf("action" to "unban"),
+        com.guardcore.core.events.securityEventEnvelope(
+            eventType = EventTypes.EVENT_IP_UNBANNED,
+            ipAddress = ip,
+            actionTaken = "unbanned",
+            reason = "dynamic_rule_whitelist",
+            handlerName = IP_BAN_HANDLER_NAME,
+            metadata = mapOf("action" to "unban"),
         ),
     )
   } catch (e: Exception) {
@@ -236,6 +236,11 @@ public suspend fun IpBanManager.banIp(
     duration: Int,
     reason: String = "threshold_exceeded",
 ): Boolean {
+  // Test seam mirroring the python harness's `ip_ban_manager.ban_ip = _raising_ban`
+  // method-assign fault injection (events_harness.py:383-387); production never sets it.
+  banIpOverride?.let {
+    return it(ip, duration, reason)
+  }
   val canonical = IpExtraction.canonicalizeIp(ip)
   assertPositiveDuration(duration)
   val refusal = selfDosRefusalReason(canonical)

@@ -15,10 +15,10 @@ import java.util.logging.Logger
  * with `send_middleware_event` (middleware_events.py:111), `send_https_violation_event`
  * (middleware_events.py:137) and `send_cloud_detection_events` (middleware_events.py:168).
  *
- * The Python bus gates on `agent_handler`/`agent_enable_events` and builds the agent's
- * SecurityEvent telemetry model; the agent model is W7 surface (KNOWN_GAPS G-11), so the JVM bus
- * forwards the same field envelope as a map to the [HandlerAgentSink]. With no agent handler the
- * bus is a faithful no-op, exactly like middleware_events.py:119-120.
+ * The bus gates on `agent_handler`/`agent_enable_events` and builds the guard-agent SecurityEvent
+ * telemetry envelope (the model's full field set carried as a map; the model class itself is the W7
+ * agent wave surface). With no agent handler the bus is a faithful no-op, exactly like
+ * middleware_events.py:119-120.
  */
 public open class SecurityEventBus(
     public val agentHandler: HandlerAgentSink?,
@@ -58,9 +58,12 @@ public open class SecurityEventBus(
   }
 
   /**
-   * Port of `_build_event` (middleware_events.py:67) up to the telemetry-model boundary: the
-   * SecurityEvent field set (timestamp, event_type, ip_address, country, user_agent, action_taken,
-   * reason, endpoint, method, response_time, decorator_type, rule_type, handler_name, metadata).
+   * Port of `_build_event` (middleware_events.py:67): constructs the SecurityEvent telemetry
+   * envelope over the guard-agent model's field set (guard_agent/models.py:208): idempotency_key,
+   * timestamp, event_type, ip_address, country, user_agent, action_taken, reason, endpoint, method,
+   * status_code, response_time, decorator_type, rule_type, pattern_matched, handler_name, metadata.
+   * The bus never passes status_code/pattern_matched (they stay null, exactly like
+   * middleware_events.py:82-109); pattern_matched is set by the sus_patterns handler seam.
    */
   protected fun buildEvent(
       eventType: String,
@@ -72,38 +75,36 @@ public open class SecurityEventBus(
       metadata: Map<String, Any?>,
   ): Map<String, Any?> {
     val rawUserAgent = request.headers["User-Agent"]
-    val userAgent =
-        if (rawUserAgent != null) {
-          RequestLogging.redactHeaderValueForDisplay(
-              rawUserAgent,
-              config.logSensitiveParams,
-              config.logSensitiveBodyFields,
-              config.logSensitiveHeaders,
-          )
-        } else {
-          null
-        }
-    return linkedMapOf(
-        "timestamp" to java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC).toString(),
-        "event_type" to eventType,
-        "ip_address" to clientIp,
-        "country" to country,
-        "user_agent" to userAgent,
-        "action_taken" to actionTaken,
-        "reason" to reason,
-        "endpoint" to
+    return securityEventEnvelope(
+        eventType = eventType,
+        ipAddress = clientIp,
+        country = country,
+        userAgent =
+            if (rawUserAgent != null) {
+              RequestLogging.redactHeaderValueForDisplay(
+                  rawUserAgent,
+                  config.logSensitiveParams,
+                  config.logSensitiveBodyFields,
+                  config.logSensitiveHeaders,
+              )
+            } else {
+              null
+            },
+        actionTaken = actionTaken,
+        reason = reason,
+        endpoint =
             RequestLogging.redactEndpointForDisplay(
                 request.urlPath,
                 config.logSensitiveParams,
                 config.logSensitiveBodyFields,
                 config.logSensitiveHeaders,
             ),
-        "method" to request.method,
-        "response_time" to AgentEvents.getPipelineResponseTime(request),
-        "decorator_type" to metadata["decorator_type"],
-        "rule_type" to metadata["rule_type"],
-        "handler_name" to MIDDLEWARE_HANDLER_NAME,
-        "metadata" to metadata,
+        method = request.method,
+        responseTime = AgentEvents.getPipelineResponseTime(request),
+        decoratorType = metadata["decorator_type"] as? String,
+        ruleType = metadata["rule_type"] as? String,
+        handlerName = MIDDLEWARE_HANDLER_NAME,
+        metadata = metadata,
     )
   }
 
@@ -122,7 +123,8 @@ public open class SecurityEventBus(
       return
     }
     try {
-      val clientIp = IpExtraction.extractClientIp(request, config)
+      val clientIp =
+          IpExtraction.extractClientIp(request, config, sinkAsAgentProtocol(agentHandler))
       val country = lookupCountry(clientIp)
       val forwarded = forwardTraceHeaders(request, metadata)
       val event = buildEvent(eventType, request, clientIp, country, actionTaken, reason, forwarded)
@@ -208,5 +210,35 @@ public open class SecurityEventBus(
   public companion object {
     /** Python `_MIDDLEWARE_HANDLER_NAME` (middleware_events.py:23). */
     public const val MIDDLEWARE_HANDLER_NAME: String = "middleware"
+
+    /**
+     * The bus hands its agent handler to extract_client_ip (middleware_events.py:125-127); the
+     * sink-shaped field adapts to the protocol shape the extraction seam reads.
+     */
+    public fun sinkAsAgentProtocol(
+        sink: com.guardcore.handlers.HandlerAgentSink,
+    ): com.guardcore.protocols.AgentHandlerProtocol =
+        object : com.guardcore.protocols.AgentHandlerProtocol {
+          override suspend fun initializeRedis(
+              redisHandler: com.guardcore.protocols.RedisHandlerProtocol,
+          ) {}
+
+          override suspend fun sendEvent(event: Any?) {
+            @Suppress("UNCHECKED_CAST")
+            sink.sendEvent((event as? Map<String, Any?>) ?: mapOf<String, Any?>())
+          }
+
+          override suspend fun sendMetric(metric: Any?) {}
+
+          override suspend fun start() {}
+
+          override suspend fun stop() {}
+
+          override suspend fun flushBuffer() {}
+
+          override suspend fun getDynamicRules(): Any? = null
+
+          override suspend fun healthCheck(): Boolean = true
+        }
   }
 }

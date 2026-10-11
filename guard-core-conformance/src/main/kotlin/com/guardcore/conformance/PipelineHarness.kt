@@ -72,6 +72,9 @@ public object PipelineHarness {
           "auto_ban_threshold",
       )
 
+  /** Read access for the events harness (events_harness.py:99 composes over it). */
+  public fun configKeys(): Set<String> = CONFIG_KEYS
+
   /** Python `ROUTE_KEYS` (pipeline_harness.py:88). */
   private val ROUTE_KEYS: Set<String> =
       setOf(
@@ -89,6 +92,9 @@ public object PipelineHarness {
           "excluded_detection_body_fields",
           "geo_rate_limits",
       )
+
+  /** Read access for the events harness (events_harness.py:120 composes over it). */
+  public fun routeKeys(): Set<String> = ROUTE_KEYS
 
   /** Python `DEFAULT_STATE` (pipeline_harness.py:104). */
   private const val ENABLE_REDIS: Boolean = false
@@ -342,56 +348,7 @@ public object PipelineHarness {
 
     for ((key, value) in caseConfig) {
       if (key !in CONFIG_KEYS) continue
-      when (key) {
-        "whitelist" -> builder.whitelist = (value as List<*>).map { it.toString() }
-        "blacklist" -> builder.blacklist = (value as List<*>).map { it.toString() }
-        "exempt_ips" -> builder.exemptIps = (value as List<*>).map { it.toString() }
-        "blocked_user_agents" ->
-            builder.blockedUserAgents = (value as List<*>).map { it.toString() }
-        "blocked_countries" ->
-            builder.blockedCountries = (value as List<*>).map { it.toString() }.toSet()
-        "whitelist_countries" ->
-            builder.whitelistCountries = (value as List<*>).map { it.toString() }.toSet()
-        "rate_limit" -> builder.rateLimit = (value as Number).toInt()
-        "rate_limit_window" -> builder.rateLimitWindow = (value as Number).toInt()
-        "endpoint_rate_limits" -> {
-          @Suppress("UNCHECKED_CAST") val map = value as Map<String, List<Number>>
-          builder.endpointRateLimits = map.mapValues { (_, lw) -> lw[0].toInt() to lw[1].toInt() }
-        }
-        "passive_mode" -> builder.passiveMode = value as Boolean
-        "custom_error_responses" -> {
-          @Suppress("UNCHECKED_CAST") val map = value as Map<String, String>
-          builder.customErrorResponses = map.mapKeys { (k, _) -> k.toInt() }
-        }
-        "security_headers" ->
-            builder.securityHeaders = jsonValueToKotlin(value) as? Map<String, Any?>
-        "enable_cors" -> builder.enableCors = value as Boolean
-        "cors_allow_origins" -> builder.corsAllowOrigins = (value as List<*>).map { it.toString() }
-        "cors_allow_methods" -> builder.corsAllowMethods = (value as List<*>).map { it.toString() }
-        "cors_allow_headers" -> builder.corsAllowHeaders = (value as List<*>).map { it.toString() }
-        "cors_allow_credentials" -> builder.corsAllowCredentials = value as Boolean
-        "global_behavior_rules" -> {
-          @Suppress("UNCHECKED_CAST") val rules = value as List<Map<String, Any?>>
-          builder.globalBehaviorRules = rules.map { rule ->
-            BehaviorRuleConfig(
-                ruleType = RuleType.entries.first { it.pythonName == rule["rule_type"] },
-                threshold = (rule["threshold"] as Number).toInt(),
-                window = (rule["window"] as? Number)?.toInt() ?: 3600,
-                pattern = rule["pattern"]?.toString(),
-                action =
-                    rule["action"]?.let { a -> RuleAction.entries.first { it.pythonName == a } }
-                        ?: RuleAction.LOG,
-                banDuration = (rule["ban_duration"] as? Number)?.toInt(),
-            )
-          }
-        }
-        "behavior_scan_response_body" -> builder.behaviorScanResponseBody = value as Boolean
-        "enable_rate_limiting" -> builder.enableRateLimiting = value as Boolean
-        "enable_penetration_detection" -> builder.enablePenetrationDetection = value as Boolean
-        "enable_ip_banning" -> builder.enableIpBanning = value as Boolean
-        "enable_rate_limit_auto_ban" -> builder.enableRateLimitAutoBan = value as Boolean
-        "auto_ban_threshold" -> builder.autoBanThreshold = (value as Number).toInt()
-      }
+      applyPipelineConfigKey(builder, key, value, geo)
     }
     if (
         caseConfig.containsKey("blocked_countries") || caseConfig.containsKey("whitelist_countries")
@@ -399,6 +356,63 @@ public object PipelineHarness {
       builder.geoIpHandler = geo
     }
     return builder.build()
+  }
+
+  /** The per-key config mapping shared with the events harness (events_harness.py:209). */
+  public fun applyPipelineConfigKey(
+      builder: SecurityConfigBuilder,
+      key: String,
+      value: Any?,
+      geo: StubGeoHandler,
+  ) {
+    when (key) {
+      "whitelist" -> builder.whitelist = (value as List<*>).map { it.toString() }
+      "blacklist" -> builder.blacklist = (value as List<*>).map { it.toString() }
+      "exempt_ips" -> builder.exemptIps = (value as List<*>).map { it.toString() }
+      "blocked_user_agents" -> builder.blockedUserAgents = (value as List<*>).map { it.toString() }
+      "blocked_countries" ->
+          builder.blockedCountries = (value as List<*>).map { it.toString() }.toSet()
+      "whitelist_countries" ->
+          builder.whitelistCountries = (value as List<*>).map { it.toString() }.toSet()
+      "rate_limit" -> builder.rateLimit = (value as Number).toInt()
+      "rate_limit_window" -> builder.rateLimitWindow = (value as Number).toInt()
+      "endpoint_rate_limits" -> {
+        @Suppress("UNCHECKED_CAST") val map = value as Map<String, List<Number>>
+        builder.endpointRateLimits = map.mapValues { (_, lw) -> lw[0].toInt() to lw[1].toInt() }
+      }
+      "passive_mode" -> builder.passiveMode = value as Boolean
+      "custom_error_responses" -> {
+        @Suppress("UNCHECKED_CAST") val map = value as Map<String, String>
+        builder.customErrorResponses = map.mapKeys { (k, _) -> k.toInt() }
+      }
+      "security_headers" -> builder.securityHeaders = jsonValueToKotlin(value) as? Map<String, Any?>
+      "enable_cors" -> builder.enableCors = value as Boolean
+      "cors_allow_origins" -> builder.corsAllowOrigins = (value as List<*>).map { it.toString() }
+      "cors_allow_methods" -> builder.corsAllowMethods = (value as List<*>).map { it.toString() }
+      "cors_allow_headers" -> builder.corsAllowHeaders = (value as List<*>).map { it.toString() }
+      "cors_allow_credentials" -> builder.corsAllowCredentials = value as Boolean
+      "global_behavior_rules" -> {
+        @Suppress("UNCHECKED_CAST") val rules = value as List<Map<String, Any?>>
+        builder.globalBehaviorRules = rules.map { rule ->
+          BehaviorRuleConfig(
+              ruleType = RuleType.entries.first { it.pythonName == rule["rule_type"] },
+              threshold = (rule["threshold"] as Number).toInt(),
+              window = (rule["window"] as? Number)?.toInt() ?: 3600,
+              pattern = rule["pattern"]?.toString(),
+              action =
+                  rule["action"]?.let { a -> RuleAction.entries.first { it.pythonName == a } }
+                      ?: RuleAction.LOG,
+              banDuration = (rule["ban_duration"] as? Number)?.toInt(),
+          )
+        }
+      }
+      "behavior_scan_response_body" -> builder.behaviorScanResponseBody = value as Boolean
+      "enable_rate_limiting" -> builder.enableRateLimiting = value as Boolean
+      "enable_penetration_detection" -> builder.enablePenetrationDetection = value as Boolean
+      "enable_ip_banning" -> builder.enableIpBanning = value as Boolean
+      "enable_rate_limit_auto_ban" -> builder.enableRateLimitAutoBan = value as Boolean
+      "auto_ban_threshold" -> builder.autoBanThreshold = (value as Number).toInt()
+    }
   }
 
   /** Converts a parsed-JSON tree into plain Kotlin collections (the harness payload shapes). */

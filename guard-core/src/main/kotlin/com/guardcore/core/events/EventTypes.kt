@@ -2,9 +2,9 @@ package com.guardcore.core.events
 
 /**
  * Port of `guard_core/core/events/event_types.py`: the event-type constants (event_types.py:5-43),
- * metric constants (event_types.py:90-92), check-name registry (event_types.py:102-122) and
- * EventFilter (event_types.py:135-144). The enrichment keys (event_types.py:125-131) and the
- * EVENT_TYPE_VALUES / METRIC_TYPE_VALUES frozensets close with the W4b events wave.
+ * metric constants (event_types.py:90-92), check-name registry (event_types.py:102-122), the
+ * enrichment keys (event_types.py:125-131), the EVENT_TYPE_VALUES / METRIC_TYPE_VALUES frozensets
+ * (event_types.py:46-100) and EventFilter (event_types.py:135-144).
  */
 public object EventTypes {
   public const val EVENT_PENETRATION_ATTEMPT: String = "penetration_attempt"
@@ -53,6 +53,58 @@ public object EventTypes {
   public const val METRIC_REQUEST_COUNT: String = "request_count"
   public const val METRIC_ERROR_RATE: String = "error_rate"
 
+  /** Port of `EVENT_TYPE_VALUES` (event_types.py:46). */
+  public val EVENT_TYPE_VALUES: Set<String> =
+      setOf(
+          EVENT_PENETRATION_ATTEMPT,
+          EVENT_IP_BLOCKED,
+          EVENT_IP_BANNED,
+          EVENT_IP_BAN_FAILED,
+          EVENT_IP_UNBANNED,
+          EVENT_CLOUD_BLOCKED,
+          EVENT_HTTPS_ENFORCED,
+          EVENT_DECORATOR_VIOLATION,
+          EVENT_BEHAVIOR_VIOLATION,
+          EVENT_PATTERN_DETECTED,
+          EVENT_DYNAMIC_RULE_UPDATED,
+          EVENT_DYNAMIC_RULE_APPLIED,
+          EVENT_DYNAMIC_RULE_VIOLATION,
+          EVENT_EMERGENCY_MODE,
+          EVENT_ACCESS_DENIED,
+          EVENT_AUTHENTICATION_FAILED,
+          EVENT_CONTENT_FILTERED,
+          EVENT_COUNTRY_BLOCKED,
+          EVENT_CSP_VIOLATION,
+          EVENT_CUSTOM_REQUEST_CHECK,
+          EVENT_DECODING_ERROR,
+          EVENT_EMERGENCY_MODE_BLOCK,
+          EVENT_GEO_LOOKUP_FAILED,
+          EVENT_PATH_EXCLUDED,
+          EVENT_PATTERN_ADDED,
+          EVENT_PATTERN_REMOVED,
+          EVENT_RATE_LIMITED,
+          EVENT_RATE_LIMIT_SCRIPT_RELOADED,
+          EVENT_REDIS_CONNECTION,
+          EVENT_REDIS_ERROR,
+          EVENT_ROUTE_UNRESOLVED,
+          EVENT_SECURITY_BYPASS,
+          EVENT_SECURITY_HEADERS_APPLIED,
+          EVENT_USER_AGENT_BLOCKED,
+          EVENT_SUSPICIOUS_REQUEST,
+          EVENT_DETECTION_ENGINE_CALLBACK_ERROR,
+          EVENT_PATTERN_ANOMALY_TIMEOUT,
+          EVENT_PATTERN_ANOMALY_SLOW_EXECUTION,
+          EVENT_PATTERN_ANOMALY_STATISTICAL_ANOMALY,
+      )
+
+  /** Port of `METRIC_TYPE_VALUES` (event_types.py:94). */
+  public val METRIC_TYPE_VALUES: Set<String> =
+      setOf(
+          METRIC_RESPONSE_TIME,
+          METRIC_REQUEST_COUNT,
+          METRIC_ERROR_RATE,
+      )
+
   /** Port of `CHECK_NAME_VALUES` (event_types.py:102). */
   public val CHECK_NAME_VALUES: Set<String> =
       setOf(
@@ -74,6 +126,16 @@ public object EventTypes {
           "time_window",
           "user_agent",
       )
+
+  /** Enrichment keys (event_types.py:125-131), verbatim values. */
+  public const val ENRICHMENT_KEY_PROJECT_ID: String = "guard.project_id"
+  public const val ENRICHMENT_KEY_SERVICE_NAME: String = "guard.service.name"
+  public const val ENRICHMENT_KEY_DEPLOYMENT_ENV: String = "guard.deployment.environment"
+  public const val ENRICHMENT_KEY_THREAT_SCORE: String = "guard.threat_score"
+  public const val ENRICHMENT_KEY_RULE_ID: String = "guard.rule.id"
+  public const val ENRICHMENT_KEY_RULE_VERSION: String = "guard.rule.version"
+  public const val ENRICHMENT_KEY_BEHAVIOR_KEY: String = "guard.behavior.correlation_key"
+  public const val ENRICHMENT_KEY_RECENT_EVENT_COUNT: String = "guard.behavior.recent_event_count"
 }
 
 /** Port of `EventFilter` (event_types.py:135): muted event/metric sets with allow checks. */

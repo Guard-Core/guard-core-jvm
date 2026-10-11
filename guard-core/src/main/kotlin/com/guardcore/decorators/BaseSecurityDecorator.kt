@@ -128,7 +128,15 @@ public open class BaseSecurityDecorator(
             config = config,
             geoIpHandler = geoIpHandler as? GeoIPHandler,
         )
-    eventBus.sendMiddlewareEvent(eventType, request, actionTaken, reason, metadata)
+    // Python passes decorator_type as a send_middleware_event kwarg, so it lands in the
+    // forwarded metadata (and the model's decorator_type field reads it back out).
+    eventBus.sendMiddlewareEvent(
+        eventType,
+        request,
+        actionTaken,
+        reason,
+        LinkedHashMap(metadata).also { it["decorator_type"] = decoratorType },
+    )
   }
 
   /** Python async `send_access_denied_event` (base.py:164). */

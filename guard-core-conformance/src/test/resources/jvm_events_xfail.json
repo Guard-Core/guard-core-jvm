@@ -1,0 +1,8 @@
+{
+  "spec_version": "4.1.0",
+  "_comment": "Documented divergences of the JVM event surface against the event_stream corpus. Fail-closed: a failing case NOT listed here is red; a listed case that now passes is red (stale baseline); an entry whose recorded diff no longer matches the mechanical diff is red. The residual divergences are reason-string shapes (a Python exception class name and Python redis-driver error text embedded in reference reason strings, with no JVM equivalent), the same divergence class the TS family ledger carries - not missing emitters.",
+  "cases": {
+    "event_stream/evt_geo_lookup_failed_download": "event 0 field reason: want \"Failed to download IPInfo database: RuntimeError\", got \"Failed to download IPInfo database: RuntimeException\"",
+    "event_stream/evt_redis_error_connection_failed": "event 0 field reason: want \"Redis connection failed: Error Multiple exceptions: [Errno 61] Connect call failed ('::1', 59999, 0, 0), [Errno 61] Connect call failed ('127.0.0.1', 59999) connecting to localhost:59999.\", got \"Redis connection failed: io.lettuce.core.RedisConnectionException: Unable to connect to localhost/<unresolved>:59999\""
+  }
+}

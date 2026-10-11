@@ -52,9 +52,13 @@ public object AgentEvents {
 
   /**
    * Port of `send_agent_event` (agent_events.py:39-94). The Python version constructs the
-   * guard-agent SecurityEvent telemetry model via `_pydantic_plugin_mute.get_telemetry_model`; that
-   * model factory is the guard-agent-jvm (W7) seam: the event is built as the same field map and
-   * handed to `AgentHandlerProtocol.sendEvent`.
+   * guard-agent SecurityEvent telemetry model via `_pydantic_plugin_mute.get_telemetry_model`
+   * (guard_agent/models.py:208); the model class itself is the W7 agent seam, so the event is built
+   * as the same full field map (idempotency_key, timestamp, event_type, ip_address, country,
+   * user_agent, action_taken, reason, endpoint, method, status_code, response_time, decorator_type,
+   * rule_type, pattern_matched, handler_name, metadata; extra kwargs fold into top-level model
+   * fields exactly like the `extra="allow"` construction) and handed to
+   * `AgentHandlerProtocol.sendEvent`.
    */
   public suspend fun sendAgentEvent(
       agentHandler: AgentHandlerProtocol?,
@@ -86,20 +90,20 @@ public object AgentEvents {
         meta["rule_type"] = ruleType
       }
       val event =
-          linkedMapOf<String, Any?>(
-              "event_type" to eventType,
-              "ip_address" to ipAddress,
-              "country" to null,
-              "user_agent" to userAgent,
-              "action_taken" to actionTaken,
-              "reason" to reason,
-              "endpoint" to endpoint,
-              "method" to method,
-              "response_time" to getPipelineResponseTime(request),
-              "decorator_type" to decoratorType,
-              "rule_type" to ruleType,
-              "handler_name" to IP_EXTRACTION_HANDLER_NAME,
-              "metadata" to meta,
+          com.guardcore.core.events.securityEventEnvelope(
+              eventType = eventType,
+              ipAddress = ipAddress,
+              country = null,
+              userAgent = userAgent,
+              actionTaken = actionTaken,
+              reason = reason,
+              endpoint = endpoint,
+              method = method,
+              responseTime = getPipelineResponseTime(request),
+              decoratorType = decoratorType as? String,
+              ruleType = ruleType as? String,
+              handlerName = IP_EXTRACTION_HANDLER_NAME,
+              metadata = meta,
           ) + extra.filterKeys { it !in setOf("decorator_type", "rule_type", "metadata") }
       agentHandler.sendEvent(event)
     } catch (e: Exception) {
