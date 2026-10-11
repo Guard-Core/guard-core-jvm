@@ -255,7 +255,7 @@ public class RateLimitCheck(
   }
 
   /** Python async `_check_global_rate_limit` (rate_limit.py:262). */
-  private suspend fun checkGlobalRateLimit(
+  internal suspend fun checkGlobalRateLimit(
       request: GuardRequest,
       clientIp: String,
   ): GuardResponse? {
