@@ -297,8 +297,19 @@ public open class CloudManager {
     )
   }
 
+  /**
+   * Test seams mirroring the python events harness's cloud_handler method-assign pins
+   * (events_harness.py:686-694); production never sets them.
+   */
+  @Volatile public var isCloudIpOverride: ((ip: String, providers: Set<String>) -> Boolean)? = null
+
+  @Volatile
+  public var cloudProviderDetailsOverride: ((ip: String, providers: Set<String>) -> Pair<String, String>?)? =
+      null
+
   /** Port of `is_cloud_ip` (cloud_handler.py:328). */
   public fun isCloudIp(ip: String, providers: Set<String> = ALL_PROVIDERS): Boolean {
+    isCloudIpOverride?.let { return it(ip, providers) }
     return try {
       val ipObj = parseAddress(ip)
       val (blocked, carveouts) = parseCloudSelectors(providers)
@@ -339,6 +350,7 @@ public open class CloudManager {
       ip: String,
       providers: Set<String> = ALL_PROVIDERS,
   ): Pair<String, String>? {
+    cloudProviderDetailsOverride?.let { return it(ip, providers) }
     return try {
       val ipObj = parseAddress(ip)
       for (provider in bareProviderNames(providers)) {

@@ -123,7 +123,8 @@ public open class SecurityEventBus(
       return
     }
     try {
-      val clientIp = IpExtraction.extractClientIp(request, config)
+      val clientIp =
+          IpExtraction.extractClientIp(request, config, sinkAsAgentProtocol(agentHandler))
       val country = lookupCountry(clientIp)
       val forwarded = forwardTraceHeaders(request, metadata)
       val event = buildEvent(eventType, request, clientIp, country, actionTaken, reason, forwarded)
@@ -209,5 +210,34 @@ public open class SecurityEventBus(
   public companion object {
     /** Python `_MIDDLEWARE_HANDLER_NAME` (middleware_events.py:23). */
     public const val MIDDLEWARE_HANDLER_NAME: String = "middleware"
+
+    /**
+     * The bus hands its agent handler to extract_client_ip (middleware_events.py:125-127); the
+     * sink-shaped field adapts to the protocol shape the extraction seam reads.
+     */
+    public fun sinkAsAgentProtocol(sink: com.guardcore.handlers.HandlerAgentSink):
+        com.guardcore.protocols.AgentHandlerProtocol =
+        object : com.guardcore.protocols.AgentHandlerProtocol {
+          override suspend fun initializeRedis(
+              redisHandler: com.guardcore.protocols.RedisHandlerProtocol,
+          ) {}
+
+          override suspend fun sendEvent(event: Any?) {
+            @Suppress("UNCHECKED_CAST")
+            sink.sendEvent((event as? Map<String, Any?>) ?: mapOf<String, Any?>())
+          }
+
+          override suspend fun sendMetric(metric: Any?) {}
+
+          override suspend fun start() {}
+
+          override suspend fun stop() {}
+
+          override suspend fun flushBuffer() {}
+
+          override suspend fun getDynamicRules(): Any? = null
+
+          override suspend fun healthCheck(): Boolean = true
+        }
   }
 }

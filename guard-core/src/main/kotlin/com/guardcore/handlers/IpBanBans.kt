@@ -236,6 +236,9 @@ public suspend fun IpBanManager.banIp(
     duration: Int,
     reason: String = "threshold_exceeded",
 ): Boolean {
+  // Test seam mirroring the python harness's `ip_ban_manager.ban_ip = _raising_ban`
+  // method-assign fault injection (events_harness.py:383-387); production never sets it.
+  banIpOverride?.let { return it(ip, duration, reason) }
   val canonical = IpExtraction.canonicalizeIp(ip)
   assertPositiveDuration(duration)
   val refusal = selfDosRefusalReason(canonical)

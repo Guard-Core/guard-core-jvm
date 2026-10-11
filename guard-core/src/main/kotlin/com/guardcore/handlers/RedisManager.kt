@@ -23,6 +23,7 @@ import io.lettuce.core.api.async.RedisAsyncCommands
 import java.time.Duration
 import java.util.UUID
 import java.util.concurrent.CompletionException
+import java.util.concurrent.ExecutionException
 import java.util.logging.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -252,6 +253,10 @@ internal constructor(
       withContext(Dispatchers.IO) {
         try {
           block(connection.async()).get()
+        } catch (e: ExecutionException) {
+          // redis-py raises the driver exception synchronously (NOSCRIPT, connection errors);
+          // unwrap so the engine-level catches see the driver type.
+          throw (e.cause ?: e)
         } catch (e: CompletionException) {
           throw (e.cause ?: e)
         }
@@ -399,6 +404,16 @@ public open class RedisManager(
     } catch (e: Exception) {
       logger.severe("Failed to send Redis event to agent: $e")
     }
+  }
+
+  /**
+   * Test seam mirroring the events harness's `manager._closed = True; await
+   * manager._discard_client()` teardown (events_harness.py:551-552): drop the connection without
+   * the close event; production never calls it.
+   */
+  public suspend fun discardClientQuietlyForCorpus() {
+    closed = true
+    connectionLock.withLock { discardClient() }
   }
 
   /** Port of `_connection_kwargs` (redis_handler.py:97): connection tuning floors. */

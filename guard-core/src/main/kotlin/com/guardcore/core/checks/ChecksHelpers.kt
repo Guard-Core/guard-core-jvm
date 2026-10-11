@@ -552,7 +552,8 @@ public object ChecksHelpers {
         EventTypes.EVENT_IP_BAN_FAILED,
         request,
         "ban_not_applied",
-        "Escalation ban failed for $clientIp: $error",
+        // Python f"{error}" renders str(error): the message without the class name.
+        "Escalation ban failed for $clientIp: ${error.message ?: error.toString()}",
         linkedMapOf("ip_address" to clientIp),
     )
   }

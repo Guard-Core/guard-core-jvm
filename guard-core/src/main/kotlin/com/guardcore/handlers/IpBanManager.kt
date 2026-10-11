@@ -65,6 +65,14 @@ public class IpBanManager private constructor() {
 
   @Volatile public var agentHandler: HandlerAgentSink? = null
 
+  /**
+   * Test seam mirroring the python harness's `ip_ban_manager.ban_ip = _raising_ban`
+   * method-assign fault injection (events_harness.py:383-387); production never sets it.
+   */
+  @Volatile
+  public var banIpOverride: (suspend (ip: String, duration: Int, reason: String) -> Boolean)? =
+      null
+
   /** Port of `_on_eviction` (ipban_handler.py:57). */
   public fun onEviction() {
     evictionsCount += 1
