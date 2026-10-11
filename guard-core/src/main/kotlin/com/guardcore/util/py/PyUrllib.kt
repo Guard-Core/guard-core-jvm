@@ -51,8 +51,8 @@ public object PyUrllib {
 
   /**
    * Port of `urllib.parse.parse_qs` with the CPython 3.10 defaults (keep_blank_values=False,
-   * strict_parsing=False, separator='&'): blank pairs and value-less pairs are skipped, blank
-   * NAMES are kept, each key maps to its value list.
+   * strict_parsing=False, separator='&'): blank pairs and value-less pairs are skipped, blank NAMES
+   * are kept, each key maps to its value list.
    */
   public fun parseQs(qs: String): Map<String, List<String>> {
     val result = LinkedHashMap<String, List<String>>()

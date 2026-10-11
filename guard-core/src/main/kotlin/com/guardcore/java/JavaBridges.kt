@@ -1,17 +1,17 @@
 package com.guardcore.java
 
 import com.guardcore.core.checks.SecurityCheckPipeline
-import com.guardcore.engine.suspatterns.SusPatternsManager
 import com.guardcore.engine.suspatterns.DetectResult
-import com.guardcore.handlers.applyAction
-import com.guardcore.handlers.banIp
+import com.guardcore.engine.suspatterns.SusPatternsManager
 import com.guardcore.handlers.BehaviorRule
 import com.guardcore.handlers.BehaviorTracker
 import com.guardcore.handlers.IpBanManager
 import com.guardcore.handlers.RateLimitManager
 import com.guardcore.handlers.RedisManager
-import com.guardcore.handlers.unbanIp
 import com.guardcore.handlers.SecurityHeadersManager
+import com.guardcore.handlers.applyAction
+import com.guardcore.handlers.banIp
+import com.guardcore.handlers.unbanIp
 import com.guardcore.protocols.GuardRequest
 import com.guardcore.protocols.GuardResponse
 import java.util.concurrent.CompletableFuture
@@ -61,8 +61,9 @@ public object JavaBridges {
       content: String,
       ipAddress: String,
       context: String = "unknown",
-  ): CompletableFuture<DetectResult> =
-      bridgeScope.future { SusPatternsManager.shared().detect(content, ipAddress, context) }
+  ): CompletableFuture<DetectResult> = bridgeScope.future {
+    SusPatternsManager.shared().detect(content, ipAddress, context)
+  }
 
   /** Blocking variant of [SusPatternsManager.detect]. */
   @JvmStatic
@@ -97,7 +98,10 @@ public object JavaBridges {
   public fun unbanIp(
       manager: IpBanManager,
       ip: String,
-  ): CompletableFuture<Void?> = bridgeScope.future { manager.unbanIp(ip); null }
+  ): CompletableFuture<Void?> = bridgeScope.future {
+    manager.unbanIp(ip)
+    null
+  }
 
   /** Blocking variant of [IpBanManager.unbanIp]. */
   @JvmStatic
@@ -119,10 +123,9 @@ public object JavaBridges {
       clientIp: String,
       createErrorResponse: suspend (Int, String) -> GuardResponse,
       endpointPath: String = "",
-  ): CompletableFuture<GuardResponse?> =
-      bridgeScope.future {
-        manager.checkRateLimit(request, clientIp, createErrorResponse, endpointPath)
-      }
+  ): CompletableFuture<GuardResponse?> = bridgeScope.future {
+    manager.checkRateLimit(request, clientIp, createErrorResponse, endpointPath)
+  }
 
   /** Blocking variant of [RateLimitManager.checkRateLimit]. */
   @JvmStatic
@@ -132,16 +135,16 @@ public object JavaBridges {
       clientIp: String,
       createErrorResponse: suspend (Int, String) -> GuardResponse,
       endpointPath: String = "",
-  ): GuardResponse? =
-      runBlocking { manager.checkRateLimit(request, clientIp, createErrorResponse, endpointPath) }
+  ): GuardResponse? = runBlocking {
+    manager.checkRateLimit(request, clientIp, createErrorResponse, endpointPath)
+  }
 
   /** Async variant of [SecurityHeadersManager.getHeaders]. */
   @JvmStatic
   public fun getSecurityHeaders(
       manager: SecurityHeadersManager,
       requestPath: String?,
-  ): CompletableFuture<Map<String, String>> =
-      bridgeScope.future { manager.getHeaders(requestPath) }
+  ): CompletableFuture<Map<String, String>> = bridgeScope.future { manager.getHeaders(requestPath) }
 
   /** Blocking variant of [SecurityHeadersManager.getHeaders]. */
   @JvmStatic
@@ -173,11 +176,10 @@ public object JavaBridges {
       clientIp: String,
       endpointId: String,
       details: String,
-  ): CompletableFuture<Void?> =
-      bridgeScope.future {
-        tracker.applyAction(rule, clientIp, endpointId, details)
-        null
-      }
+  ): CompletableFuture<Void?> = bridgeScope.future {
+    tracker.applyAction(rule, clientIp, endpointId, details)
+    null
+  }
 
   /** Blocking variant of [BehaviorTracker.applyAction] extension. */
   @JvmStatic

@@ -24,9 +24,9 @@ public object EventsComparison {
       }
 
   /**
-   * Compares one expected envelope against the observed envelope; returns the mechanical diff
-   * lines (empty = match). Absence of an observed key diverges only against a non-null expected
-   * value (a runner that cannot observe a field records its absence, it does not fail).
+   * Compares one expected envelope against the observed envelope; returns the mechanical diff lines
+   * (empty = match). Absence of an observed key diverges only against a non-null expected value (a
+   * runner that cannot observe a field records its absence, it does not fail).
    */
   public fun envelopeDiffs(index: Int, expected: Map<*, *>, observed: Map<*, *>?): List<String> {
     if (observed == null) {

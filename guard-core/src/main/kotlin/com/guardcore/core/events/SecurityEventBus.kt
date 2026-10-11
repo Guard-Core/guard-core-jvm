@@ -16,8 +16,8 @@ import java.util.logging.Logger
  * (middleware_events.py:137) and `send_cloud_detection_events` (middleware_events.py:168).
  *
  * The bus gates on `agent_handler`/`agent_enable_events` and builds the guard-agent SecurityEvent
- * telemetry envelope (the model's full field set carried as a map; the model class itself is the
- * W7 agent wave surface). With no agent handler the bus is a faithful no-op, exactly like
+ * telemetry envelope (the model's full field set carried as a map; the model class itself is the W7
+ * agent wave surface). With no agent handler the bus is a faithful no-op, exactly like
  * middleware_events.py:119-120.
  */
 public open class SecurityEventBus(
@@ -60,9 +60,9 @@ public open class SecurityEventBus(
   /**
    * Port of `_build_event` (middleware_events.py:67): constructs the SecurityEvent telemetry
    * envelope over the guard-agent model's field set (guard_agent/models.py:208): idempotency_key,
-   * timestamp, event_type, ip_address, country, user_agent, action_taken, reason, endpoint,
-   * method, status_code, response_time, decorator_type, rule_type, pattern_matched, handler_name,
-   * metadata. The bus never passes status_code/pattern_matched (they stay null, exactly like
+   * timestamp, event_type, ip_address, country, user_agent, action_taken, reason, endpoint, method,
+   * status_code, response_time, decorator_type, rule_type, pattern_matched, handler_name, metadata.
+   * The bus never passes status_code/pattern_matched (they stay null, exactly like
    * middleware_events.py:82-109); pattern_matched is set by the sus_patterns handler seam.
    */
   protected fun buildEvent(
@@ -215,8 +215,9 @@ public open class SecurityEventBus(
      * The bus hands its agent handler to extract_client_ip (middleware_events.py:125-127); the
      * sink-shaped field adapts to the protocol shape the extraction seam reads.
      */
-    public fun sinkAsAgentProtocol(sink: com.guardcore.handlers.HandlerAgentSink):
-        com.guardcore.protocols.AgentHandlerProtocol =
+    public fun sinkAsAgentProtocol(
+        sink: com.guardcore.handlers.HandlerAgentSink,
+    ): com.guardcore.protocols.AgentHandlerProtocol =
         object : com.guardcore.protocols.AgentHandlerProtocol {
           override suspend fun initializeRedis(
               redisHandler: com.guardcore.protocols.RedisHandlerProtocol,

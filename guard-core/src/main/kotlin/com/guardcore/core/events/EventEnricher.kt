@@ -91,8 +91,7 @@ public class EventEnricher(
   public suspend fun enrichEvent(event: Map<String, Any?>) {
     try {
       @Suppress("UNCHECKED_CAST")
-      val metadata =
-          event["metadata"] as? MutableMap<String, Any?> ?: return
+      val metadata = event["metadata"] as? MutableMap<String, Any?> ?: return
       applyIdentity(metadata)
       applyThreatScore(event, metadata)
       applyRuleCorrelation(event, metadata)
@@ -105,8 +104,7 @@ public class EventEnricher(
   /** Port of `enrich_metric` (enricher.py:141). */
   public suspend fun enrichMetric(metric: Map<String, Any?>) {
     try {
-      @Suppress("UNCHECKED_CAST")
-      val tags = metric["tags"] as? MutableMap<String, Any?> ?: return
+      @Suppress("UNCHECKED_CAST") val tags = metric["tags"] as? MutableMap<String, Any?> ?: return
       applyIdentity(tags)
     } catch (e: Exception) {
       logger.severe("metric enrichment failed; metric will be sent unenriched: $e")

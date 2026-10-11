@@ -223,8 +223,8 @@ public object SusPatternsRegistry {
       engine.patterns + engine.customPatterns.toList()
 
   /**
-   * Port of `suspatterns_handler.detect` (suspatterns_handler.py:855): the full engine verdict
-   * plus the `overall_detection` performance record (suspatterns_handler.py:966-976) and the
+   * Port of `suspatterns_handler.detect` (suspatterns_handler.py:855): the full engine verdict plus
+   * the `overall_detection` performance record (suspatterns_handler.py:966-976) and the
    * pattern_detected threat event on match (suspatterns_handler.py:1020-1050).
    */
   public suspend fun detect(
@@ -236,8 +236,7 @@ public object SusPatternsRegistry {
       contentPreview: String? = null,
   ): Map<String, Any?> {
     val executionStart = System.nanoTime()
-    val result =
-        engine.detect(content, ipAddress, context, correlationId, enabledCategories)
+    val result = engine.detect(content, ipAddress, context, correlationId, enabledCategories)
     val totalExecutionTime = (System.nanoTime() - executionStart) / 1e9
 
     engine.detectionState.performanceMonitor?.recordMetric(
@@ -246,12 +245,13 @@ public object SusPatternsRegistry {
         content.length,
         matched = result.isThreat,
         timeout = false,
-        agentHandler = agentHandler?.let { sink ->
-          // The engine monitor seam is synchronous; the sink handoff blocks on the dispatch.
-          com.guardcore.engine.detection.AnomalyEventSink { event ->
-            kotlinx.coroutines.runBlocking { sink.sendEvent(event) }
-          }
-        },
+        agentHandler =
+            agentHandler?.let { sink ->
+              // The engine monitor seam is synchronous; the sink handoff blocks on the dispatch.
+              com.guardcore.engine.detection.AnomalyEventSink { event ->
+                kotlinx.coroutines.runBlocking { sink.sendEvent(event) }
+              }
+            },
         correlationId = correlationId,
     )
 
@@ -281,9 +281,9 @@ public object SusPatternsRegistry {
   }
 
   /**
-   * Port of `_send_threat_event` (suspatterns_handler.py:990): pattern info from the first
-   * matched pattern (semantic threats render `semantic:<attack_type>`), redacted pattern source,
-   * and the count metadata payload.
+   * Port of `_send_threat_event` (suspatterns_handler.py:990): pattern info from the first matched
+   * pattern (semantic threats render `semantic:<attack_type>`), redacted pattern source, and the
+   * count metadata payload.
    */
   private suspend fun sendThreatEvent(
       result: com.guardcore.engine.suspatterns.DetectResult,
@@ -306,11 +306,9 @@ public object SusPatternsRegistry {
         }
 
     val previewSource = contentPreview ?: content
-    val cappedPreview =
-        if (previewSource.length > 100) previewSource.take(100) else previewSource
+    val cappedPreview = if (previewSource.length > 100) previewSource.take(100) else previewSource
 
-    val threatCategories =
-        com.guardcore.engine.suspatterns.collectThreatCategories(threats)
+    val threatCategories = com.guardcore.engine.suspatterns.collectThreatCategories(threats)
 
     val patternMatched =
         com.guardcore.handlers.DetectionScanRedaction.redactPatternSource(patternInfo)
@@ -352,8 +350,8 @@ public object SusPatternsRegistry {
   }
 
   /**
-   * Corpus helper mirroring the events harness's direct registry clears
-   * (events_harness.py:397-398, 410-411); production never calls it.
+   * Corpus helper mirroring the events harness's direct registry clears (events_harness.py:397-398,
+   * 410-411); production never calls it.
    */
   public fun clearCustomPatternsForCorpus() {
     engine.customPatterns.clear()

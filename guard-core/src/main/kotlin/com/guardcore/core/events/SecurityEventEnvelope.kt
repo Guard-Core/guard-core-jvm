@@ -1,13 +1,12 @@
 package com.guardcore.core.events
 
 /**
- * The guard-agent `SecurityEvent` telemetry envelope as a field map
- * (guard_agent/models.py:208): the model constructor's defaults (ip_address="", action_taken="",
- * reason="", metadata={}, every optional field null, idempotency_key=uuid4) applied to whatever
- * the emitter passes, exactly like the python emitters constructing `SecurityEvent(...)` and the
- * bus/harness dumping the model. The model class itself is the W7 agent seam; every emitter in
- * the engine builds its events through this helper so the observable envelope key set is the
- * model's field set everywhere.
+ * The guard-agent `SecurityEvent` telemetry envelope as a field map (guard_agent/models.py:208):
+ * the model constructor's defaults (ip_address="", action_taken="", reason="", metadata={}, every
+ * optional field null, idempotency_key=uuid4) applied to whatever the emitter passes, exactly like
+ * the python emitters constructing `SecurityEvent(...)` and the bus/harness dumping the model. The
+ * model class itself is the W7 agent seam; every emitter in the engine builds its events through
+ * this helper so the observable envelope key set is the model's field set everywhere.
  */
 public fun securityEventEnvelope(
     eventType: String,

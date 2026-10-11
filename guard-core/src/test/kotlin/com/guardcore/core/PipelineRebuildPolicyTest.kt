@@ -45,8 +45,8 @@ public class PipelineRebuildPolicyTest {
 
   /**
    * The python test's `middleware.guard_decorator = MagicMock()` shape: a decorator presenting an
-   * EMPTY route-config collection, so `route_config_applies([], pred)` is False and the
-   * route-only checks start eliminated (config_revision harness, test_pipeline_config_revision.py).
+   * EMPTY route-config collection, so `route_config_applies([], pred)` is False and the route-only
+   * checks start eliminated (config_revision harness, test_pipeline_config_revision.py).
    */
   private class EmptyRoutesMiddleware(private val inner: GuardMiddlewareProtocol) :
       GuardMiddlewareProtocol by inner {
@@ -263,8 +263,8 @@ public class PipelineRebuildPolicyTest {
 
     val cloud = CloudManager.getInstance()
     val savedRanges = cloud.ipRanges.toMap()
-    cloud.ipRanges["AWS"] = (savedRanges["AWS"] ?: emptySet()) +
-        com.guardcore.util.py.IpNetwork.parse("3.0.0.0/8")
+    cloud.ipRanges["AWS"] =
+        (savedRanges["AWS"] ?: emptySet()) + com.guardcore.util.py.IpNetwork.parse("3.0.0.0/8")
     config.blockCloudProviders = setOf("AWS")
 
     try {

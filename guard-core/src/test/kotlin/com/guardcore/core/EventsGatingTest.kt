@@ -7,7 +7,6 @@ import com.guardcore.core.events.SecurityEventBus
 import com.guardcore.handlers.HandlerAgentSink
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -139,8 +138,7 @@ public class EventsGatingTest {
     val agent = RecordingAgent()
     val geo =
         object : com.guardcore.protocols.GeoIPHandler by NoopGeo {
-          override fun getCountry(ip: String): String? =
-              throw IllegalStateException("geo down")
+          override fun getCountry(ip: String): String? = throw IllegalStateException("geo down")
         }
     val bus = SecurityEventBus(agent, config { agentEnableEvents = true }, geoIpHandler = geo)
     bus.sendMiddlewareEvent("test", TestRequest(), "blocked", "reason")
@@ -188,9 +186,13 @@ public class EventsGatingTest {
 
     override suspend fun initialize() {}
 
-    override suspend fun initializeRedis(redisHandler: com.guardcore.protocols.RedisHandlerProtocol) {}
+    override suspend fun initializeRedis(
+        redisHandler: com.guardcore.protocols.RedisHandlerProtocol,
+    ) {}
 
-    override suspend fun initializeAgent(agentHandler: com.guardcore.protocols.AgentHandlerProtocol) {}
+    override suspend fun initializeAgent(
+        agentHandler: com.guardcore.protocols.AgentHandlerProtocol,
+    ) {}
 
     override suspend fun refresh() {}
 

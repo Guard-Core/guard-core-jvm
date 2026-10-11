@@ -11,17 +11,17 @@ import java.util.logging.Logger
  * Port of `guard_core/decorators/` beyond the W4a route/base slice: the per-feature decorator
  * factories as Kotlin methods carrying the SAME parameter surface 1:1.
  *
- * The python idiom is `@decorator_factory(args)` applied to a function; the factory closes over
- * the args, resolves the function's RouteConfig through `_ensure_route_config` and mutates it.
- * The JVM idiom (adapters consume this) is the same factory as a method taking the route key
- * first: `securityDecorator.requireAuth(routeKey, "bearer")`. Every factory applies the same
- * ensure -> mutate -> apply sequence over [BaseSecurityDecorator.ensureRouteConfig], with the
- * python validation and warning behavior byte-for-byte.
+ * The python idiom is `@decorator_factory(args)` applied to a function; the factory closes over the
+ * args, resolves the function's RouteConfig through `_ensure_route_config` and mutates it. The JVM
+ * idiom (adapters consume this) is the same factory as a method taking the route key first:
+ * `securityDecorator.requireAuth(routeKey, "bearer")`. Every factory applies the same ensure ->
+ * mutate -> apply sequence over [BaseSecurityDecorator.ensureRouteConfig], with the python
+ * validation and warning behavior byte-for-byte.
  *
- * File anchors: access_control.py:14 (AccessControlMixin), rate_limiting.py:9
- * (RateLimitingMixin), behavioral.py:13 (BehavioralMixin), authentication.py:13
- * (AuthenticationMixin), content_filtering.py:15 (ContentFilteringMixin), advanced.py:50
- * (AdvancedMixin), __init__.py:16 (SecurityDecorator).
+ * File anchors: access_control.py:14 (AccessControlMixin), rate_limiting.py:9 (RateLimitingMixin),
+ * behavioral.py:13 (BehavioralMixin), authentication.py:13 (AuthenticationMixin),
+ * content_filtering.py:15 (ContentFilteringMixin), advanced.py:50 (AdvancedMixin), __init__.py:16
+ * (SecurityDecorator).
  */
 public open class SecurityDecorator(
     config: SecurityConfig,
@@ -60,7 +60,9 @@ public open class SecurityDecorator(
     applyRouteConfig(routeKey)
   }
 
-  /** Python `block_clouds` (access_control.py:54): selector validation + unknown-provider warning. */
+  /**
+   * Python `block_clouds` (access_control.py:54): selector validation + unknown-provider warning.
+   */
   public fun blockClouds(routeKey: Any, providers: List<String>? = null) {
     val routeConfig = ensureRouteConfig(routeKey)
     if (providers == null) {
@@ -69,7 +71,10 @@ public open class SecurityDecorator(
     } else {
       val valid =
           providers
-              .filter { it.substringBefore(":!") in com.guardcore.config.CloudProviders.VALID_CLOUD_PROVIDERS }
+              .filter {
+                it.substringBefore(":!") in
+                    com.guardcore.config.CloudProviders.VALID_CLOUD_PROVIDERS
+              }
               .toSet()
       routeConfig.blockCloudProviders = valid.toMutableSet()
       val invalid = providers.toSet() - valid
@@ -86,9 +91,7 @@ public open class SecurityDecorator(
   public fun bypass(routeKey: Any, checks: List<String>) {
     val routeConfig = ensureRouteConfig(routeKey)
     val valid =
-        com.guardcore.config.ConfigFieldRegistry.VALID_BYPASS_CHECKS
-            .filter { it in checks }
-            .toSet()
+        com.guardcore.config.ConfigFieldRegistry.VALID_BYPASS_CHECKS.filter { it in checks }.toSet()
     routeConfig.bypassedChecks.addAll(valid)
     val invalid = checks.toSet() - valid
     if (invalid.isNotEmpty()) {
@@ -266,8 +269,8 @@ public open class SecurityDecorator(
   // -------------------------------------------------- content_filtering.py (ContentFilteringMixin)
 
   /**
-   * Python `block_user_agents` (content_filtering.py:17): every pattern passes the ReDoS
-   * validator BEFORE the route mutation, exactly like the python factory raising ValueError.
+   * Python `block_user_agents` (content_filtering.py:17): every pattern passes the ReDoS validator
+   * BEFORE the route mutation, exactly like the python factory raising ValueError.
    */
   public fun blockUserAgents(routeKey: Any, patterns: List<String>) {
     val compiler = com.guardcore.engine.detection.PatternCompiler()
@@ -278,8 +281,7 @@ public open class SecurityDecorator(
               maxContentLength = config.detectionMaxBodyInspectBytes,
           )
       if (!isSafe) {
-        val redacted =
-            com.guardcore.handlers.DetectionScanRedaction.redactPatternSource(pattern)
+        val redacted = com.guardcore.handlers.DetectionScanRedaction.redactPatternSource(pattern)
         throw IllegalArgumentException(
             "block_user_agents pattern rejected by ReDoS validator: '$redacted' ($reason)",
         )
@@ -376,8 +378,8 @@ public open class SecurityDecorator(
   }
 
   /**
-   * Python `honeypot_detection` (advanced.py:72): appends the honeypot validator closure over
-   * the trap fields; form and JSON bodies with a filled trap field reject with 403.
+   * Python `honeypot_detection` (advanced.py:72): appends the honeypot validator closure over the
+   * trap fields; form and JSON bodies with a filled trap field reject with 403.
    */
   public fun honeypotDetection(routeKey: Any, trapFields: List<String>) {
     val honeypotValidator: suspend (GuardRequest) -> Any? =
@@ -396,11 +398,10 @@ internal fun honeypotValidatorClosure(
     trapFields: List<String>,
     config: SecurityConfig,
 ): suspend (GuardRequest) -> Any? {
-  fun hasTrapFieldFilled(data: Map<String, Any?>): Boolean =
-      trapFields.any { field ->
-        val value = data[field]
-        value != null && value.toString().isNotEmpty()
-      }
+  fun hasTrapFieldFilled(data: Map<String, Any?>): Boolean = trapFields.any { field ->
+    val value = data[field]
+    value != null && value.toString().isNotEmpty()
+  }
 
   fun forbidden(): GuardResponse = SimpleDecoratorResponse(403, "Forbidden")
 
@@ -432,8 +433,7 @@ internal fun honeypotValidatorClosure(
         rawBody == null -> null
         "application/x-www-form-urlencoded" in (request.headers["content-type"] ?: "") ->
             validateFormData(rawBody)
-        "application/json" in (request.headers["content-type"] ?: "") ->
-            validateJsonData(rawBody)
+        "application/json" in (request.headers["content-type"] ?: "") -> validateJsonData(rawBody)
         else -> null
       }
     }

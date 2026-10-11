@@ -53,11 +53,11 @@ public object AgentEvents {
   /**
    * Port of `send_agent_event` (agent_events.py:39-94). The Python version constructs the
    * guard-agent SecurityEvent telemetry model via `_pydantic_plugin_mute.get_telemetry_model`
-   * (guard_agent/models.py:208); the model class itself is the W7 agent seam, so the event is
-   * built as the same full field map (idempotency_key, timestamp, event_type, ip_address, country,
-   * user_agent, action_taken, reason, endpoint, method, status_code, response_time,
-   * decorator_type, rule_type, pattern_matched, handler_name, metadata; extra kwargs fold into
-   * top-level model fields exactly like the `extra="allow"` construction) and handed to
+   * (guard_agent/models.py:208); the model class itself is the W7 agent seam, so the event is built
+   * as the same full field map (idempotency_key, timestamp, event_type, ip_address, country,
+   * user_agent, action_taken, reason, endpoint, method, status_code, response_time, decorator_type,
+   * rule_type, pattern_matched, handler_name, metadata; extra kwargs fold into top-level model
+   * fields exactly like the `extra="allow"` construction) and handed to
    * `AgentHandlerProtocol.sendEvent`.
    */
   public suspend fun sendAgentEvent(

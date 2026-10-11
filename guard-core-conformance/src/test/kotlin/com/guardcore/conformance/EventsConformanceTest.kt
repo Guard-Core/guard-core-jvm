@@ -1,9 +1,9 @@
 package com.guardcore.conformance
 
+import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
-import java.nio.file.Files
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -14,8 +14,8 @@ import kotlinx.serialization.json.jsonPrimitive
  * compared under the index.json contract.
  *
  * Contract (conformance/guard-core-spec-4.1.0/cases/index.json):
- * - events_envelopes: only the keys present in each expected envelope are compared; volatile
- *   fields dropped recursively (events_volatile_fields); xfail cases advisory.
+ * - events_envelopes: only the keys present in each expected envelope are compared; volatile fields
+ *   dropped recursively (events_volatile_fields); xfail cases advisory.
  * - float_precision 6.
  *
  * Documented divergences live in conformance/jvm_events_xfail.json with the fail-closed drift
@@ -48,9 +48,11 @@ public class EventsConformanceTest {
     @Suppress("UNCHECKED_CAST")
     public fun loadLedger(): Map<String, String> {
       val text =
-          EventsConformanceTest::class.java.getResourceAsStream(LEDGER_RESOURCE)
-              ?.bufferedReader()?.readText()
-              ?: error("missing $LEDGER_RESOURCE")
+          EventsConformanceTest::class
+              .java
+              .getResourceAsStream(LEDGER_RESOURCE)
+              ?.bufferedReader()
+              ?.readText() ?: error("missing $LEDGER_RESOURCE")
       val obj = Json.parseToJsonElement(text).jsonObject
       val cases = obj.getValue("cases").jsonObject
       return cases.entries.associate { it.key to it.value.jsonPrimitive.content }
@@ -111,8 +113,7 @@ public class EventsConformanceTest {
           recorded[key] = mechanical
           val ledgered = ledger[key]
           when {
-            ledgered == null ->
-                failures.add(CaseFailure(suite, caseId, mechanical))
+            ledgered == null -> failures.add(CaseFailure(suite, caseId, mechanical))
             ledgered != mechanical ->
                 failures.add(
                     CaseFailure(

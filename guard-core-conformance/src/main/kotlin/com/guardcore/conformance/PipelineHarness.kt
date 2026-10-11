@@ -369,8 +369,7 @@ public object PipelineHarness {
       "whitelist" -> builder.whitelist = (value as List<*>).map { it.toString() }
       "blacklist" -> builder.blacklist = (value as List<*>).map { it.toString() }
       "exempt_ips" -> builder.exemptIps = (value as List<*>).map { it.toString() }
-      "blocked_user_agents" ->
-          builder.blockedUserAgents = (value as List<*>).map { it.toString() }
+      "blocked_user_agents" -> builder.blockedUserAgents = (value as List<*>).map { it.toString() }
       "blocked_countries" ->
           builder.blockedCountries = (value as List<*>).map { it.toString() }.toSet()
       "whitelist_countries" ->
@@ -386,8 +385,7 @@ public object PipelineHarness {
         @Suppress("UNCHECKED_CAST") val map = value as Map<String, String>
         builder.customErrorResponses = map.mapKeys { (k, _) -> k.toInt() }
       }
-      "security_headers" ->
-          builder.securityHeaders = jsonValueToKotlin(value) as? Map<String, Any?>
+      "security_headers" -> builder.securityHeaders = jsonValueToKotlin(value) as? Map<String, Any?>
       "enable_cors" -> builder.enableCors = value as Boolean
       "cors_allow_origins" -> builder.corsAllowOrigins = (value as List<*>).map { it.toString() }
       "cors_allow_methods" -> builder.corsAllowMethods = (value as List<*>).map { it.toString() }

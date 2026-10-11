@@ -34,8 +34,15 @@ public class EventsPortTest {
     // event_types.py:46-100: 39 event values, 3 metric values.
     assertEquals(39, EventTypes.EVENT_TYPE_VALUES.size)
     assertEquals(3, EventTypes.METRIC_TYPE_VALUES.size)
-    assertTrue(EventTypes.EVENT_TYPE_VALUES.containsAll(setOf("penetration_attempt",
-        "emergency_mode_activated", "pattern_anomaly_statistical_anomaly")))
+    assertTrue(
+        EventTypes.EVENT_TYPE_VALUES.containsAll(
+            setOf(
+                "penetration_attempt",
+                "emergency_mode_activated",
+                "pattern_anomaly_statistical_anomaly",
+            ),
+        ),
+    )
     // Enrichment keys (event_types.py:125-131), verbatim.
     assertEquals("guard.project_id", EventTypes.ENRICHMENT_KEY_PROJECT_ID)
     assertEquals("guard.service.name", EventTypes.ENRICHMENT_KEY_SERVICE_NAME)
@@ -106,16 +113,14 @@ public class EventsPortTest {
 
   @Test
   fun enricherAppliesIdentityAndThreatScore() = runBlocking {
-    val cfg =
-        config {
-          agentProjectId = "proj-1"
-          otelServiceName = "svc"
-          otelResourceAttributes = mapOf("deployment.environment" to "prod")
-        }
+    val cfg = config {
+      agentProjectId = "proj-1"
+      otelServiceName = "svc"
+      otelResourceAttributes = mapOf("deployment.environment" to "prod")
+    }
     val enricher = EventEnricher(EnrichmentContext(config = cfg))
     val metadata = linkedMapOf<String, Any?>()
-    val event =
-        linkedMapOf<String, Any?>("event_type" to "ip_banned", "metadata" to metadata)
+    val event = linkedMapOf<String, Any?>("event_type" to "ip_banned", "metadata" to metadata)
     enricher.enrichEvent(event)
     assertEquals("proj-1", metadata["guard.project_id"])
     assertEquals("svc", metadata["guard.service.name"])
@@ -138,8 +143,7 @@ public class EventsPortTest {
   fun enricherBehaviorCorrelationHashesIpServiceBucket() = runBlocking {
     val cfg = config { otelServiceName = "svc" }
     val tracker = BehaviorTracker(cfg)
-    val enricher =
-        EventEnricher(EnrichmentContext(config = cfg, behaviorTracker = tracker))
+    val enricher = EventEnricher(EnrichmentContext(config = cfg, behaviorTracker = tracker))
     val metadata = linkedMapOf<String, Any?>()
     enricher.enrichEvent(
         linkedMapOf<String, Any?>(
@@ -209,12 +213,18 @@ public class EventsPortTest {
 
   @Test
   fun otelHandlerSignalEndpointStripsKnownSuffix() {
-    assertEquals("http://otel:4318/v1/traces",
-        OtelHandler.otlpSignalEndpoint("http://otel:4318", "/v1/traces"))
-    assertEquals("http://otel:4318/v1/metrics",
-        OtelHandler.otlpSignalEndpoint("http://otel:4318/v1/traces", "/v1/metrics"))
-    assertEquals("http://otel:4318/v1/logs",
-        OtelHandler.otlpSignalEndpoint("http://otel:4318/", "/v1/logs"))
+    assertEquals(
+        "http://otel:4318/v1/traces",
+        OtelHandler.otlpSignalEndpoint("http://otel:4318", "/v1/traces"),
+    )
+    assertEquals(
+        "http://otel:4318/v1/metrics",
+        OtelHandler.otlpSignalEndpoint("http://otel:4318/v1/traces", "/v1/metrics"),
+    )
+    assertEquals(
+        "http://otel:4318/v1/logs",
+        OtelHandler.otlpSignalEndpoint("http://otel:4318/", "/v1/logs"),
+    )
     assertNull(OtelHandler.otlpSignalEndpoint(null, "/v1/traces"))
   }
 

@@ -57,8 +57,8 @@ public class HandlerInitializer(
   /**
    * The composite member factory (handler_initializer.py:93-100): given the composed members and
    * the config, returns the additional member handlers. The default returns otel/logfire members
-   * when requested and raises explicitly while their SDKs are absent from the dependency set
-   * (the W4a contract, kept); hosts that provide the `core.events` SDK surfaces register their own
+   * when requested and raises explicitly while their SDKs are absent from the dependency set (the
+   * W4a contract, kept); hosts that provide the `core.events` SDK surfaces register their own
    * factory composing the real [OtelHandler]/[LogfireHandler] members.
    */
   public var compositeMemberFactory:
@@ -100,7 +100,8 @@ public class HandlerInitializer(
     if (config.enableDynamicRules) {
       dynamicRuleHandler = com.guardcore.handlers.DynamicRuleManager(config)
     }
-    var tracker = (guardDecorator as? com.guardcore.decorators.BaseSecurityDecorator)?.behaviorTracker
+    var tracker =
+        (guardDecorator as? com.guardcore.decorators.BaseSecurityDecorator)?.behaviorTracker
     if (tracker == null) {
       tracker = BehaviorTracker(config)
     }

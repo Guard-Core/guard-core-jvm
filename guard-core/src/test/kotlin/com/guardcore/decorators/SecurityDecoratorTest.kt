@@ -74,7 +74,9 @@ public class SecurityDecoratorTest {
 
     assertEquals(first.routeKey, first.stampedRouteId)
     assertNotEquals(first.routeKey, second.stampedRouteId)
-    assertTrue(guard.getRouteConfig(first.routeKey) === guard.getRouteConfig(first.stampedRouteId!!))
+    assertTrue(
+        guard.getRouteConfig(first.routeKey) === guard.getRouteConfig(first.stampedRouteId!!),
+    )
   }
 
   @Test

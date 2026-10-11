@@ -20,21 +20,21 @@ import com.guardcore.decorators.RouteConfig
 import com.guardcore.decorators.RouteConfigRevision
 import com.guardcore.engine.detection.AnomalyEventSink
 import com.guardcore.engine.detection.PerformanceMonitor
-import com.guardcore.handlers.applyAction
-import com.guardcore.handlers.banIp
 import com.guardcore.handlers.BehaviorRule
 import com.guardcore.handlers.BehaviorTracker
 import com.guardcore.handlers.CloudManager
 import com.guardcore.handlers.DynamicRuleManager
 import com.guardcore.handlers.DynamicRules
 import com.guardcore.handlers.HandlerAgentSink
-import com.guardcore.handlers.initializeBanAgent
 import com.guardcore.handlers.IpBanManager
 import com.guardcore.handlers.IpInfoManager
 import com.guardcore.handlers.RateLimitManager
 import com.guardcore.handlers.RedisManager
 import com.guardcore.handlers.SecurityHeadersManager
 import com.guardcore.handlers.SusPatternsRegistry
+import com.guardcore.handlers.applyAction
+import com.guardcore.handlers.banIp
+import com.guardcore.handlers.initializeBanAgent
 import com.guardcore.handlers.resetIpBanGlobalState
 import com.guardcore.handlers.unbanIp
 import com.guardcore.protocols.GeoIPHandler
@@ -198,7 +198,9 @@ public object EventsHarness {
     }
   }
 
-  /** Python `_EventsMiddleware` (events_harness.py:253): real bus wired to the capturing handler. */
+  /**
+   * Python `_EventsMiddleware` (events_harness.py:253): real bus wired to the capturing handler.
+   */
   public class EventsMiddleware(
       override val config: SecurityConfig,
       public val rateLimitHandlerValue: RateLimitManager,
@@ -300,8 +302,7 @@ public object EventsHarness {
       merged[key] = value
     }
     var wantsGeo =
-        caseConfig.containsKey("blocked_countries") ||
-            caseConfig.containsKey("whitelist_countries")
+        caseConfig.containsKey("blocked_countries") || caseConfig.containsKey("whitelist_countries")
     for ((key, value) in merged) {
       if (key == "custom_request_check") continue
       if (key == "blocked_countries" || key == "whitelist_countries") wantsGeo = true
@@ -332,11 +333,9 @@ public object EventsHarness {
       "detection_anomaly_threshold" -> builder.detectionAnomalyThreshold = value as Double
       "detection_min_samples_for_anomaly" ->
           builder.detectionMinSamplesForAnomaly = (value as Number).toInt()
-      "detection_slow_pattern_threshold" ->
-          builder.detectionSlowPatternThreshold = value as Double
+      "detection_slow_pattern_threshold" -> builder.detectionSlowPatternThreshold = value as Double
       "emergency_mode" -> builder.emergencyMode = value as Boolean
-      "emergency_whitelist" ->
-          builder.emergencyWhitelist = (value as List<*>).map { it.toString() }
+      "emergency_whitelist" -> builder.emergencyWhitelist = (value as List<*>).map { it.toString() }
       "enable_dynamic_rules" -> builder.enableDynamicRules = value as Boolean
       "enable_redis" -> builder.enableRedis = value as Boolean
       "redis_prefix" -> builder.redisPrefix = value.toString()
@@ -358,7 +357,7 @@ public object EventsHarness {
         "auth_required" -> routeConfig.authRequired = value.toString()
         "block_cloud_providers" ->
             routeConfig.blockCloudProviders =
-            (value as List<*>).map { it.toString() }.toMutableSet()
+                (value as List<*>).map { it.toString() }.toMutableSet()
         "max_request_size" -> routeConfig.maxRequestSize = (value as Number).toInt()
         "require_https" -> routeConfig.requireHttps = value as Boolean
         "rate_limit" -> routeConfig.rateLimit = (value as Number).toInt()
@@ -370,14 +369,12 @@ public object EventsHarness {
         "whitelist_countries" ->
             routeConfig.whitelistCountries = (value as List<*>).map { it.toString() }
         "blocked_user_agents" ->
-            routeConfig.blockedUserAgents =
-                (value as List<*>).map { it.toString() }.toMutableList()
+            routeConfig.blockedUserAgents = (value as List<*>).map { it.toString() }.toMutableList()
         "bypassed_checks" ->
             routeConfig.bypassedChecks = (value as List<*>).map { it.toString() }.toMutableSet()
         "enable_suspicious_detection" -> routeConfig.enableSuspiciousDetection = value as Boolean
         "excluded_detection_headers" ->
-            routeConfig.excludedDetectionHeaders =
-                (value as List<*>).map { it.toString() }.toSet()
+            routeConfig.excludedDetectionHeaders = (value as List<*>).map { it.toString() }.toSet()
         "excluded_detection_params" ->
             routeConfig.excludedDetectionParams = (value as List<*>).map { it.toString() }.toSet()
         "excluded_detection_body_fields" ->
@@ -404,9 +401,9 @@ public object EventsHarness {
         )
     public val config: SecurityConfig = makeEventsConfig(caseConfig, geo)
     public val routes: Map<String, RouteConfig> =
-        (case["routes"] as? Map<String, Map<String, Any?>>)
-            ?.mapValues { (path, overrides) -> buildEventsRoute(path, overrides) }
-            ?: emptyMap()
+        (case["routes"] as? Map<String, Map<String, Any?>>)?.mapValues { (path, overrides) ->
+          buildEventsRoute(path, overrides)
+        } ?: emptyMap()
     public val eventBus: SecurityEventBus = SecurityEventBus(agent, config, geo)
     public val rateLimitHandler: RateLimitManager = RateLimitManager.getInstance(config)
     public val middleware: EventsMiddleware =
@@ -422,7 +419,10 @@ public object EventsHarness {
     }
 
     /** Python `_redis_op_config` (events_harness.py:539-545): the redis-scoped config copy. */
-    public fun redisOpConfig(redisUrl: String, enableRateLimiting: Boolean? = null): SecurityConfig {
+    public fun redisOpConfig(
+        redisUrl: String,
+        enableRateLimiting: Boolean? = null,
+    ): SecurityConfig {
       val overrides =
           linkedMapOf<String, Any?>(
               "enable_redis" to true,
@@ -538,8 +538,7 @@ public object EventsHarness {
                 anomalyThreshold = (step["anomaly_threshold"] as? Number)?.toDouble() ?: 3.0,
                 slowPatternThreshold =
                     (step["slow_pattern_threshold"] as? Number)?.toDouble() ?: 0.1,
-                minSamplesForAnomaly =
-                    (step["min_samples_for_anomaly"] as? Number)?.toInt() ?: 10,
+                minSamplesForAnomaly = (step["min_samples_for_anomaly"] as? Number)?.toInt() ?: 10,
             )
         val sink = AnomalyEventSink { event ->
           kotlinx.coroutines.runBlocking { harness.agent.sendEvent(event) }
@@ -745,8 +744,13 @@ public object EventsHarness {
                 config = harness.config,
                 logger = harness.middleware.logger,
                 eventBus = harness.eventBus,
-                routeResolver = RouteConfigResolver(RoutingContext(harness.config,
-                    harness.middleware.logger)),
+                routeResolver =
+                    RouteConfigResolver(
+                        RoutingContext(
+                            harness.config,
+                            harness.middleware.logger,
+                        ),
+                    ),
                 responseFactory = errorFactory,
                 validator = validator,
             )
@@ -785,8 +789,7 @@ public object EventsHarness {
       DynamicRules(
           ruleId = payload["rule_id"].toString(),
           version = (payload["version"] as Number).toInt(),
-          timestamp =
-              java.time.OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, java.time.ZoneOffset.UTC),
+          timestamp = java.time.OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, java.time.ZoneOffset.UTC),
           emergencyMode = payload["emergency_mode"] as? Boolean ?: false,
           emergencyWhitelist =
               (payload["emergency_whitelist"] as? List<*>)?.map { it.toString() } ?: emptyList(),
@@ -799,8 +802,7 @@ public object EventsRedisSupport {
     val url = EventsHarness.EVENTS_REDIS_URL
     val prefix = EventsHarness.EVENTS_REDIS_PREFIX
     val uri = java.net.URI(url)
-    val client =
-        io.lettuce.core.RedisClient.create(uri.toString())
+    val client = io.lettuce.core.RedisClient.create(uri.toString())
     val connection = client.connect()
     try {
       val sync = connection.sync()

@@ -104,12 +104,13 @@ public class LogfireHandler(
       return
     }
     val eventType = (event["event_type"] as? String) ?: "unknown"
-    @Suppress("UNCHECKED_CAST")
-    val metadata = event["metadata"] as? Map<String, Any?>
+    @Suppress("UNCHECKED_CAST") val metadata = event["metadata"] as? Map<String, Any?>
     val enrichment = LinkedHashMap<String, Any?>()
     if (metadata != null) {
       for ((key, value) in metadata) {
-        if (key.startsWith("guard.") && key !in setOf("traceparent", "tracestate") && value != null) {
+        if (
+            key.startsWith("guard.") && key !in setOf("traceparent", "tracestate") && value != null
+        ) {
           enrichment[key] = value
         }
       }
@@ -135,8 +136,7 @@ public class LogfireHandler(
     val metricType = (metric["metric_type"] as? String) ?: "unknown"
     val value = (metric["value"] as? Number)?.toDouble() ?: 0.0
     val endpoint = (metric["endpoint"] as? String) ?: ""
-    @Suppress("UNCHECKED_CAST")
-    val tags = (metric["tags"] as? Map<String, Any?>) ?: emptyMap()
+    @Suppress("UNCHECKED_CAST") val tags = (metric["tags"] as? Map<String, Any?>) ?: emptyMap()
     val safeTags = tags.filterKeys { it != "value" && it != "endpoint" }
     val attributes = LinkedHashMap<String, Any?>()
     attributes["value"] = value

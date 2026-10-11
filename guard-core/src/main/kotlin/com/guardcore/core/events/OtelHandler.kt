@@ -8,10 +8,10 @@ import java.util.logging.Logger
  * The python module try-imports the opentelemetry SDK and flips to `_otel_available = False` on
  * ImportError (otel_handler.py:9-38). The JVM artifact carries no opentelemetry dependency (the
  * engine dependency set is locked), so the SDK surface is the [OtelSurface] seam: absent by
- * default, which selects exactly the python not-installed branch - `start` logs
- * "opentelemetry-sdk not installed, OTEL handler disabled" and the handler stays inert;
- * `health_check` reports the availability flag. A host that provides an OTel runtime registers it
- * through [OtelHandler.installSurface]; the span/attribute/metric dispatch below is the ported
+ * default, which selects exactly the python not-installed branch - `start` logs "opentelemetry-sdk
+ * not installed, OTEL handler disabled" and the handler stays inert; `health_check` reports the
+ * availability flag. A host that provides an OTel runtime registers it through
+ * [OtelHandler.installSurface]; the span/attribute/metric dispatch below is the ported
  * otel_handler.py logic over that seam.
  */
 public class OtelHandler(
@@ -168,8 +168,7 @@ public class OtelHandler(
     val metricType = (metric["metric_type"] as? String) ?: "unknown"
     val value = (metric["value"] as? Number)?.toDouble() ?: 0.0
     val endpoint = (metric["endpoint"] as? String) ?: ""
-    @Suppress("UNCHECKED_CAST")
-    val tags = (metric["tags"] as? Map<String, Any?>) ?: emptyMap()
+    @Suppress("UNCHECKED_CAST") val tags = (metric["tags"] as? Map<String, Any?>) ?: emptyMap()
     val attrs = LinkedHashMap<String, Any?>()
     attrs["endpoint"] = endpoint
     attrs.putAll(tags)
@@ -177,8 +176,7 @@ public class OtelHandler(
       metricType == "response_time" -> otel.recordHistogram("guard.request.duration", value, attrs)
       metricType == "request_count" -> otel.recordCounterAdd("guard.request.count", value, attrs)
       metricType == "error_rate" -> otel.recordCounterAdd("guard.error.count", value, attrs)
-      else ->
-          logger.warning("Unknown OTEL metric type $metricType - no instrument recorded")
+      else -> logger.warning("Unknown OTEL metric type $metricType - no instrument recorded")
     }
   }
 

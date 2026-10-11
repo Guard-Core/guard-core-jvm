@@ -304,12 +304,15 @@ public open class CloudManager {
   @Volatile public var isCloudIpOverride: ((ip: String, providers: Set<String>) -> Boolean)? = null
 
   @Volatile
-  public var cloudProviderDetailsOverride: ((ip: String, providers: Set<String>) -> Pair<String, String>?)? =
+  public var cloudProviderDetailsOverride:
+      ((ip: String, providers: Set<String>) -> Pair<String, String>?)? =
       null
 
   /** Port of `is_cloud_ip` (cloud_handler.py:328). */
   public fun isCloudIp(ip: String, providers: Set<String> = ALL_PROVIDERS): Boolean {
-    isCloudIpOverride?.let { return it(ip, providers) }
+    isCloudIpOverride?.let {
+      return it(ip, providers)
+    }
     return try {
       val ipObj = parseAddress(ip)
       val (blocked, carveouts) = parseCloudSelectors(providers)
@@ -350,7 +353,9 @@ public open class CloudManager {
       ip: String,
       providers: Set<String> = ALL_PROVIDERS,
   ): Pair<String, String>? {
-    cloudProviderDetailsOverride?.let { return it(ip, providers) }
+    cloudProviderDetailsOverride?.let {
+      return it(ip, providers)
+    }
     return try {
       val ipObj = parseAddress(ip)
       for (provider in bareProviderNames(providers)) {

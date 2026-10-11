@@ -14,9 +14,9 @@ import kotlin.math.sqrt
 public const val DEFAULT_RECENT_TIMES_WINDOW: Int = 100
 
 /**
- * The agent send seam of `monitor.py` (`await agent_handler.send_event(event)`,
- * monitor.py:155): the engine builds the anomaly/callback-error event data maps and hands them to
- * this sink; the facade's capturing/agent handlers implement it.
+ * The agent send seam of `monitor.py` (`await agent_handler.send_event(event)`, monitor.py:155):
+ * the engine builds the anomaly/callback-error event data maps and hands them to this sink; the
+ * facade's capturing/agent handlers implement it.
  */
 public fun interface AnomalyEventSink {
   public fun sendEvent(event: Map<String, Any?>)
@@ -396,8 +396,7 @@ public class PerformanceMonitor(
 
     if (statisticalAnomaly != null) anomalies.add(statisticalAnomaly)
 
-    if (agentHandler != null && anomalies.isNotEmpty() &&
-        reserveAnomalyEmission(metric.pattern)) {
+    if (agentHandler != null && anomalies.isNotEmpty() && reserveAnomalyEmission(metric.pattern)) {
       for (anomaly in anomalies) {
         // Port of `_send_anomaly_event` (monitor.py:149): build the event data and send.
         val event = buildAnomalyEventData(anomaly, correlationId)

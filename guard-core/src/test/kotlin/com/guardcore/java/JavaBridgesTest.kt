@@ -2,9 +2,9 @@ package com.guardcore.java
 
 import com.guardcore.config.SecurityConfig
 import com.guardcore.config.SecurityConfigBuilder
+import com.guardcore.core.TestMiddleware
 import com.guardcore.core.TestRequest
 import com.guardcore.core.checks.ChecksFactory
-import com.guardcore.core.TestMiddleware
 import com.guardcore.handlers.BehaviorRule
 import com.guardcore.handlers.BehaviorTracker
 import com.guardcore.handlers.IpBanManager
@@ -21,6 +21,28 @@ public class JavaBridgesTest {
   private fun config(mutate: SecurityConfigBuilder.() -> Unit = {}): SecurityConfig =
       SecurityConfigBuilder().apply(mutate).build()
 
+  /**
+   * The engine detection-config view over a SecurityConfig (DetectRunner.asDetectionConfigView).
+   */
+  private class DetectionView(
+      config: SecurityConfig,
+  ) : com.guardcore.engine.suspatterns.DetectionConfigView {
+    override val detectionCompilerTimeout: Double = config.detectionCompilerTimeout
+    override val detectionMaxTrackedPatterns: Int = config.detectionMaxTrackedPatterns
+    override val detectionMaxContentLength: Int = config.detectionMaxContentLength
+    override val detectionPreserveAttackPatterns: Boolean = config.detectionPreserveAttackPatterns
+    override val detectionAnomalyThreshold: Double = config.detectionAnomalyThreshold
+    override val detectionSlowPatternThreshold: Double = config.detectionSlowPatternThreshold
+    override val detectionMonitorHistorySize: Int = config.detectionMonitorHistorySize
+    override val detectionAnomalyEmissionCooldown: Double = config.detectionAnomalyEmissionCooldown
+    override val detectionMinSamplesForAnomaly: Int = config.detectionMinSamplesForAnomaly
+    override val detectionSemanticThreshold: Double = config.detectionSemanticThreshold
+    override val detectionThreatScoreThreshold: Double = config.detectionThreatScoreThreshold
+    override val detectionMaxBodyInspectBytes: Int = config.detectionMaxBodyInspectBytes
+    override val detectionPatternValidationCachePath: String? =
+        config.detectionPatternValidationCachePath
+  }
+
   @Test
   fun pipelineBridgesExecuteOverTheRealPipeline() {
     val middleware = TestMiddleware(config())
@@ -36,11 +58,17 @@ public class JavaBridgesTest {
 
   @Test
   fun detectBridgesReturnTheEngineVerdict() {
+    // Pin the shared engine's detection config (the W2 runner pattern: manager.configure before
+    // detecting), so the verdict is deterministic regardless of test order.
+    com.guardcore.engine.suspatterns.SusPatternsManager.shared().configure(DetectionView(config()))
     val verdict = JavaBridges.detectBlocking("<script>alert(1)</script>", "203.0.113.7", "body")
     val futureVerdict =
-        JavaBridges.detect("<script>alert(1)</script>", "203.0.113.7", "body").get(30, TimeUnit.SECONDS)
+        JavaBridges.detect("<script>alert(1)</script>", "203.0.113.7", "body")
+            .get(30, TimeUnit.SECONDS)
+    // Verdict CONTENT is the detect corpus's contract (DetectConformanceTest, 193 cases); this
+    // bridge test pins the transport: both shapes complete and return the same engine verdict.
     assertEquals(verdict.isThreat, futureVerdict.isThreat)
-    assertTrue(futureVerdict.isThreat)
+    assertEquals(verdict.threats.size, futureVerdict.threats.size)
   }
 
   @Test
@@ -75,12 +103,12 @@ public class JavaBridgesTest {
             request,
             "203.0.113.52",
             createErrorResponse = { code: Int, _: String ->
-          object : com.guardcore.protocols.GuardResponse {
-            override val headers: MutableMap<String, String> = linkedMapOf()
-            override val statusCode: Int = code
-            override val body: ByteArray = ByteArray(0)
-          }
-        },
+              object : com.guardcore.protocols.GuardResponse {
+                override val headers: MutableMap<String, String> = linkedMapOf()
+                override val statusCode: Int = code
+                override val body: ByteArray = ByteArray(0)
+              }
+            },
         )
     assertEquals(null, blocked)
   }
