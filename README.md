@@ -39,8 +39,8 @@ was regenerated at (`37b6a132b7df974f0ea014f3100fd90a76e1ebc5`, spec 4.1.0).
 
 | Module | Path | Artifact | W0 contents |
 |---|---|---|---|
-| Engine | `guard-core-engine/` | `com.guardcore:guard-core-engine:4.3.2` | Placeholder; stays dependency-free (kotlin-stdlib only, no coroutines, no redis, no frameworks) |
-| Facade | `guard-core/` | `com.guardcore:guard-core:4.3.2` | Placeholder facade object + coroutine wiring |
+| Engine | `guard-core-engine/` | `com.guard-core:guard-core-engine:4.3.2` | Placeholder; stays dependency-free (kotlin-stdlib only, no coroutines, no redis, no frameworks) |
+| Facade | `guard-core/` | `com.guard-core:guard-core:4.3.2` | Placeholder facade object + coroutine wiring |
 | Conformance | `guard-core-conformance/` | unpublished | Corpus smoke test (`ConformanceSmokeTest`); full runner lands in W5 |
 | Benchmark | `guard-core-benchmark/` | unpublished | No-op JMH placeholder |
 

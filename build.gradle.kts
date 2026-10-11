@@ -8,8 +8,12 @@ plugins {
     alias(libs.plugins.jmh) apply false
 }
 
+// Maven coordinates: groupId com.guard-core (the Central Portal namespace;
+// it reverses to guard-core.com). Kotlin packages stay com.guardcore.*:
+// hyphens are illegal in JVM packages and the groupId/package mismatch is
+// standard practice for hyphenated domains.
 allprojects {
-    group = "com.guardcore"
+    group = "com.guard-core"
     version = "4.3.2"
 }
 
