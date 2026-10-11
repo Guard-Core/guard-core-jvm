@@ -1,0 +1,336 @@
+name: Release
+
+# Family release gate for guard-core-jvm. NOTHING releases on a tag push
+# alone: the tag runs the full gate suite (build + full-corpus certification
+# + tag/version audit) and only the `release: created` event (or an explicit
+# workflow_dispatch re-drive) reaches the Maven Central publish job. Bare
+# vX.Y.z tags only (v4.3.2): the tag-consistency job refuses anything else
+# (the guard-core-rs invisible-rule incident on refs/tags/v4.3.2 is the
+# standing lesson; the audit here is the family precedent for the JVM lane).
+#
+# Auth reality (verified 2026-10-11): the Central Portal Publisher API takes
+# a Portal user token (Bearer base64(username:password)); OIDC trusted
+# publishing does not exist for Maven Central yet, so the publish job needs
+# no id-token scope and carries the least-privilege permission set. GPG
+# signing is mandatory per Portal rules; the key arrives via secrets and
+# never leaves the runner. See docs/release.md for the operator choreography.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  release:
+    types: [created]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  test:
+    name: Test at tag (JDK 17)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@b9bee63ef481cc545e4517ec730544a4d8b1dfa0 # v6.4.0
+
+      - name: Start Redis
+        run: |
+          docker run -d --name guard-redis -p 6379:6379 redis:7-alpine
+          for _ in $(seq 1 30); do
+            if docker exec guard-redis redis-cli ping | grep -q PONG; then break; fi
+            sleep 1
+          done
+
+      - name: Build (detekt, ktfmt check, tests, benchmarks compile)
+        run: ./gradlew build --no-daemon
+
+      - name: Full corpus certification gate (21 suites + cost budgets, one gate)
+        run: ./gradlew :guard-core-conformance:fullCorpusGate --no-daemon
+
+      - name: Stop Redis
+        if: always()
+        run: docker rm -f guard-redis || true
+
+  tag-consistency:
+    name: Tag matches the project version
+    needs: [test]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The project version set in build.gradle.kts is the source of truth
+      # (the guard-core-rs precedent). The tag must equal it exactly, and a
+      # SNAPSHOT version here means the release PR forgot the flip.
+      - name: Verify bare tag equals the project version
+        run: |
+          set -euo pipefail
+          case "${GITHUB_REF_NAME}" in
+            v[0-9]*.[0-9]*.[0-9]*)
+              ;;
+            *)
+              echo "refusing non-bare tag '${GITHUB_REF_NAME}': use bare vX.Y.z (v4.3.2, no suffixes)"
+              exit 1
+              ;;
+          esac
+          tag="${GITHUB_REF_NAME#v}"
+          version=$(grep -m1 'version = "' build.gradle.kts | sed 's/^.*version = "\([^"]*\)".*$/\1/')
+          if [ -z "$version" ]; then
+            echo "could not read the project version from build.gradle.kts"
+            exit 1
+          fi
+          case "$version" in
+            *-SNAPSHOT)
+              echo "project version $version is a SNAPSHOT: the release PR must flip it (docs/release.md, version-flip checklist)"
+              exit 1
+              ;;
+          esac
+          if [ "$tag" != "$version" ]; then
+            echo "tag v$tag does not match the project version $version"
+            exit 1
+          fi
+          echo "ok: bare tag v$tag matches the project version $version"
+
+  publish:
+    name: Publish to Maven Central (Central Portal)
+    needs: [tag-consistency]
+    # The tag push runs the gates; the publish runs on GitHub release creation
+    # (the operator-facing event) and can be re-driven with workflow_dispatch
+    # after a partial failure. Publishing is two separate Portal deployments,
+    # engine before facade (the within-lane ordering rule), each gated on a
+    # registry existence check so a re-drive never double-publishes (the
+    # guard-core-ts #115 changed-only pattern, Maven edition).
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@b9bee63ef481cc545e4517ec730544a4d8b1dfa0 # v6.4.0
+
+      # Gate (b): publishing credentials must be present as secrets. Gate (c):
+      # GPG inputs must be present (the Portal requires .asc signatures for
+      # every file; there is no signing-free path as of 2026-10).
+      - name: Check publishing credentials and GPG inputs are present
+        env:
+          CENTRAL_PORTAL_USERNAME: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
+          CENTRAL_PORTAL_PASSWORD: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for secret in CENTRAL_PORTAL_USERNAME CENTRAL_PORTAL_PASSWORD GPG_PRIVATE_KEY GPG_PASSPHRASE; do
+            if [ -z "${!secret}" ]; then
+              echo "secret ${secret} is not set"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo ""
+            echo "Maven Central publishing needs four repository secrets:"
+            echo "  CENTRAL_PORTAL_USERNAME / CENTRAL_PORTAL_PASSWORD  (Portal user token)"
+            echo "  GPG_PRIVATE_KEY / GPG_PASSPHRASE                   (armored signing key)"
+            echo "Setup: docs/release.md, prerequisites section."
+            exit 1
+          fi
+          echo "ok: all four publishing secrets are present"
+
+      # Gate (a): the pre-publish existence check. repo1.maven.org serves an
+      # artifact only after it is fully live; 200 = skip, 404 = publish,
+      # anything else = unknown registry state, refuse to act.
+      - name: Resolve which artifacts still need publishing
+        id: artifacts
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          code_engine=$(curl -sS -o /dev/null -w '%{http_code}' \
+            "https://repo1.maven.org/maven2/com/guard-core/guard-core-engine/${version}/guard-core-engine-${version}.pom" \
+            || echo 000)
+          code_facade=$(curl -sS -o /dev/null -w '%{http_code}' \
+            "https://repo1.maven.org/maven2/com/guard-core/guard-core/${version}/guard-core-${version}.pom" \
+            || echo 000)
+          for pair in "engine:${code_engine}" "facade:${code_facade}"; do
+            name="${pair%%:*}"
+            code="${pair##*:}"
+            case "$code" in
+              200)
+                echo "com.guard-core:guard-core-${name} ${version} is already live on Maven Central; it will be skipped"
+                echo "${name}=skip" >> "$GITHUB_OUTPUT"
+                ;;
+              404)
+                echo "com.guard-core:guard-core-${name} ${version} is not on Maven Central; queued to publish"
+                echo "${name}=publish" >> "$GITHUB_OUTPUT"
+                ;;
+              *)
+                echo "repo1.maven.org returned HTTP ${code} for guard-core-${name}:${version}; refusing to publish against unknown registry state"
+                exit 1
+                ;;
+            esac
+          done
+
+      # Engine first (the facade POM depends on it).
+      - name: Build the guard-core-engine staging bundle
+        if: steps.artifacts.outputs.engine == 'publish'
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: ./gradlew :guard-core-engine:publishMavenPublicationToCentralStagingRepository --no-daemon
+
+      - name: Upload and validate the guard-core-engine deployment
+        if: steps.artifacts.outputs.engine == 'publish'
+        env:
+          CENTRAL_PORTAL_USERNAME: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
+          CENTRAL_PORTAL_PASSWORD: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          token=$(printf '%s:%s' "$CENTRAL_PORTAL_USERNAME" "$CENTRAL_PORTAL_PASSWORD" | base64 | tr -d '\n')
+          rm -f central-bundle.zip
+          (cd guard-core-engine/build/central-staging && zip -qr "$GITHUB_WORKSPACE/central-bundle.zip" .)
+          deployment=""
+          for attempt in 1 2 3; do
+            response=$(curl -sS --fail-with-body -X POST \
+              -H "Authorization: Bearer ${token}" \
+              -F "bundle=@central-bundle.zip;type=application/octet-stream" \
+              "https://central.sonatype.com/api/v1/publisher/upload?name=guard-core-engine-${version}&publishingType=USER_MANAGED") \
+              && deployment=$(echo "$response" | jq -r '.deploymentId') && break
+            echo "upload attempt $attempt failed; retrying in 30s"
+            sleep 30
+          done
+          if [ -z "$deployment" ] || [ "$deployment" = "null" ]; then
+            echo "guard-core-engine upload failed after 3 attempts"
+            exit 1
+          fi
+          echo "guard-core-engine deployment: ${deployment}"
+          for _ in $(seq 1 30); do
+            state=$(curl -sS -X POST \
+              -H "Authorization: Bearer ${token}" \
+              "https://central.sonatype.com/api/v1/publisher/status?id=${deployment}" | jq -r '.deploymentState')
+            echo "validation state: ${state}"
+            case "$state" in
+              VALIDATED)
+                echo "guard-core-engine ${version} is VALIDATED; release it from the Portal UI (Deployments)"
+                echo "$deployment" > guard-core-engine-deployment-id.txt
+                exit 0
+                ;;
+              PUBLISHED)
+                echo "guard-core-engine ${version} is PUBLISHED"
+                echo "$deployment" > guard-core-engine-deployment-id.txt
+                exit 0
+                ;;
+              FAILED)
+                curl -sS -X POST -H "Authorization: Bearer ${token}" \
+                  "https://central.sonatype.com/api/v1/publisher/status?id=${deployment}" | jq .
+                echo "guard-core-engine deployment failed Portal validation"
+                exit 1
+                ;;
+            esac
+            sleep 30
+          done
+          echo "guard-core-engine validation did not settle in 15 minutes; inspect deployment ${deployment} in the Portal UI, then re-drive this workflow"
+          exit 1
+
+      # Facade second: the deployment only goes up after the engine deployment
+      # is VALIDATED (the within-lane ordering rule).
+      - name: Build the guard-core staging bundle
+        if: steps.artifacts.outputs.facade == 'publish'
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: ./gradlew :guard-core:publishMavenPublicationToCentralStagingRepository --no-daemon
+
+      - name: Upload and validate the guard-core deployment
+        if: steps.artifacts.outputs.facade == 'publish'
+        env:
+          CENTRAL_PORTAL_USERNAME: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
+          CENTRAL_PORTAL_PASSWORD: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -f guard-core-engine-deployment-id.txt ]; then
+            echo "engine deployment $(cat guard-core-engine-deployment-id.txt) is VALIDATED; proceeding with the facade"
+          fi
+          version="${GITHUB_REF_NAME#v}"
+          token=$(printf '%s:%s' "$CENTRAL_PORTAL_USERNAME" "$CENTRAL_PORTAL_PASSWORD" | base64 | tr -d '\n')
+          rm -f central-bundle.zip
+          (cd guard-core/build/central-staging && zip -qr "$GITHUB_WORKSPACE/central-bundle.zip" .)
+          deployment=""
+          for attempt in 1 2 3; do
+            response=$(curl -sS --fail-with-body -X POST \
+              -H "Authorization: Bearer ${token}" \
+              -F "bundle=@central-bundle.zip;type=application/octet-stream" \
+              "https://central.sonatype.com/api/v1/publisher/upload?name=guard-core-${version}&publishingType=USER_MANAGED") \
+              && deployment=$(echo "$response" | jq -r '.deploymentId') && break
+            echo "upload attempt $attempt failed; retrying in 30s"
+            sleep 30
+          done
+          if [ -z "$deployment" ] || [ "$deployment" = "null" ]; then
+            echo "guard-core upload failed after 3 attempts"
+            exit 1
+          fi
+          echo "guard-core deployment: ${deployment}"
+          for _ in $(seq 1 30); do
+            state=$(curl -sS -X POST \
+              -H "Authorization: Bearer ${token}" \
+              "https://central.sonatype.com/api/v1/publisher/status?id=${deployment}" | jq -r '.deploymentState')
+            echo "validation state: ${state}"
+            case "$state" in
+              VALIDATED)
+                echo "guard-core ${version} is VALIDATED; release BOTH deployments from the Portal UI (engine first, facade second)"
+                exit 0
+                ;;
+              PUBLISHED)
+                echo "guard-core ${version} is PUBLISHED"
+                exit 0
+                ;;
+              FAILED)
+                curl -sS -X POST -H "Authorization: Bearer ${token}" \
+                  "https://central.sonatype.com/api/v1/publisher/status?id=${deployment}" | jq .
+                echo "guard-core deployment failed Portal validation"
+                exit 1
+                ;;
+            esac
+            sleep 30
+          done
+          echo "guard-core validation did not settle in 15 minutes; inspect deployment ${deployment} in the Portal UI, then re-drive this workflow"
+          exit 1
+
+      - name: Summary
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          echo "Publish run for ${version} finished. Operator steps:"
+          echo "  1. Release every VALIDATED deployment in the Portal UI (central.sonatype.com, Deployments): engine first, facade second."
+          echo "  2. Wait for the artifacts to reach repo1.maven.org (the release workflows for the adapters and the agent check this)."
+          echo "  3. Run the post-release audits in docs/release.md (release page per tag, registry existence checks)."
