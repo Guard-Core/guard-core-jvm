@@ -174,26 +174,29 @@ notes):
 
 Pending on the operator (each blocks the corresponding step of docs/release.md):
 
-1. Portal namespace `com.guard-core` flipping to **Verified**. History:
-   `com.guardcore` was abandoned 2026-10-11 (guardcore.com is a parked domain
-   the operator does not own, making that claim unverifiable); `com.guard-core`
-   reverses to the owned guard-core.com, TXT record placed, claim
-   re-submitted 2026-10-11, DNS verification PENDING on Sonatype's side.
-   Blocks: everything (validation fails on an unverified namespace).
-2. Portal user token generated and the two `CENTRAL_PORTAL_*` secrets set on
+1. Portal user token generated and the two `CENTRAL_PORTAL_*` secrets set on
    all four repos. Blocks: the publish jobs' credential gate.
-3. GPG key pair created, public key published to a keyserver, armored secret
-   key + passphrase set as `GPG_PRIVATE_KEY` / `GPG_PASSPHRASE` on all four
-   repos. Blocks: the publish jobs' GPG gate (and Portal validation).
-4. GitHub releases created per tag at train time (the publish jobs fire on
+2. GPG key pair created, the public key uploaded to a keyserver (the Portal
+   validates against the keyserver copy), and the armored secret key +
+   passphrase set as `GPG_PRIVATE_KEY` / `GPG_PASSPHRASE` on all four repos
+   (4 secrets per repo in total, counting the two Portal ones). Blocks: the
+   publish jobs' GPG gate (and Portal validation).
+3. GitHub releases created per tag at train time (the publish jobs fire on
    `release: created`, not on the tag push alone). Blocks: publishing only.
+
+RESOLVED (was pending item 1): the Portal namespace `com.guard-core` flipped
+to **VERIFIED** 2026-10-11 16:15 (Portal badge, Org Guard-core). History:
+`com.guardcore` was abandoned 2026-10-11 (guardcore.com is a parked domain
+the operator does not own, making that claim unverifiable); `com.guard-core`
+reverses to the owned guard-core.com; the operator re-registered, swapped
+the apex TXT to the new verification key, and the Portal validated it.
 
 ## 3. Remaining operator steps (release day, condensed)
 
 The full choreography is docs/release.md; the condensed checklist:
 
 1. Confirm the Portal shows `com.guard-core` Verified; secrets set on all
-   four repos (section 2 items 2-3); Usage Center clean.
+   four repos (section 2 items 1-2); Usage Center clean.
 2. Engine: tag `v4.3.2` on a green master -> gates green -> create the GitHub
    release -> publish job uploads + VALIDATES both deployments (engine first,
    facade second) -> click Release on both in the Portal UI -> repo1 answers

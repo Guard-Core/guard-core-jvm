@@ -10,6 +10,8 @@ on:
       - "gradlew"
       - "gradle.properties"
       - "conformance/**"
+      - "**/gradle.lockfile"
+      - "osv-scanner.toml"
       - ".github/workflows/ci.yml"
   pull_request:
     branches: [master]
@@ -20,6 +22,8 @@ on:
       - "gradlew"
       - "gradle.properties"
       - "conformance/**"
+      - "**/gradle.lockfile"
+      - "osv-scanner.toml"
       - ".github/workflows/ci.yml"
 
 permissions: {}
@@ -70,3 +74,37 @@ jobs:
       - name: Stop Redis
         if: always()
         run: docker rm -f guard-redis || true
+
+  dependency-audit:
+    name: Dependency audit (osv-scanner)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The family-equivalent of govulncheck / cargo audit (the spec 14.1
+      # dependency-auditing row): the OSV database aggregates the same
+      # advisory sources, and it scans the committed gradle.lockfile state
+      # (gradle dependency locking, one lockfile per module) - the JVM
+      # frozen-lockfile analog. Any known vulnerability fails the job;
+      # suppression goes through a reasoned osv-scanner.toml, never by
+      # disabling the scan.
+      - name: Install osv-scanner (v2.6.0, checksum-pinned)
+        run: |
+          curl --fail --silent --show-error --location \
+            -o /usr/local/bin/osv-scanner \
+            https://github.com/google/osv-scanner/releases/download/v2.6.0/osv-scanner_linux_amd64
+          echo "ca69b3d3cd08f889a49dc0a383122f71cc528b83803671df5fd874d97485b108  /usr/local/bin/osv-scanner" | sha256sum --check -
+          chmod +x /usr/local/bin/osv-scanner
+
+      - name: Scan the committed lockfiles
+        run: |
+          osv-scanner scan --config osv-scanner.toml \
+            --lockfile guard-core-engine/gradle.lockfile \
+            --lockfile guard-core/gradle.lockfile \
+            --lockfile guard-core-conformance/gradle.lockfile \
+            --lockfile guard-core-benchmark/gradle.lockfile

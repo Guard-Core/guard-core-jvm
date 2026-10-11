@@ -41,8 +41,8 @@ Closed this wave (2026-10-11, PR W4a):
 | G-5 | `AccessControl.userAgentBlockedPatternMatcher`. | W2 |
 | G-8 | Scan budget JSON depth cap - superseded by the engine-side budget accounting; the remaining value/char budgets closed with G-7a in W4a. | W2 (superseded), W4a (closure) |
 
-## W1 (foundation) - G-3 open, closes with W7
+## W1 (foundation) - closed
 
-| id | gap | owner wave | closure condition |
-|---|---|---|---|
-| G-3 | `ConfigSeams.agentConfigFactory` raises AgentPackageNotInstalledError until guard-agent-jvm lands; the None short-circuit paths are live (`models.py:317-365`). | W7 (agent) | W7 registers the AgentConfig factory; to_agent_config parity tests extend to the constructed object. |
+| id | gap | closed in |
+|---|---|---|
+| G-3 | The agent seam closed when guard-agent-jvm landed (W7): its FacadeBridge (`GuardAgentTelemetry`, `com.guardcore.agent`) implements the facade's `AgentHandlerProtocol` (+ the `AgentTelemetryMember` composite shape, the Rust trait pattern), carrying the full 17-key SecurityEvent envelope into the agent's buffer - proven in the agent's FacadeBridgeTest (protocol shape, envelope field mapping, error swallowing, composite plug-in). Wiring an agent is constructing `GuardAgentTelemetry(GuardAgent.create(config))` and handing it to the facade's composite sink; `ConfigSeams.agentConfigFactory` remains the documented injection point for auto-wiring `toAgentConfig` (python's import-based auto-detection has no JVM analog - classloading is explicit, which the `toAgentConfig` KDoc records), and the `AgentPackageNotInstalledError` raise stays byte-exact on the unregistered path (`models.py:317-365`, None short-circuits live). | W7 |

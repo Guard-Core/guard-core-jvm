@@ -1,0 +1,30 @@
+# This is a Gradle generated file for dependency locking.
+# Manual edits can break the build and are not advised.
+# This file is expected to be part of source control.
+# To regenerate this file, run: ./gradlew :guard-core-benchmark:dependencies --write-locks
+net.sf.jopt-simple:jopt-simple:5.0.4=jmhCompileClasspath
+org.apache.commons:commons-math3:3.2=jmhCompileClasspath
+org.jetbrains.kotlin:kotlin-build-tools-api:2.4.21=kotlinBuildToolsApiClasspath
+org.jetbrains.kotlin:kotlin-build-tools-compat:2.4.21=kotlinBuildToolsApiClasspath
+org.jetbrains.kotlin:kotlin-build-tools-cri-impl:2.4.21=kotlinBuildToolsApiClasspath
+org.jetbrains.kotlin:kotlin-build-tools-impl:2.4.21=kotlinBuildToolsApiClasspath
+org.jetbrains.kotlin:kotlin-compiler-embeddable:2.4.21=kotlinBuildToolsApiClasspath
+org.jetbrains.kotlin:kotlin-compiler-runner:2.4.21=kotlinBuildToolsApiClasspath
+org.jetbrains.kotlin:kotlin-daemon-client:2.4.21=kotlinBuildToolsApiClasspath
+org.jetbrains.kotlin:kotlin-daemon-embeddable:2.4.21=kotlinBuildToolsApiClasspath
+org.jetbrains.kotlin:kotlin-reflect:1.6.10=kotlinBuildToolsApiClasspath
+org.jetbrains.kotlin:kotlin-script-runtime:2.4.21=kotlinBuildToolsApiClasspath,kotlinCompilerPluginClasspathJmh
+org.jetbrains.kotlin:kotlin-scripting-common:2.4.21=kotlinCompilerPluginClasspathJmh
+org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:2.4.21=kotlinCompilerPluginClasspathJmh
+org.jetbrains.kotlin:kotlin-scripting-compiler-impl-embeddable:2.4.21=kotlinCompilerPluginClasspathJmh
+org.jetbrains.kotlin:kotlin-scripting-jvm:2.4.21=kotlinCompilerPluginClasspathJmh
+org.jetbrains.kotlin:kotlin-stdlib:2.4.21=jmhCompileClasspath,kotlinBuildToolsApiClasspath,kotlinCompilerPluginClasspathJmh,testCompileClasspath
+org.jetbrains.kotlin:kotlin-tooling-core:2.4.21=kotlinBuildToolsApiClasspath
+org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.8.0=kotlinBuildToolsApiClasspath
+org.jetbrains:annotations:13.0=jmhCompileClasspath,kotlinBuildToolsApiClasspath,kotlinCompilerPluginClasspathJmh,testCompileClasspath
+org.openjdk.jmh:jmh-core:1.36=jmhCompileClasspath
+org.openjdk.jmh:jmh-generator-asm:1.36=jmhCompileClasspath
+org.openjdk.jmh:jmh-generator-bytecode:1.36=jmhCompileClasspath
+org.openjdk.jmh:jmh-generator-reflection:1.36=jmhCompileClasspath
+org.ow2.asm:asm:9.0=jmhCompileClasspath
+empty=jmhKotlinScriptDefExtensions,kotlinScriptDefExtensions,testKotlinScriptDefExtensions

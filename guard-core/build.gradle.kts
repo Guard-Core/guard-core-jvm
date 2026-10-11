@@ -36,13 +36,13 @@ val sourcesJar by
       from(sourceSets["main"].allSource)
     }
 
-// The standard javadoc task renders nothing for Kotlin-only sources; the jar
-// carries the project README so it is never an empty javadoc jar (the Portal
-// validator rejects those). Dokka HTML replaces this when the docs wave lands.
+// The javadoc jar carries the Dokka HTML rendering of the KDoc surface (the
+// standard javadoc task renders nothing for Kotlin-only sources, and the
+// Portal validator rejects empty javadoc jars).
 val javadocJar by
     tasks.registering(Jar::class) {
       archiveClassifier = "javadoc"
-      from(tasks.named("javadoc"))
+      from(tasks.named("dokkaGeneratePublicationHtml"))
       from(rootProject.file("README.md"))
     }
 
