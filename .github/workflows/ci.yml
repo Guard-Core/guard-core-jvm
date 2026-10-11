@@ -59,7 +59,7 @@ jobs:
       # W3 lands the handler test surface + redis_interop runner; both need Redis.
       - name: Start Redis
         run: |
-          docker run -d --name guard-redis -p 6379:6379 redis:8-alpine
+          docker run -d --name guard-redis -p 6379:6379 redis:8
           for i in $(seq 1 30); do
             if docker exec guard-redis redis-cli ping | grep -q PONG; then break; fi
             sleep 1
