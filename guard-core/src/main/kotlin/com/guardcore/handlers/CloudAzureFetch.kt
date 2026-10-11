@@ -33,6 +33,10 @@ public object CloudAzureFetch {
 
   public const val AZURE_TRUSTED_DOWNLOAD_HOST: String = "download.microsoft.com"
 
+  /** Python's fixed download-page URL (_cloud_azure_fetch.py). */
+  public const val PAGE_URL: String =
+      "https://www.microsoft.com/en-us/download/details.aspx?id=56519"
+
   /** Python `_AZURE_SERVICE_TAGS_URL_PATTERN` (_cloud_azure_fetch.py:22). */
   public const val AZURE_SERVICE_TAGS_URL_PATTERN: String =
       "https://download\\.microsoft\\.com/[^\"'\\s<>]+ServiceTags[^\"'\\s<>]*\\.json(?:\\?[^\"'\\s<>]*)?"
@@ -48,6 +52,48 @@ public object CloudAzureFetch {
           .followRedirects(HttpClient.Redirect.NEVER)
           .connectTimeout(Duration.ofSeconds(10))
           .build()
+
+  /**
+   * Test seam mirroring the python tests' aiohttp session mocks (test_cloud_ips.py, the Azure
+   * redirect real-sockets family): when set, every GET resolves through it as (status, body);
+   * production never sets it.
+   */
+  @Volatile
+  internal var httpGetOverride: (suspend (url: String) -> Pair<Int, String>)? = null
+
+  private suspend fun httpGet(url: String, timeoutNanos: Long): HttpResponse<String> {
+    httpGetOverride?.let {
+      val (status, body) = it(url)
+      return FakeHttpResponse(status, body, URI.create(url))
+    }
+    return withContext(Dispatchers.IO) {
+      val request =
+          HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .timeout(Duration.ofNanos(timeoutNanos))
+              .GET()
+              .build()
+      client.send(request, HttpResponse.BodyHandlers.ofString())
+    }
+  }
+
+  private class FakeHttpResponse(
+      private val status: Int,
+      private val content: String,
+      private val uri: URI,
+  ) : HttpResponse<String> {
+    override fun statusCode(): Int = status
+    override fun body(): String = content
+    override fun uri(): URI = uri
+    override fun headers(): java.net.http.HttpHeaders =
+        java.net.http.HttpHeaders.of(mapOf(), { _, _ -> true })
+    override fun previousResponse(): java.util.Optional<HttpResponse<String>> =
+        java.util.Optional.empty()
+    override fun request(): HttpRequest = HttpRequest.newBuilder().uri(uri).build()
+    override fun sslSession(): java.util.Optional<javax.net.ssl.SSLSession> =
+        java.util.Optional.empty()
+    override fun version(): HttpClient.Version = HttpClient.Version.HTTP_1_1
+  }
 
   private fun monotonic(): Double = System.nanoTime() / 1_000_000_000.0
 
@@ -66,15 +112,7 @@ public object CloudAzureFetch {
       val attemptTimeout = minOf(AZURE_DOWNLOAD_ATTEMPT_TIMEOUT_SECONDS, remaining)
       val response =
           try {
-            withContext(Dispatchers.IO) {
-              val request =
-                  HttpRequest.newBuilder()
-                      .uri(URI.create(downloadUrl))
-                      .timeout(Duration.ofNanos((attemptTimeout * 1e9).toLong()))
-                      .GET()
-                      .build()
-              client.send(request, HttpResponse.BodyHandlers.ofString())
-            }
+            httpGet(downloadUrl, (attemptTimeout * 1e9).toLong())
           } catch (e: Exception) {
             val remainingAfter = deadline - monotonic()
             if (attempt >= AZURE_DOWNLOAD_MAX_ATTEMPTS || remainingAfter <= 0) {
@@ -254,26 +292,7 @@ public object CloudAzureFetch {
         throw IllegalStateException("Azure IP ranges download exceeded max elapsed time")
       }
 
-      val pageResponse =
-          withContext(Dispatchers.IO) {
-            val request =
-                HttpRequest.newBuilder()
-                    .uri(
-                        URI.create(
-                            "https://www.microsoft.com/en-us/download/details.aspx?id=56519",
-                        ),
-                    )
-                    .timeout(Duration.ofNanos((pageTimeout * 1e9).toLong()))
-                    .header(
-                        "User-Agent",
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-                            "AppleWebKit/537.36 (KHTML, like Gecko) " +
-                            "Chrome/91.0.4472.124 Safari/537.36",
-                    )
-                    .GET()
-                    .build()
-            client.send(request, HttpResponse.BodyHandlers.ofString())
-          }
+      val pageResponse = httpGet(PAGE_URL, (pageTimeout * 1e9).toLong())
       if (pageResponse.statusCode() < 200 || pageResponse.statusCode() >= 300) {
         throw IllegalStateException("HTTP ${pageResponse.statusCode()} for the download page")
       }
