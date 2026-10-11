@@ -257,7 +257,17 @@ public suspend fun IpBanManager.banIp(
   return true
 }
 
-internal fun nowSeconds(): Double = System.currentTimeMillis() / 1000.0
+/**
+ * Port of python `time.time()`: epoch seconds as a double at the clock's real resolution.
+ * `System.currentTimeMillis()/1000.0` truncates to milliseconds, which collapses two
+ * sliding-window zadd members written within the same millisecond into one sorted-set member
+ * (python's microsecond-resolution `time.time()` never does), silently dropping the second
+ * rate-limit write. `Instant.now()` carries the platform clock's sub-millisecond precision.
+ */
+internal fun nowSeconds(): Double {
+  val now = java.time.Instant.now()
+  return now.epochSecond + now.nano / 1_000_000_000.0
+}
 
 /** Python `str(time.time() + duration)` (float repr) for Redis ban values. */
 public object PyTimeStr {

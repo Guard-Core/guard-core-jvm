@@ -356,11 +356,13 @@ class CloudManagerRefreshTest {
     try {
       runBlocking {
         val manager = CloudManager.getInstance()
-        // A custom refresh closure keeps the background task cheap and deterministic.
-        val first = manager.scheduleRefresh(refresh = {})
-        val second = manager.scheduleRefresh(refresh = {})
+        // Hold the in-flight task open so the second scheduling attempt races nothing.
+        val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
+        val first = manager.scheduleRefresh(refresh = { gate.await() })
+        val second = manager.scheduleRefresh(refresh = { gate.await() })
         assertTrue(first)
         assertEquals(false, second)
+        gate.complete(Unit)
         // Let the launched task settle before resetting the singleton.
         kotlinx.coroutines.delay(200)
       }
