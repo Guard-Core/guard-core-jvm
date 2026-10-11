@@ -194,22 +194,62 @@ public class RouteConfig(public val revision: RouteConfigRevision? = null) {
   public var bypassedChecks: MutableSet<String> = mutableSetOf()
   public var requireHttps: Boolean = false
   public var authRequired: String? = null
-  public var customValidators: MutableList<suspend (GuardRequest) -> Any?> = mutableListOf()
-  public var blockedUserAgents: MutableList<String> = mutableListOf()
-  public var requiredHeaders: MutableMap<String, String> = mutableMapOf()
+
+  /**
+   * The tracked container fields (route_config.py:283-286 init + :265-278 `__setattr__` wrap):
+   * every [RouteConfig] holds its container payload in a revision-tracked container from
+   * construction, so IN-PLACE mutation (append/put/add) bumps the revision exactly like the
+   * reference; assignment wraps the new payload in a tracked container and bumps.
+   */
+  public var customValidators: MutableList<suspend (GuardRequest) -> Any?> =
+      TrackedList(revision = revision)
+      set(value) {
+        revision.bumpIfNotNull()
+        field = TrackedList(value, revision = revision)
+      }
+  public var blockedUserAgents: MutableList<String> = TrackedList(revision = revision)
+      set(value) {
+        revision.bumpIfNotNull()
+        field = TrackedList(value, revision = revision)
+      }
+  public var requiredHeaders: MutableMap<String, String> = TrackedMap(revision = revision)
+      set(value) {
+        revision.bumpIfNotNull()
+        field = TrackedMap(value, revision = revision)
+      }
   public var behaviorRules: MutableList<BehaviorRule> = mutableListOf()
-  public var blockCloudProviders: MutableSet<String> = mutableSetOf()
+  public var blockCloudProviders: MutableSet<String> = TrackedSet(revision = revision)
+      set(value) {
+        revision.bumpIfNotNull()
+        field = TrackedSet(value, revision = revision)
+      }
   public var maxRequestSize: Int? = null
   public var allowedContentTypes: List<String>? = null
+      set(value) {
+        revision.bumpIfNotNull()
+        field = value?.let { TrackedList(it, revision = revision) }
+      }
   public var timeRestrictions: Map<String, String>? = null
+      set(value) {
+        revision.bumpIfNotNull()
+        field = value?.let { TrackedMap(value, revision = revision) }
+      }
   public var enableSuspiciousDetection: Boolean = true
   public var requireReferrer: List<String>? = null
+      set(value) {
+        revision.bumpIfNotNull()
+        field = value?.let { TrackedList(it, revision = revision) }
+      }
   public var apiKeyRequired: Boolean = false
   public var authVerifier: RouteAuthVerifier? = null
   public var apiKeyVerifier: RouteAuthVerifier? = null
   public var apiKeyHeader: String? = null
   public var authorizationHeaderRequired: String? = null
   public var geoRateLimits: Map<String, Pair<Int, Int>>? = null
+      set(value) {
+        revision.bumpIfNotNull()
+        field = value?.let { TrackedMap(value, revision = revision) }
+      }
   public var excludedDetectionHeaders: Set<String>? = null
   public var excludedDetectionParams: Set<String>? = null
   public var excludedDetectionBodyFields: Set<String>? = null

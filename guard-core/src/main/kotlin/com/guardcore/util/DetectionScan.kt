@@ -52,7 +52,17 @@ public object DetectionScan {
                 normalizedContext,
                 binaryPrefix,
             )
-          } catch (e: Exception) {
+          } catch (e: StackOverflowError) {
+            // Python catches ONLY RecursionError here (detection_scan.py:216-222): the pattern
+            // whose engine search blows the recursion limit is logged with its redacted source,
+            // skipped, and the fallback scan continues; every other failure propagates. The JVM
+            // recursion-limit analog is StackOverflowError (an Error, which the previous
+            // catch-all Exception both missed and over-swallowed real exceptions with).
+            DetectionScanContext.guardLogger.warning(
+                "Fallback pattern search hit the regex engine's recursion limit on pattern " +
+                    "'${DetectionScanRedaction.redactPatternSource(row.compiled.source)}'; " +
+                    "skipping it and continuing the fallback scan",
+            )
             null
           }
       if (threat != null) {
@@ -164,6 +174,21 @@ public object DetectionScan {
                   correlationId = correlationId,
                   enabledCategories = enabledCategories,
               )
+        } catch (e: java.util.concurrent.ExecutionException) {
+          // Python re-raises RecursionError ahead of the generic handler (detection_scan.py:
+          // 337-339): the recursion class escapes `_check_value_enhanced` untouched and every
+          // other engine failure falls back to the basic scan. The engine pool delivers worker
+          // failures as ExecutionException, so unwrap: a StackOverflowError cause is the
+          // recursion class and must escape, any other cause takes the fallback branch.
+          val cause = e.cause
+          if (cause is StackOverflowError) {
+            throw cause
+          }
+          DetectionScanContext.guardLogger.severe(
+              "Enhanced detection failed: ${cause ?: e}, falling back to basic check",
+          )
+          val (detected, trigger) = fallbackPatternCheck(value, clientIp, context)
+          return ScanHit(detected, trigger, emptyList(), null)
         } catch (e: Exception) {
           DetectionScanContext.guardLogger.severe(
               "Enhanced detection failed: $e, falling back to basic check",
