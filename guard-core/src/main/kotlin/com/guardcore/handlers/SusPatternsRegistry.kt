@@ -46,14 +46,14 @@ public object SusPatternsRegistry {
     val handler = agentHandler ?: return
     try {
       handler.sendEvent(
-          linkedMapOf<String, Any?>(
-              "event_type" to eventType,
-              "ip_address" to ipAddress,
-              "action_taken" to actionTaken,
-              "reason" to reason,
-              "pattern_matched" to patternMatched,
-              "handler_name" to SUS_PATTERNS_HANDLER_NAME,
-              "metadata" to metadata,
+          com.guardcore.core.events.securityEventEnvelope(
+              eventType = eventType,
+              ipAddress = ipAddress,
+              actionTaken = actionTaken,
+              reason = reason,
+              patternMatched = patternMatched,
+              handlerName = SUS_PATTERNS_HANDLER_NAME,
+              metadata = metadata,
           ),
       )
     } catch (e: Exception) {

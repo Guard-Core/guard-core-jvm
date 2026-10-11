@@ -644,12 +644,11 @@ public class SecurityHeadersManager private constructor() {
   public suspend fun sendHeadersAppliedEvent(path: String, headers: Map<String, String>) {
     try {
       agentHandler?.sendEvent(
-          linkedMapOf<String, Any?>(
-              "event_type" to EventTypes.EVENT_SECURITY_HEADERS_APPLIED,
-              "ip_address" to null,
-              "action_taken" to "headers_added",
-              "handler_name" to SECURITY_HEADERS_HANDLER_NAME,
-              "metadata" to
+          com.guardcore.core.events.securityEventEnvelope(
+              eventType = EventTypes.EVENT_SECURITY_HEADERS_APPLIED,
+              actionTaken = "headers_added",
+              handlerName = SECURITY_HEADERS_HANDLER_NAME,
+              metadata =
                   mapOf(
                       "path" to RequestLogging.redactEndpointForDisplay(path, null, null),
                       "headers_count" to headers.size,
@@ -691,12 +690,11 @@ public class SecurityHeadersManager private constructor() {
   public suspend fun sendCspViolationEvent(report: Map<String, Any?>) {
     try {
       agentHandler?.sendEvent(
-          linkedMapOf<String, Any?>(
-              "event_type" to EventTypes.EVENT_CSP_VIOLATION,
-              "ip_address" to null,
-              "action_taken" to "logged",
-              "handler_name" to SECURITY_HEADERS_HANDLER_NAME,
-              "metadata" to
+          com.guardcore.core.events.securityEventEnvelope(
+              eventType = EventTypes.EVENT_CSP_VIOLATION,
+              actionTaken = "logged",
+              handlerName = SECURITY_HEADERS_HANDLER_NAME,
+              metadata =
                   mapOf(
                       "document_uri" to safeCspUri(report["document-uri"]),
                       "violated_directive" to safeCspDirective(report["violated-directive"]),

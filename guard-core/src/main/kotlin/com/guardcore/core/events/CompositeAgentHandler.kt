@@ -5,8 +5,9 @@ import java.util.logging.Logger
 /**
  * Port of `guard_core/core/events/composite_handler.py`: CompositeAgentHandler
  * (composite_handler.py:11) fanning events/metrics out over member handlers with the event filter
- * and the (W4b) enricher seam. The otel/logfire member handlers are W4b (KNOWN_GAPS G-11); the
- * initializer composes agent-only until they land.
+ * and the [EventEnricher] seam (composite_handler.py:40-41, 52-53). The otel/logfire member
+ * handlers are the real `core/events` ports; they construct explicitly and disable with the
+ * reference warning strings when their SDK is absent from the dependency set.
  */
 public interface AgentTelemetryMember {
   public suspend fun sendEvent(event: Map<String, Any?>)
@@ -42,8 +43,8 @@ public class SinkTelemetryMember(
 public class CompositeAgentHandler(
     public val handlers: List<AgentTelemetryMember>,
     public val eventFilter: EventFilter = EventFilter(),
-    /** W4b: the EventEnricher port (core/events/enricher.py). */
-    public val enricher: Any? = null,
+    /** Port of the python `enricher` parameter (composite_handler.py:16). */
+    public val enricher: EventEnricher? = null,
 ) {
   public val logger: Logger = Logger.getLogger("guard_core")
 
@@ -66,6 +67,7 @@ public class CompositeAgentHandler(
     if (!eventType.isNullOrEmpty() && !eventFilter.isEventAllowed(eventType)) {
       return
     }
+    enricher?.enrichEvent(event)
     for (handler in handlers) {
       try {
         handler.sendEvent(event)
@@ -81,6 +83,7 @@ public class CompositeAgentHandler(
     if (!metricType.isNullOrEmpty() && !eventFilter.isMetricAllowed(metricType)) {
       return
     }
+    enricher?.enrichMetric(metric)
     for (handler in handlers) {
       try {
         handler.sendMetric(metric)

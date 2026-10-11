@@ -387,13 +387,13 @@ public open class RedisManager(
     val handler = agentHandler ?: return
     try {
       handler.sendEvent(
-          linkedMapOf<String, Any?>(
-              "event_type" to eventType,
-              "ip_address" to "system",
-              "action_taken" to actionTaken,
-              "reason" to reason,
-              "handler_name" to REDIS_HANDLER_NAME,
-              "metadata" to metadata,
+          com.guardcore.core.events.securityEventEnvelope(
+              eventType = eventType,
+              ipAddress = "system",
+              actionTaken = actionTaken,
+              reason = reason,
+              handlerName = REDIS_HANDLER_NAME,
+              metadata = metadata,
           ),
       )
     } catch (e: Exception) {

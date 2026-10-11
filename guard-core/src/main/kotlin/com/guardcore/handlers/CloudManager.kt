@@ -390,13 +390,13 @@ public open class CloudManager {
     val handler = agentHandler ?: return
     try {
       handler.sendEvent(
-          linkedMapOf<String, Any?>(
-              "event_type" to eventType,
-              "ip_address" to ipAddress,
-              "action_taken" to actionTaken,
-              "reason" to reason,
-              "handler_name" to CLOUD_HANDLER_NAME,
-              "metadata" to metadata,
+          com.guardcore.core.events.securityEventEnvelope(
+              eventType = eventType,
+              ipAddress = ipAddress,
+              actionTaken = actionTaken,
+              reason = reason,
+              handlerName = CLOUD_HANDLER_NAME,
+              metadata = metadata,
           ),
       )
     } catch (e: Exception) {

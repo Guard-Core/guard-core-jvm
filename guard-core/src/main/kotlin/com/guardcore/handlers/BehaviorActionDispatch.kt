@@ -147,14 +147,14 @@ public suspend fun BehaviorTracker.sendBehaviorEvent(
   val handler = agentHandler ?: return
   try {
     handler.sendEvent(
-        linkedMapOf<String, Any?>(
-            "event_type" to eventType,
-            "ip_address" to ipAddress,
-            "action_taken" to actionTaken,
-            "reason" to reason,
-            "rule_type" to metadata["rule_type"],
-            "handler_name" to BEHAVIOR_HANDLER_NAME,
-            "metadata" to metadata,
+        com.guardcore.core.events.securityEventEnvelope(
+            eventType = eventType,
+            ipAddress = ipAddress,
+            actionTaken = actionTaken,
+            reason = reason,
+            ruleType = metadata["rule_type"] as? String,
+            handlerName = BEHAVIOR_HANDLER_NAME,
+            metadata = metadata,
         ),
     )
   } catch (e: Exception) {

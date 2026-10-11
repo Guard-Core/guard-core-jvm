@@ -16,13 +16,13 @@ public suspend fun DynamicRuleManager.sendRuleReceivedEvent(rules: DynamicRules)
   val handler = agentHandler ?: return
   try {
     handler.sendEvent(
-        linkedMapOf<String, Any?>(
-            "event_type" to EventTypes.EVENT_DYNAMIC_RULE_UPDATED,
-            "ip_address" to "system",
-            "action_taken" to "rules_received",
-            "reason" to "Received updated rules ${rules.ruleId} v${rules.version}",
-            "handler_name" to DYNAMIC_RULES_HANDLER_NAME,
-            "metadata" to
+        com.guardcore.core.events.securityEventEnvelope(
+            eventType = EventTypes.EVENT_DYNAMIC_RULE_UPDATED,
+            ipAddress = "system",
+            actionTaken = "rules_received",
+            reason = "Received updated rules ${rules.ruleId} v${rules.version}",
+            handlerName = DYNAMIC_RULES_HANDLER_NAME,
+            metadata =
                 mapOf(
                     "rule_id" to rules.ruleId,
                     "version" to rules.version,
@@ -40,13 +40,13 @@ public suspend fun DynamicRuleManager.sendRuleAppliedEvent(rules: DynamicRules) 
   val handler = agentHandler ?: return
   try {
     handler.sendEvent(
-        linkedMapOf<String, Any?>(
-            "event_type" to EventTypes.EVENT_DYNAMIC_RULE_APPLIED,
-            "ip_address" to "system",
-            "action_taken" to "rules_updated",
-            "reason" to "Applied dynamic rules ${rules.ruleId} v${rules.version}",
-            "handler_name" to DYNAMIC_RULES_HANDLER_NAME,
-            "metadata" to
+        com.guardcore.core.events.securityEventEnvelope(
+            eventType = EventTypes.EVENT_DYNAMIC_RULE_APPLIED,
+            ipAddress = "system",
+            actionTaken = "rules_updated",
+            reason = "Applied dynamic rules ${rules.ruleId} v${rules.version}",
+            handlerName = DYNAMIC_RULES_HANDLER_NAME,
+            metadata =
                 mapOf(
                     "rule_id" to rules.ruleId,
                     "version" to rules.version,
@@ -66,13 +66,13 @@ public suspend fun DynamicRuleManager.sendEmergencyEvent(whitelist: List<String>
   val handler = agentHandler ?: return
   try {
     handler.sendEvent(
-        linkedMapOf<String, Any?>(
-            "event_type" to EventTypes.EVENT_EMERGENCY_MODE,
-            "ip_address" to "system",
-            "action_taken" to "emergency_lockdown",
-            "reason" to "[EMERGENCY MODE] activated via dynamic rules",
-            "handler_name" to DYNAMIC_RULES_HANDLER_NAME,
-            "metadata" to
+        com.guardcore.core.events.securityEventEnvelope(
+            eventType = EventTypes.EVENT_EMERGENCY_MODE,
+            ipAddress = "system",
+            actionTaken = "emergency_lockdown",
+            reason = "[EMERGENCY MODE] activated via dynamic rules",
+            handlerName = DYNAMIC_RULES_HANDLER_NAME,
+            metadata =
                 mapOf(
                     "whitelist_count" to whitelist.size,
                     "whitelist" to whitelist.take(10),

@@ -7,10 +7,20 @@ import kotlin.math.sqrt
  * PerformanceMonitor: per-pattern stats, recent metrics, and anomaly detection.
  *
  * Port of guard_core/detection_engine/monitor_types.py, monitor_anomalies.py, monitor_reporting.py,
- * and monitor.py (the anomaly emission seam notifies registered callbacks; the agent send seam is a
- * no-op until the facade wires telemetry in W4).
+ * and monitor.py (the anomaly emission seam notifies registered callbacks and sends the
+ * anomaly/callback-error event data to the agent sink - monitor.py:150-176,
+ * monitor_anomalies.py:93-133).
  */
 public const val DEFAULT_RECENT_TIMES_WINDOW: Int = 100
+
+/**
+ * The agent send seam of `monitor.py` (`await agent_handler.send_event(event)`,
+ * monitor.py:155): the engine builds the anomaly/callback-error event data maps and hands them to
+ * this sink; the facade's capturing/agent handlers implement it.
+ */
+public fun interface AnomalyEventSink {
+  public fun sendEvent(event: Map<String, Any?>)
+}
 
 public class PerformanceMetric(
     public val pattern: String,
@@ -117,6 +127,64 @@ public fun sanitizeAnomalyData(anomaly: Map<String, Any>): Map<String, Any> {
     safeAnomaly["pattern_hash"] = Integer.toHexString(redacted.hashCode()).take(8)
   }
   return safeAnomaly
+}
+
+/** Port of `_anomaly_event_type` (monitor_anomalies.py:81). */
+public fun anomalyEventType(anomalyType: String): String =
+    when (anomalyType) {
+      "timeout" -> "pattern_anomaly_timeout"
+      "slow_execution" -> "pattern_anomaly_slow_execution"
+      else -> "pattern_anomaly_statistical_anomaly"
+    }
+
+/**
+ * Port of `build_anomaly_event_data` (monitor_anomalies.py:93). The python builder redacts the
+ * pattern through `_redact_pattern_source` (detection_scan.py:154, a facade-seam util over the
+ * suspatterns sensitive unions); the engine takes it as the [redactPatternSource] seam so the
+ * engine/stdlib boundary holds - with empty unions the reference redaction is the identity, which
+ * is the default here.
+ */
+public fun buildAnomalyEventData(
+    anomaly: Map<String, Any>,
+    correlationId: String?,
+    redactPatternSource: (String) -> String = { it },
+): Map<String, Any?> {
+  val eventType = anomalyEventType(anomaly["type"] as String)
+  val safeAnomaly = anomaly.toMutableMap()
+  if (safeAnomaly.containsKey("pattern")) {
+    safeAnomaly["pattern"] = redactPatternSource(safeAnomaly["pattern"].toString())
+  }
+  val metadata = LinkedHashMap<String, Any?>()
+  metadata["component"] = "PerformanceMonitor"
+  metadata["correlation_id"] = correlationId
+  metadata.putAll(safeAnomaly)
+  return mapOf(
+      "event_type" to eventType,
+      "ip_address" to "system",
+      "action_taken" to "anomaly_detected",
+      "reason" to "Pattern performance anomaly: ${anomaly["type"]}",
+      "metadata" to metadata,
+  )
+}
+
+/** Port of `build_callback_error_event_data` (monitor_anomalies.py:114). */
+public fun buildCallbackErrorEventData(
+    error: Throwable,
+    safeAnomaly: Map<String, Any>,
+    correlationId: String?,
+): Map<String, Any?> {
+  val metadata = LinkedHashMap<String, Any?>()
+  metadata["component"] = "PerformanceMonitor"
+  metadata["correlation_id"] = correlationId
+  metadata["callback_error"] = error.message ?: error.toString()
+  metadata["anomaly_type"] = safeAnomaly["type"] ?: "unknown"
+  return mapOf(
+      "event_type" to "detection_engine_callback_error",
+      "ip_address" to "system",
+      "action_taken" to "logged",
+      "reason" to "Anomaly callback failed: ${error.message ?: error.toString()}",
+      "metadata" to metadata,
+  )
 }
 
 // monitor_reporting
@@ -251,6 +319,8 @@ public class PerformanceMonitor(
       contentLengthIn: Int,
       matched: Boolean,
       timeout: Boolean = false,
+      agentHandler: AnomalyEventSink? = null,
+      correlationId: String? = null,
   ) {
     val maxPatternLength = 100
     var pattern = patternIn
@@ -305,10 +375,15 @@ public class PerformanceMonitor(
           detectStatisticalAnomaly(metric, stats, minSamplesForAnomaly, anomalyThreshold)
     }
 
-    checkAnomalies(metric, statisticalAnomaly)
+    checkAnomalies(metric, statisticalAnomaly, agentHandler, correlationId)
   }
 
-  private fun checkAnomalies(metric: PerformanceMetric, statisticalAnomaly: Map<String, Any>?) {
+  private fun checkAnomalies(
+      metric: PerformanceMetric,
+      statisticalAnomaly: Map<String, Any>?,
+      agentHandler: AnomalyEventSink? = null,
+      correlationId: String? = null,
+  ) {
     val anomalies = ArrayList<Map<String, Any>>()
 
     val timeoutAnomaly = detectTimeoutAnomaly(metric)
@@ -321,19 +396,44 @@ public class PerformanceMonitor(
 
     if (statisticalAnomaly != null) anomalies.add(statisticalAnomaly)
 
+    if (agentHandler != null && anomalies.isNotEmpty() &&
+        reserveAnomalyEmission(metric.pattern)) {
+      for (anomaly in anomalies) {
+        // Port of `_send_anomaly_event` (monitor.py:149): build the event data and send.
+        val event = buildAnomalyEventData(anomaly, correlationId)
+        try {
+          agentHandler.sendEvent(event)
+        } catch (e: Exception) {
+          System.err.println("Failed to send anomaly event to agent: $e")
+        }
+      }
+    }
+
     for (anomaly in anomalies) {
-      notifyCallbacks(anomaly)
+      notifyCallbacks(anomaly, agentHandler, correlationId)
     }
   }
 
-  private fun notifyCallbacks(anomaly: Map<String, Any>) {
+  private fun notifyCallbacks(
+      anomaly: Map<String, Any>,
+      agentHandler: AnomalyEventSink? = null,
+      correlationId: String? = null,
+  ) {
     val safeAnomaly = sanitizeAnomalyData(anomaly)
     for (callback in anomalyCallbacks.toList()) {
       try {
         callback(safeAnomaly)
       } catch (e: Exception) {
-        // The reference emits a callback-error event to the agent; the engine logs nothing
-        // (no logging surface in the engine module).
+        // Port of `_send_callback_error_event` (monitor.py:163): the callback failure emits
+        // detection_engine_callback_error to the agent sink; engine-side there is no logger.
+        if (agentHandler != null) {
+          val event = buildCallbackErrorEventData(e, safeAnomaly, correlationId)
+          try {
+            agentHandler.sendEvent(event)
+          } catch (sendError: Exception) {
+            // monitor.py:173 swallows the nested send failure the same way.
+          }
+        }
       }
     }
   }

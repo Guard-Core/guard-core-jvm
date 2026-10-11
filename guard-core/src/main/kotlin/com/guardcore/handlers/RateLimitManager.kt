@@ -398,13 +398,13 @@ private constructor(
     val handler = agentHandler ?: return
     try {
       handler.sendEvent(
-          linkedMapOf<String, Any?>(
-              "event_type" to EventTypes.EVENT_RATE_LIMIT_SCRIPT_RELOADED,
-              "ip_address" to "system",
-              "action_taken" to "script_reloaded",
-              "reason" to "NOSCRIPT recovery: Lua script re-cached on Redis",
-              "handler_name" to RATE_LIMIT_HANDLER_NAME,
-              "metadata" to emptyMap<String, Any?>(),
+          com.guardcore.core.events.securityEventEnvelope(
+              eventType = EventTypes.EVENT_RATE_LIMIT_SCRIPT_RELOADED,
+              ipAddress = "system",
+              actionTaken = "script_reloaded",
+              reason = "NOSCRIPT recovery: Lua script re-cached on Redis",
+              handlerName = RATE_LIMIT_HANDLER_NAME,
+              metadata = emptyMap<String, Any?>(),
           ),
       )
     } catch (e: Exception) {
@@ -570,22 +570,22 @@ private constructor(
       val details = "${requestCount} requests in ${displayConfig.rateLimitWindow}s window"
 
       agentHandler?.sendEvent(
-          linkedMapOf<String, Any?>(
-              "event_type" to EventTypes.EVENT_RATE_LIMITED,
-              "ip_address" to clientIp,
-              "action_taken" to "request_blocked",
-              "reason" to "$message: $details",
-              "endpoint" to
+          com.guardcore.core.events.securityEventEnvelope(
+              eventType = EventTypes.EVENT_RATE_LIMITED,
+              ipAddress = clientIp,
+              actionTaken = "request_blocked",
+              reason = "$message: $details",
+              endpoint =
                   RequestLogging.redactEndpointForDisplay(
                       request.urlPath,
                       displayConfig.logSensitiveParams,
                       displayConfig.logSensitiveBodyFields,
                       displayConfig.logSensitiveHeaders,
                   ),
-              "method" to request.method,
-              "response_time" to AgentEvents.getPipelineResponseTime(request),
-              "handler_name" to RATE_LIMIT_HANDLER_NAME,
-              "metadata" to
+              method = request.method,
+              responseTime = AgentEvents.getPipelineResponseTime(request),
+              handlerName = RATE_LIMIT_HANDLER_NAME,
+              metadata =
                   mapOf(
                       "request_count" to requestCount,
                       "rate_limit" to displayConfig.rateLimit,

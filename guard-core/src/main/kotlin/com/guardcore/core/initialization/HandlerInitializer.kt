@@ -3,6 +3,8 @@ package com.guardcore.core.initialization
 import com.guardcore.config.SecurityConfig
 import com.guardcore.core.events.AgentTelemetryMember
 import com.guardcore.core.events.CompositeAgentHandler
+import com.guardcore.core.events.EnrichmentContext
+import com.guardcore.core.events.EventEnricher
 import com.guardcore.core.events.EventFilter
 import com.guardcore.core.events.MetricsCollector
 import com.guardcore.core.events.SecurityEventBus
@@ -28,9 +30,14 @@ import java.util.logging.Logger
  * (_handler_initializer_steps.py:12) plus `handler_initializer.py:15`: HandlerInitializer wires the
  * handlers to redis/agent and builds the event-filter/bus/metrics trio.
  *
- * W4a boundary (KNOWN_GAPS G-11): the otel/logfire member handlers and the EventEnricher are the
- * W4b events wave; the composite factory seam composes agent-only until they land, and requesting
- * otel/logfire through the default factory raises instead of silently skipping.
+ * W4b events port: [buildEnricher] constructs the real `EventEnricher` (handler_initializer.py:58)
+ * and [buildCompositeHandler] composes the real member-handler ports (otel/logfire; the python
+ * factory appends OtelHandler/LogfireHandler at handler_initializer.py:93-100). The W4a explicit
+ * raise is kept: opentelemetry/logfire are not part of guard-core's dependency set, so requesting
+ * them through the default composition raises NamingW4bContractError-style IllegalStateException
+ * naming the missing packages instead of silently skipping; a host that provides the SDK surface
+ * registers a [compositeMemberFactory] (or installs the `core.events` surface seams) and the real
+ * member handlers compose.
  */
 public class HandlerInitializer(
     public val config: SecurityConfig,
@@ -42,15 +49,17 @@ public class HandlerInitializer(
 ) {
   public var compositeHandler: CompositeAgentHandler? = null
   public var eventFilter: EventFilter? = null
-  public var enricher: Any? = null
+  public var enricher: EventEnricher? = null
   public var behaviorTracker: BehaviorTracker? = null
   public var lazyInitTask: java.util.concurrent.CompletableFuture<Void>? = null
   public val logger: Logger = Logger.getLogger("guard_core.core.initialization")
 
   /**
-   * W4b seam: composes the otel/logfire member handlers. The default composes agent-only and
-   * refuses otel/logfire explicitly (the python factory appends OtelHandler/LogfireHandler here,
-   * handler_initializer.py:87-105).
+   * The composite member factory (handler_initializer.py:93-100): given the composed members and
+   * the config, returns the additional member handlers. The default returns otel/logfire members
+   * when requested and raises explicitly while their SDKs are absent from the dependency set
+   * (the W4a contract, kept); hosts that provide the `core.events` SDK surfaces register their own
+   * factory composing the real [OtelHandler]/[LogfireHandler] members.
    */
   public var compositeMemberFactory:
       ((
@@ -82,14 +91,27 @@ public class HandlerInitializer(
     )
   }
 
-  /** Python `build_enricher` (handler_initializer.py:58): the W4b EventEnricher seam. */
-  public fun buildEnricher(): Any? {
+  /** Python `build_enricher` (handler_initializer.py:58): the real EventEnricher construction. */
+  public fun buildEnricher(): EventEnricher? {
     if (!config.enableEnrichment) {
       return null
     }
-    throw IllegalStateException(
-        "EventEnricher is the W4b events wave (KNOWN_GAPS G-11); enable_enrichment " +
-            "requires the events port",
+    var dynamicRuleHandler: com.guardcore.handlers.DynamicRuleManager? = null
+    if (config.enableDynamicRules) {
+      dynamicRuleHandler = com.guardcore.handlers.DynamicRuleManager(config)
+    }
+    var tracker = (guardDecorator as? com.guardcore.decorators.BaseSecurityDecorator)?.behaviorTracker
+    if (tracker == null) {
+      tracker = BehaviorTracker(config)
+    }
+    behaviorTracker = tracker
+    return EventEnricher(
+        EnrichmentContext(
+            config = config,
+            agentHandler = agentHandler,
+            dynamicRuleHandler = dynamicRuleHandler,
+            behaviorTracker = tracker,
+        ),
     )
   }
 
@@ -98,13 +120,16 @@ public class HandlerInitializer(
     val members = mutableListOf<AgentTelemetryMember>()
     (agentHandler as? HandlerAgentSink)?.let { members.add(SinkTelemetryMember(it)) }
     if (config.enableOtel || config.enableLogfire) {
-      // The python factory appends OtelHandler/LogfireHandler (handler_initializer.py:93-100).
-      // Until W4b lands them the default composition refuses; a registered factory may supply
-      // them.
+      // The python factory appends OtelHandler/LogfireHandler (handler_initializer.py:93-100);
+      // the JVM mirrors the construction through the factory seam. The default raises explicitly
+      // while the otel/logfire SDKs are absent (the W4a contract, kept); a host providing the
+      // `core.events` SDK surfaces registers a factory composing the real member handlers.
       val extra =
           compositeMemberFactory?.invoke(members.toList(), config)
               ?: throw IllegalStateException(
-                  "enable_otel/enable_logfire require the W4b events port (KNOWN_GAPS G-11)",
+                  "enable_otel/enable_logfire requested but the opentelemetry-sdk/logfire " +
+                      "packages are not part of guard-core's dependency set; install the SDK " +
+                      "surface and register a compositeMemberFactory (KNOWN_GAPS G-11/W4b contract)",
               )
       members.addAll(extra)
     }
