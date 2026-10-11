@@ -129,6 +129,12 @@ public class TestMiddleware(
    */
   public var eventBusOverride: MiddlewareEventBusProtocol? = null
 
+  /**
+   * Swap-in point for a recording/failing logger (the python tests assign
+   * `mw.logger = MagicMock(side_effect=...)`).
+   */
+  public var loggerOverride: Logger? = null
+
   public constructor(
       config: SecurityConfig,
       bus: RecordingBus?,
@@ -140,7 +146,8 @@ public class TestMiddleware(
     this.bus.let {}
   }
 
-  override val logger: Logger = Logger.getLogger("test.core")
+  override val logger: Logger
+    get() = loggerOverride ?: DEFAULT_MIDDLEWARE_LOGGER
   override var lastCloudIpRefresh: Int = 0
   override val suspiciousRequestCounts: MutableMap<String, MutableMap<String, Int>> = linkedMapOf()
   override val eventBus: MiddlewareEventBusProtocol
@@ -175,6 +182,9 @@ public class TestResponseFactory : MiddlewareResponseFactoryProtocol {
 
   override suspend fun applyModifier(response: GuardResponse): GuardResponse = response
 }
+
+/** The default middleware test logger (python conftest MockGuardMiddleware's logger). */
+public val DEFAULT_MIDDLEWARE_LOGGER: Logger = Logger.getLogger("test.core")
 
 /** Idempotent seam registration for the core tests (the conftest seed). */
 public object HandlerSeamsRegister {
