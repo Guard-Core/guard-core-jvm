@@ -4,15 +4,14 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * The W5 full-corpus certification gate: ALL 21 suites + the self-relative cost budgets in one
- * command, with a per-suite summary (pass / ledgered / total). Run via
- * `./gradlew :guard-core-conformance:fullCorpusGate`; CI's conformance step runs it.
+ * command, with a per-suite summary (pass / ledgered / total). Run via `./gradlew
+ * :guard-core-conformance:fullCorpusGate`; CI's conformance step runs it.
  *
  * The campaign zero-xfail bar (specs/impl/jvm.md, W5 gate) is expressed here as: detect 193/0,
  * pipeline 35/0, redis_interop 14/0, event_stream 37+2 ledgered reason-string shapes (the TS
@@ -66,7 +65,9 @@ class FullCorpusTest {
 
     // ---- redis arm: 14 cases ----
     val redisFailures = redis.runAll()
-    summaries.add(SuiteSummary("redis_interop", suiteCaseCount("redis_interop"), redisFailures.size, 0))
+    summaries.add(
+        SuiteSummary("redis_interop", suiteCaseCount("redis_interop"), redisFailures.size, 0),
+    )
 
     // ---- pattern-safety arm: 94 cases, 6 ledgered cost-verdict timing facts ----
     val safetyLedger = PatternSafetyConformanceTest.loadLedger()
@@ -139,8 +140,7 @@ class FullCorpusTest {
 
   private fun suiteCaseCount(suite: String): Int {
     val idx = DetectRunner.index()
-    return idx
-        .getValue("suites")
+    return idx.getValue("suites")
         .jsonObject
         .getValue(suite)
         .jsonObject

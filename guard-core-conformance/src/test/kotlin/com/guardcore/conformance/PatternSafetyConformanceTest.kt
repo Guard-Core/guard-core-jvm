@@ -1,6 +1,5 @@
 package com.guardcore.conformance
 
-import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -13,8 +12,8 @@ import kotlinx.serialization.json.jsonPrimitive
  * (dangerous-construct gate, python-re compile gate, structural prefilters, test-string probe,
  * reach-probe cost arbiter).
  *
- * Fail-closed ledger semantics (conformance/jvm_safety_xfail.json), mirroring the family policy:
- * a failing case NOT listed is red; a listed case that now reproduces the reference verdict is red
+ * Fail-closed ledger semantics (conformance/jvm_safety_xfail.json), mirroring the family policy: a
+ * failing case NOT listed is red; a listed case that now reproduces the reference verdict is red
  * (stale baseline); a listed case whose observed divergent verdict no longer matches the recorded
  * one is red (drifted entry). The six listed entries are cost-verdict-mode timing facts: the
  * extrapolated probe cost is measured on THIS engine's executor, and java.util.regex's relative
@@ -41,35 +40,31 @@ class PatternSafetyConformanceTest {
               ?.bufferedReader()
               ?.readText() ?: error("missing $LEDGER_RESOURCE")
       val obj = Json.parseToJsonElement(text).jsonObject
-      return obj
-          .getValue("cases")
-          .jsonObject
-          .entries
-          .associate { entry ->
-            val raw = entry.value.jsonPrimitive.content
-            val sep = raw.indexOf(" :: ")
-            check(sep > 0) { "ledger entry ${entry.key} malformed: missing ' :: ' separator" }
-            val observed = raw.substring(0, sep)
-            val reason = raw.substring(sep + 4)
-            val boundary = observed.startsWith("boundary ")
-            val verdict = if (boundary) observed.removePrefix("boundary ") else observed
-            val parts = verdict.split(",")
-            check(parts.size == 2) { "ledger entry ${entry.key} malformed observed verdict" }
-            check(parts[0].startsWith("safe=")) {
-              "ledger entry ${entry.key} malformed observed safe"
-            }
+      return obj.getValue("cases").jsonObject.entries.associate { entry ->
+        val raw = entry.value.jsonPrimitive.content
+        val sep = raw.indexOf(" :: ")
+        check(sep > 0) { "ledger entry ${entry.key} malformed: missing ' :: ' separator" }
+        val observed = raw.substring(0, sep)
+        val reason = raw.substring(sep + 4)
+        val boundary = observed.startsWith("boundary ")
+        val verdict = if (boundary) observed.removePrefix("boundary ") else observed
+        val parts = verdict.split(",")
+        check(parts.size == 2) { "ledger entry ${entry.key} malformed observed verdict" }
+        check(parts[0].startsWith("safe=")) {
+          "ledger entry ${entry.key} malformed observed safe"
+        }
+        Pair(
+            entry.key,
             Pair(
-                entry.key,
-                Pair(
-                    reason,
-                    LedgeredOutcome(
-                        boundary,
-                        parts[0].substringAfter("=").toBooleanStrict(),
-                        parts[1].removePrefix("reason_class="),
-                    ),
+                reason,
+                LedgeredOutcome(
+                    boundary,
+                    parts[0].substringAfter("=").toBooleanStrict(),
+                    parts[1].removePrefix("reason_class="),
                 ),
-            )
-          }
+            ),
+        )
+      }
     }
 
     /**
@@ -101,8 +96,9 @@ class PatternSafetyConformanceTest {
             ledgered.add(key)
             if (!observed.boundary) {
               val actual = LedgeredOutcome(false, failure.observedSafe, failure.observedClass)
-              if (actual.observedSafe != observed.observedSafe ||
-                  actual.observedClass != observed.observedClass
+              if (
+                  actual.observedSafe != observed.observedSafe ||
+                      actual.observedClass != observed.observedClass
               ) {
                 failures.add(
                     PatternSafetyRunner.CaseFailure(

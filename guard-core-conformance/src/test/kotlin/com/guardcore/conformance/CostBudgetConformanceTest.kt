@@ -10,9 +10,9 @@ import kotlinx.serialization.json.jsonPrimitive
 /**
  * The W5 cost-budget gate: every cost_bodies workload must sit under its self-relative ceiling
  * (index.json cost_budgets.method: best_ms <= K * best8_ms * size/8192 + floor_ms, K=5,
- * floor_ms=250), measured against this engine's own 8 KiB baseline on this host. Fail-closed
- * ledger jvm_cost_xfail.json: an over-ceiling workload must be listed; a listed workload that
- * comes back under ceiling fails the build (stale entry).
+ * floor_ms=250), measured against this engine's own 8 KiB baseline on this host. Fail-closed ledger
+ * jvm_cost_xfail.json: an over-ceiling workload must be listed; a listed workload that comes back
+ * under ceiling fails the build (stale entry).
  */
 class CostBudgetConformanceTest {
   @Test
@@ -50,11 +50,9 @@ class CostBudgetConformanceTest {
               ?.bufferedReader()
               ?.readText() ?: error("missing $LEDGER_RESOURCE")
       val obj = Json.parseToJsonElement(text).jsonObject
-      return obj
-          .getValue("workloads")
-          .jsonObject
-          .entries
-          .associate { it.key to it.value.jsonPrimitive.content }
+      return obj.getValue("workloads").jsonObject.entries.associate {
+        it.key to it.value.jsonPrimitive.content
+      }
     }
   }
 }

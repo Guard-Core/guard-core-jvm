@@ -52,7 +52,9 @@ public object PatternSafetyRunner {
   )
 
   /** Loads the safety_gates suite file and asserts its registration pins. */
-  public fun loadCases(corpus: java.nio.file.Path = DetectRunner.corpusDir()): Pair<String, List<SafetyCase>> {
+  public fun loadCases(
+      corpus: java.nio.file.Path = DetectRunner.corpusDir(),
+  ): Pair<String, List<SafetyCase>> {
     val suiteJson =
         Json.parseToJsonElement(Files.readString(corpus.resolve("safety_gates.json"))).jsonObject
     val suite = suiteJson.getValue("suite").jsonPrimitive.content
@@ -71,8 +73,7 @@ public object PatternSafetyRunner {
                   input["test_strings"]?.let {
                     it.jsonArray.map { s -> s.jsonPrimitive.content }
                   },
-              maxContentLength =
-                  input["max_content_length"]?.let { it.jsonPrimitive.int },
+              maxContentLength = input["max_content_length"]?.let { it.jsonPrimitive.int },
               expectedSafe = expected.getValue("safe").jsonPrimitive.boolean,
               expectedReasonClass = expected.getValue("reason_class").jsonPrimitive.content,
           )
@@ -91,7 +92,10 @@ public object PatternSafetyRunner {
             Pair("Pattern contains dangerous construct", "dangerous_construct"),
             Pair("Pattern validation failed:", "compile_failed"),
             Pair("Pattern contains nested unbounded quantifier", "structural_nested_unbounded"),
-            Pair("Pattern contains adjacent broad unbounded quantifiers", "structural_adjacent_broad"),
+            Pair(
+                "Pattern contains adjacent broad unbounded quantifiers",
+                "structural_adjacent_broad",
+            ),
             Pair("terminator cannot be reached by", "structural_unreachable_terminator"),
             Pair("absorb the mandatory literal", "structural_literal_absorb"),
             Pair("ambiguous optional tail", "structural_ambiguous_tail"),
@@ -109,8 +113,8 @@ public object PatternSafetyRunner {
   }
 
   /**
-   * Diagnostics only: which ported chain module produced a verdict, with the python anchor. Used
-   * in failure output so a divergence names its producer.
+   * Diagnostics only: which ported chain module produced a verdict, with the python anchor. Used in
+   * failure output so a divergence names its producer.
    */
   public fun chainModuleOf(reasonClass: String): String =
       when (reasonClass) {
@@ -147,7 +151,9 @@ public object PatternSafetyRunner {
    */
   public fun runAll(corpus: java.nio.file.Path = DetectRunner.corpusDir()): SuiteResult {
     val (_, cases) = loadCases(corpus)
-    check(cases.isNotEmpty()) { "safety_gates corpus matched zero cases: a vacuous pass is a failure" }
+    check(cases.isNotEmpty()) {
+      "safety_gates corpus matched zero cases: a vacuous pass is a failure"
+    }
     val failures = ArrayList<CaseFailure>()
     var passed = 0
     for (case in cases) {

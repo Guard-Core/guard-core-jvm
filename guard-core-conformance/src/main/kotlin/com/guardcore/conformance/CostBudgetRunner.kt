@@ -6,7 +6,6 @@ import java.nio.file.Files
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.double
-import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -55,26 +54,24 @@ public object CostBudgetRunner {
       val context: String,
   )
 
-  public fun loadBudgets(corpus: java.nio.file.Path = DetectRunner.corpusDir()): Triple<Double, Double, Map<String, Pair<Double, Boolean>>> {
+  public fun loadBudgets(
+      corpus: java.nio.file.Path = DetectRunner.corpusDir(),
+  ): Triple<Double, Double, Map<String, Pair<Double, Boolean>>> {
     val index = Json.parseToJsonElement(Files.readString(corpus.resolve("index.json"))).jsonObject
     val budgetsBlock = index.getValue("cost_budgets").jsonObject
     val k = budgetsBlock.getValue("k").jsonPrimitive.double
     val floorMs = budgetsBlock.getValue("floor_ms").jsonPrimitive.double
     val budgets =
-        budgetsBlock
-            .getValue("budgets")
-            .jsonObject
-            .entries
-            .associate {
-              val obj = it.value.jsonObject
+        budgetsBlock.getValue("budgets").jsonObject.entries.associate {
+          val obj = it.value.jsonObject
+          Pair(
+              it.key,
               Pair(
-                  it.key,
-                  Pair(
-                      obj.getValue("reference_ms").jsonPrimitive.double,
-                      obj.getValue("expected_is_threat").jsonPrimitive.boolean,
-                  ),
-              )
-            }
+                  obj.getValue("reference_ms").jsonPrimitive.double,
+                  obj.getValue("expected_is_threat").jsonPrimitive.boolean,
+              ),
+          )
+        }
     check(budgets.isNotEmpty()) {
       "index.json has no cost_budgets block; regenerate the corpus so cost stays enforced"
     }

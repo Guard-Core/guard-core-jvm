@@ -155,7 +155,11 @@ public object PyRe {
             }
           }
         }
-        c == '(' && !inClass && i + 3 < n && pattern[i + 1] == '?' && pattern[i + 2] == 'P' &&
+        c == '(' &&
+            !inClass &&
+            i + 3 < n &&
+            pattern[i + 1] == '?' &&
+            pattern[i + 2] == 'P' &&
             (pattern[i + 3] == '<' || pattern[i + 3] == '=') -> {
           if (pattern[i + 3] == '<') {
             // (?P<name> -> (?<name>: java's named-group spelling.
