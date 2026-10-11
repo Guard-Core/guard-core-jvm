@@ -26,11 +26,12 @@ for the exact per-line enumeration below.
 | com/guardcore/core/bypass | 98.5% (1) | 98.5% (1) |
 | com/guardcore/core/routing | 95.8% (1) | 95.8% (1) |
 
-Facade module total: 14,703 lines, 1,391 missed -> **90.54% line coverage**
-(baseline 69.12%, 10,122/14,644). The 97% wave gate needs <=441 residual
-lines; the remaining 950 are enumerated per class below with their reason and
-are the explicit W9a-inflight worklist (no JaCoCo excludes were added; the
-engine/conformance residuals are W9b scope per the work order).
+Facade module total: 14,704 lines, 1,391 missed -> **90.54% line coverage**
+(13,313/14,704, measured on the merged master c80e621; the wave baseline was
+69.12%, 10,122/14,644). The 97% wave gate needs <=441 residual lines; the
+remaining ~950 are enumerated per class below with their reason and are the
+explicit W9a-inflight worklist (tracked in #26; no JaCoCo excludes were
+added; the engine/conformance residuals are W9b scope per the work order).
 
 ## Tests added this wave
 
@@ -59,6 +60,16 @@ engine/conformance residuals are W9b scope per the work order).
    has microsecond resolution and never collides. The work order's
    "RateLimitManager pipeline+primitive interleave zwrite loss" flake (3
    recurrences this wave) is this bug. Fixed with an Instant-based nowSeconds.
+3. **redis_interop runner: score_equals_member compared RAW STRINGS**
+   (RedisInteropTest.kt): the reference harness (redis_interop_cases.py:311-313)
+   pins the rate-limit zset contract as NUMERIC equality within 1e-6
+   (abs(score - float(member)) < 1e-6) because the member is rendered by the
+   redis-side Lua, whose float formatting is build-dependent (the docker
+   redis builds emit e-notation for sub-microsecond timestamps; glibc/macOS
+   builds render positionally). The nowSeconds fidelity fix (item 2) is what
+   surfaced it. The verifier now ports the numeric contract, and the CI redis
+   images were aligned to the redis 8 major the corpus is generated against
+   (matching the python family pin image: redis).
 3. **Test-suite state leak (SusPatternsRegistryTest)**: removed a DEFAULT
    pattern from the process-global table and never restored it, disabling one
    detection pattern for every suite running after it.
