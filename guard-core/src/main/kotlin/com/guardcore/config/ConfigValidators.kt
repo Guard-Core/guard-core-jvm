@@ -537,6 +537,77 @@ public object ConfigValidators {
 
   // -------------------------------------------------------------- helpers
 
+  /**
+   * Port of `_validate_typed_collection_field_value` with `_GLOBAL_BEHAVIOR_RULES_ADAPTER`
+   * (_security_config_typed_validators.py:6-12): the assignment-time revalidator coerces dict
+   * entries to BehaviorRuleConfig exactly like pydantic's TypeAdapter (the construction-time map
+   * applier shares the same semantics); anything else rejects with the python-shaped message.
+   */
+  internal fun validateGlobalBehaviorRulesFieldValue(
+      value: Any?,
+      fieldName: String,
+  ): List<BehaviorRuleConfig> {
+    if (value !is List<*>) {
+      throw ConfigValidationError(
+          "$fieldName is invalid: Input should be a valid list " +
+              "[type=list_type, input_value=$value, input_type=${typeName(value)}]",
+      )
+    }
+    val out = ArrayList<BehaviorRuleConfig>(value.size)
+    for (item in value) {
+      out.add(
+          when (item) {
+            is BehaviorRuleConfig -> item
+            is Map<*, *> -> behaviorRuleConfigFromMap(item, fieldName)
+            else ->
+                throw ConfigValidationError(
+                    "$fieldName is invalid: Input should be a valid dictionary or instance " +
+                        "of BehaviorRuleConfig [type=model_type, input_value=$item, " +
+                        "input_type=${typeName(item)}]",
+                )
+          },
+      )
+    }
+    return out
+  }
+
+  private fun behaviorRuleConfigFromMap(map: Map<*, *>, fieldName: String): BehaviorRuleConfig {
+    fun require(key: String): Any? =
+        map[key]
+            ?: throw ConfigValidationError(
+                "$fieldName is invalid: $key is required " +
+                    "[type=missing, input_value=$map, input_type=dict]",
+            )
+    val ruleTypeRaw =
+        require("rule_type") as? String
+            ?: throw ConfigValidationError(
+                "$fieldName is invalid: Input should be a valid string " +
+                    "[type=string_type, input_value=${map["rule_type"]}]",
+            )
+    val ruleType =
+        RuleType.entries.firstOrNull { it.pythonName == ruleTypeRaw }
+            ?: throw ConfigValidationError(
+                "$fieldName is invalid: Input should be 'usage', 'return_pattern' or " +
+                    "'frequency' [type=enum, input_value=$ruleTypeRaw]",
+            )
+    val actionRaw = (map["action"] as? String) ?: "log"
+    val action =
+        RuleAction.entries.firstOrNull { it.pythonName == actionRaw }
+            ?: throw ConfigValidationError(
+                "$fieldName is invalid: Input should be 'ban', 'log', 'throttle' or " +
+                    "'alert' [type=enum, input_value=$actionRaw]",
+            )
+    return BehaviorRuleConfig(
+        ruleType = ruleType,
+        threshold = require("threshold") as Int,
+        window = (map["window"] as? Int) ?: 3600,
+        pattern = map["pattern"] as? String,
+        action = action,
+        banDuration = map["ban_duration"] as? Int,
+        correlateWithDetection = (map["correlate_with_detection"] as? Boolean) ?: false,
+    )
+  }
+
   private fun stringSetOf(value: Any?): Set<String> =
       when (value) {
         null -> emptySet()

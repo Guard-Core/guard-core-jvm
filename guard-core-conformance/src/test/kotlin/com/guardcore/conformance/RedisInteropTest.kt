@@ -487,8 +487,20 @@ class RedisInteropTest {
       if (scoreShape != null && !Pattern.compile(scoreShape).matcher(score).matches()) {
         problems.add("$id: score $score fails shape $scoreShape")
       }
-      if (scoreEqualsMember && score != member) {
-        problems.add("$id: score $score != member $member")
+      if (scoreEqualsMember) {
+        // Reference contract (redis_interop_cases.py:311-313): the member is the epoch
+        // float stringified and the score equals it NUMERICALLY within 1e-6 - redis's
+        // Lua member rendering is version-dependent (e-notation on some builds), so a
+        // raw string compare would diverge from the generator.
+        val memberValue = member.toDoubleOrNull()
+        val scoreValue = score.toDoubleOrNull()
+        val numericallyEqual =
+            memberValue != null &&
+                scoreValue != null &&
+                kotlin.math.abs(scoreValue - memberValue) < 1e-6
+        if (!numericallyEqual) {
+          problems.add("$id: score $score != member $member")
+        }
       }
     }
     return problems

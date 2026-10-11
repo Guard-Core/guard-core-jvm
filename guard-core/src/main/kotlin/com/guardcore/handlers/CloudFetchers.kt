@@ -24,19 +24,58 @@ public object CloudFetchers {
   private val client: HttpClient =
       HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build()
 
+  /**
+   * Test seam mirroring the python tests' aiohttp session mocks (test_cloud_ips.py): when set,
+   * every GET resolves through it as (status, body); production never sets it.
+   */
+  @Volatile internal var httpGetOverride: (suspend (url: String) -> Pair<Int, String>)? = null
+
   private suspend fun httpGet(
       url: String,
       timeoutSeconds: Long = 10,
-  ): HttpResponse<String> =
-      withContext(Dispatchers.IO) {
-        val request =
-            HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(timeoutSeconds))
-                .GET()
-                .build()
-        client.send(request, HttpResponse.BodyHandlers.ofString())
-      }
+  ): HttpResponse<String> {
+    httpGetOverride?.let {
+      val (status, body) = it(url)
+      return FakeHttpResponse(status, body, URI.create(url))
+    }
+    return withContext(Dispatchers.IO) {
+      val request =
+          HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .timeout(Duration.ofSeconds(timeoutSeconds))
+              .GET()
+              .build()
+      client.send(request, HttpResponse.BodyHandlers.ofString())
+    }
+  }
+
+  /** The status/body pair the override seam folds into the HttpClient response shape. */
+  private class FakeHttpResponse(
+      private val status: Int,
+      private val content: String,
+      private val uri: URI,
+  ) : HttpResponse<String> {
+    override fun statusCode(): Int = status
+
+    override fun body(): String = content
+
+    override fun uri(): URI = uri
+
+    override fun headers(): java.net.http.HttpHeaders =
+        java.net.http.HttpHeaders.of(mapOf(), { _, _ -> true })
+
+    override fun previousResponse(): java.util.Optional<HttpResponse<String>> =
+        java.util.Optional.empty()
+
+    override fun request(): HttpRequest = HttpRequest.newBuilder().uri(uri).build()
+
+    override fun sslSession(): java.util.Optional<javax.net.ssl.SSLSession> =
+        java.util.Optional.empty()
+
+    override fun version(): HttpClient.Version = HttpClient.Version.HTTP_1_1
+
+    override fun toString(): String = "FakeHttpResponse[$status]"
+  }
 
   private fun raiseForStatus(response: HttpResponse<String>) {
     if (response.statusCode() < 200 || response.statusCode() >= 300) {

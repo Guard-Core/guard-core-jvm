@@ -1,5 +1,6 @@
 package com.guardcore.handlers
 
+import com.guardcore.engine.suspatterns.SusPatternsManager
 import com.guardcore.protocols.RedisHandlerProtocol
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -69,11 +70,21 @@ class SusPatternsRegistryTest {
 
   @Test
   fun removePatternDefaultRemovesFromTable() = runTest {
+    val engine = SusPatternsManager.shared()
+    val savedPatterns = engine.patterns.toList()
+    val savedCompiled = engine.compiledPatterns.toList()
     val before = SusPatternsRegistry.getDefaultPatterns().size
     val victim = SusPatternsRegistry.getDefaultPatterns().first()
     assertTrue(SusPatternsRegistry.removePattern(victim, custom = false))
     assertEquals(before - 1, SusPatternsRegistry.getDefaultPatterns().size)
     assertFalse(victim in SusPatternsRegistry.getDefaultPatterns())
+    // The registry is process-global: restore the table byte-exact so later suites scan
+    // against the full set (the reference conftest restores the pattern table per test).
+    engine.patterns.clear()
+    engine.patterns.addAll(savedPatterns)
+    engine.compiledPatterns.clear()
+    engine.compiledPatterns.addAll(savedCompiled)
+    assertEquals(before, SusPatternsRegistry.getDefaultPatterns().size)
   }
 
   @Test

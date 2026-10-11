@@ -426,9 +426,22 @@ public open class CloudManager {
  * Port of `_fetch_provider_ranges` (cloud_handler.py:86): normalizes set-returning fetchers to
  * (ranges, regions) pairs.
  */
+/**
+ * Test seam mirroring the python tests' `patch("...cloud_handler.fetch_aws_ip_ranges")` pins
+ * (test_nonblocking_refresh.py, test_cloud_ips.py): when set, every provider fetch resolves through
+ * it; production never sets it.
+ */
+@Volatile
+public var fetchProviderRangesOverride:
+    (suspend (provider: String) -> Pair<Set<IpNetwork>, Map<String, String>>)? =
+    null
+
 public suspend fun fetchProviderRanges(
     provider: String,
 ): Pair<Set<IpNetwork>, Map<String, String>> {
+  fetchProviderRangesOverride?.let {
+    return it(provider)
+  }
   val result: Any =
       when (provider) {
         "AWS" -> CloudFetchers.fetchAwsIpRanges()
