@@ -218,9 +218,9 @@ public fun coreRunTest(block: suspend () -> Unit) {
 }
 
 /**
- * Full ban-manager reset for the core tests: the python fixtures call `reset_global_state()`
- * (and build fresh mocks per test); the JVM must also drop any fault-injection override a
- * previous test installed on the singleton.
+ * Full ban-manager reset for the core tests: the python fixtures call `reset_global_state()` (and
+ * build fresh mocks per test); the JVM must also drop any fault-injection override a previous test
+ * installed on the singleton.
  */
 public suspend fun resetCoreBanState() {
   com.guardcore.handlers.resetIpBanGlobalState()
