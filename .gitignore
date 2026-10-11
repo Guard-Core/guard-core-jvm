@@ -17,3 +17,6 @@ local.properties
 
 # macOS
 .DS_Store
+
+# Release rehearsal / publish staging leftovers
+central-bundle.zip
