@@ -25,16 +25,36 @@ conformance/
         └── (21 suite files)
 ```
 
-## Scope (W0)
+## Scope (W5, complete)
 
-W0 ships only the corpus smoke test (`ConformanceSmokeTest` in the
-`guard-core-conformance` module), which reads `cases/index.json` from this
-directory via a relative path and asserts the vendored index pins:
-`spec_version == "4.1.0"`, `engine_version == "4.3.2"`, 21 suite entries,
-`cost_budgets.k == 5`, and `fixed_ip == "203.0.113.7"`.
+The full corpus runs in one command:
 
-The full runner, cost-budget measurement, and xfail manifests land in W5. The
-comparison rules every port must implement are defined in the `comparison`
-object of `cases/index.json` (threat multiset ordering, excluded fields, float
-precision, pipeline/event envelope semantics, redis byte equality, and
-pattern-safety reason classes).
+```bash
+./gradlew :guard-core-conformance:fullCorpusGate
+```
+
+Runner map (all in the `guard-core-conformance` module):
+
+- `ConformanceSmokeTest` - the W0 vendored-index pins (spec version, engine
+  version, suite count, cost budget k, fixed IP).
+- `DetectConformanceTest` - the 13 detect suites (193 cases) through the
+  engine stack under the index comparison contract.
+- `PipelineConformanceTest` - the 5 pipeline suites (35 cases).
+- `EventsConformanceTest` - event_stream (39 cases; the 2-entry
+  `jvm_events_xfail.json` ledger is the TS-floor reason-string divergence).
+- `RedisInteropTest` - redis_interop (14 cases, live Redis).
+- `PatternSafetyConformanceTest` - safety_gates (94 cases; the 6-entry
+  `jvm_safety_xfail.json` ledger holds cost-verdict timing facts, two of
+  them boundary-class).
+- `CostBudgetConformanceTest` - the self-relative scan-cost ceilings over
+  cost_bodies with the empty fail-closed `jvm_cost_xfail.json`.
+- `FullCorpusTest` - the one-gate aggregate with the per-suite summary and
+  the pinned totals/ledger floors.
+
+Fail-closed ledger policy everywhere: a failing case not listed is red, a
+listed case that heals is a stale baseline (red), and a recorded divergence
+that drifts is red. The comparison rules every port must implement are
+defined in the `comparison` object of `cases/index.json` (threat multiset
+ordering, excluded fields, float precision, pipeline/event envelope
+semantics, redis byte equality, and pattern-safety reason classes). See
+docs/w5-certification.md for the full W5 accounting.
