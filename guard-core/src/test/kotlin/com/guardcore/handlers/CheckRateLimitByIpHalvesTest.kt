@@ -2,13 +2,11 @@ package com.guardcore.handlers
 
 import com.guardcore.config.SecurityConfig
 import com.guardcore.config.SecurityConfigBuilder
-import com.guardcore.util.IdentityHash
 import java.util.ArrayDeque
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-import kotlinx.coroutines.runBlocking
 
 /**
  * The remaining handler-side halves of tests/test_core/test_check_rate_limit_by_ip.py (the first
@@ -129,8 +127,7 @@ public class CheckRateLimitByIpHalvesTest {
 
       checkRateLimitByIp(ip, config, endpointPath = secretPath)
 
-      val matchingKeys =
-          RateLimitState.byIpRequestTimestamps.keys.filter { it.startsWith("$ip:") }
+      val matchingKeys = RateLimitState.byIpRequestTimestamps.keys.filter { it.startsWith("$ip:") }
       assertTrue(matchingKeys.isNotEmpty(), "expected an in-memory bucket for this ip")
       for (key in matchingKeys) {
         assertTrue(!key.contains(secretPath), "key must not carry the raw path: $key")
@@ -149,8 +146,7 @@ public class CheckRateLimitByIpHalvesTest {
 
       try {
         checkRateLimitByIp("not-an-ip", config)
-      } catch (expected: IllegalArgumentException) {
-      }
+      } catch (expected: IllegalArgumentException) {}
 
       assertEquals(true, checkRateLimitByIp("203.0.113.21", config))
     }
@@ -164,8 +160,7 @@ public class CheckRateLimitByIpHalvesTest {
 
       try {
         checkRateLimitByIp("not-an-ip", disabledConfig)
-      } catch (expected: IllegalArgumentException) {
-      }
+      } catch (expected: IllegalArgumentException) {}
 
       val enabledConfig = halvesConfig {}
       assertEquals(true, checkRateLimitByIp("203.0.113.22", enabledConfig))
@@ -180,8 +175,7 @@ public class CheckRateLimitByIpHalvesTest {
 
       try {
         checkRateLimitByIp("203.0.113.23", config, endpointPath = "a:b")
-      } catch (expected: IllegalArgumentException) {
-      }
+      } catch (expected: IllegalArgumentException) {}
 
       assertEquals(true, checkRateLimitByIp("203.0.113.23", config))
     }
@@ -256,7 +250,12 @@ public class CheckRateLimitByIpHalvesTest {
         pipeline.redisHandler = handler
 
         val count =
-            pipeline.getRedisRequestCount("1.2.3.4", nowSeconds(), nowSeconds() - 60, endpointPath = "ws")
+            pipeline.getRedisRequestCount(
+                "1.2.3.4",
+                nowSeconds(),
+                nowSeconds() - 60,
+                endpointPath = "ws",
+            )
         assertEquals(1L, count)
 
         assertFailsWith<IllegalArgumentException> {
@@ -264,7 +263,12 @@ public class CheckRateLimitByIpHalvesTest {
         }
 
         val countAfter =
-            pipeline.getRedisRequestCount("1.2.3.4", nowSeconds(), nowSeconds() - 60, endpointPath = "ws")
+            pipeline.getRedisRequestCount(
+                "1.2.3.4",
+                nowSeconds(),
+                nowSeconds() - 60,
+                endpointPath = "ws",
+            )
         assertEquals(2L, countAfter)
       } finally {
         handler.close()

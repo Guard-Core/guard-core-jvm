@@ -3,7 +3,6 @@ package com.guardcore.core
 import com.guardcore.core.checks.implementations.IpSecurityCheck
 import com.guardcore.decorators.RouteConfig
 import com.guardcore.handlers.CloudManager
-import com.guardcore.handlers.resetIpBanGlobalState
 import com.guardcore.protocols.GeoIPHandler
 import com.guardcore.util.py.IpNetwork
 import kotlin.test.Test
@@ -14,16 +13,15 @@ import kotlin.test.assertTrue
 
 /**
  * Port of tests/test_core/test_ip_security_global_route_merge.py: the global-vs-route IP control
- * merge semantics of IpSecurityCheck (decorated routes keep the global blacklist, route
- * whitelists override, country rules compose, cloud-provider and country blocks name their
- * filter).
+ * merge semantics of IpSecurityCheck (decorated routes keep the global blacklist, route whitelists
+ * override, country rules compose, cloud-provider and country blocks name their filter).
  *
  * Seam mapping: the python autouse fixture patches `ip_ban_manager.is_ip_banned` to False and
  * `escalate_identity_violation` to a no-op. On the JVM the ban manager drives the real singleton
- * emptied by [resetIpBanGlobalState], and the escalation is muted the way the reference exposes
- * to users: penetration detection off in the config and on the route config, so the escalation
- * helper returns before emitting (helpers.py:316-329 not_enabled branch) - the asserted events
- * stay exactly the ip_blocked / decorator_violation pair the python file pins.
+ * emptied by [resetIpBanGlobalState], and the escalation is muted the way the reference exposes to
+ * users: penetration detection off in the config and on the route config, so the escalation helper
+ * returns before emitting (helpers.py:316-329 not_enabled branch) - the asserted events stay
+ * exactly the ip_blocked / decorator_violation pair the python file pins.
  */
 public class IpSecurityGlobalRouteMergeTest {
   private class StubGeoHandler(private val country: String?) : GeoIPHandler {
@@ -50,10 +48,10 @@ public class IpSecurityGlobalRouteMergeTest {
   private fun mergeConfig(
       mutate: com.guardcore.config.SecurityConfigBuilder.() -> Unit = {},
   ) = coreTestConfig {
-        passiveMode = false
-        enablePenetrationDetection = false
-        mutate()
-      }
+    passiveMode = false
+    enablePenetrationDetection = false
+    mutate()
+  }
 
   /** Route configs in this file carry no detection override: silence the escalation helper. */
   private fun routeConfig(mutate: RouteConfig.() -> Unit = {}): RouteConfig =
@@ -83,7 +81,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun decoratedRouteStillEnforcesGlobalBlacklist() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = mergeConfig { blacklist = listOf("1.2.3.4") }
       val middleware = TestMiddleware(config)
       val check = IpSecurityCheck(middleware)
@@ -101,7 +99,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeIpWhitelistOverridesGlobalBlacklist() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = mergeConfig { blacklist = listOf("1.2.3.4") }
       val middleware = TestMiddleware(config)
       val check = IpSecurityCheck(middleware)
@@ -120,7 +118,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeCountryRulesKeepGlobalIpBlacklistActive() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = mergeConfig { blacklist = listOf("1.2.3.4") }
       val middleware = TestMiddleware(config, geoIpHandler = StubGeoHandler("US"))
       val check = IpSecurityCheck(middleware)
@@ -140,7 +138,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeWithoutIpFieldsLeavesGlobalWhitelistSemantics() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = mergeConfig { whitelist = listOf("9.9.9.9") }
       val middleware = TestMiddleware(config)
       val check = IpSecurityCheck(middleware)
@@ -159,7 +157,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun globalWhitelistMatchSetsIsWhitelistedWithRouteConfig() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = mergeConfig { whitelist = listOf("1.2.3.4") }
       val middleware = TestMiddleware(config)
       val check = IpSecurityCheck(middleware)
@@ -178,7 +176,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeWhitelistWithUnparseableIpBlocksAtRouteStep() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val middleware = TestMiddleware(mergeConfig())
       val check = IpSecurityCheck(middleware)
       val rc = routeConfig { ipWhitelist = listOf("1.2.3.4") }
@@ -196,7 +194,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun globallyWhitelistedConfigWithUnparseableClientIpNotWhitelisted() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = mergeConfig { whitelist = listOf("1.2.3.4") }
       val middleware = TestMiddleware(config)
       val check = IpSecurityCheck(middleware)
@@ -220,7 +218,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun globalCheckUnparseableIpWithRouteWhitelistNotWhitelisted() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val middleware = TestMiddleware(mergeConfig())
       val check = IpSecurityCheck(middleware)
       val rc = routeConfig { ipWhitelist = listOf("1.2.3.4") }
@@ -238,7 +236,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeBlacklistOnlyStillEnforcesGlobalWhitelist() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = mergeConfig { whitelist = listOf("1.1.1.1") }
       val middleware = TestMiddleware(config)
       val check = IpSecurityCheck(middleware)
@@ -258,7 +256,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeBlacklistOnlyAllowsGloballyWhitelistedClient() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = mergeConfig { whitelist = listOf("1.2.3.4") }
       val middleware = TestMiddleware(config)
       val check = IpSecurityCheck(middleware)
@@ -277,12 +275,11 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeBlockedCountriesOnlyStillEnforcesGlobalBlockedCountries() {
     coreRunTest {
-      resetIpBanGlobalState()
-      val config =
-          mergeConfig {
-            geoIpHandler = StubGeoHandler("CN")
-            blockedCountries = setOf("CN")
-          }
+      resetCoreBanState()
+      val config = mergeConfig {
+        geoIpHandler = StubGeoHandler("CN")
+        blockedCountries = setOf("CN")
+      }
       val middleware = TestMiddleware(config, geoIpHandler = StubGeoHandler("CN"))
       val check = IpSecurityCheck(middleware)
       val rc = routeConfig { blockedCountries = listOf("RU") }
@@ -301,7 +298,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeWhitelistMatchOverridesGlobalWhitelistDefaultDeny() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = mergeConfig { whitelist = listOf("1.1.1.1") }
       val middleware = TestMiddleware(config)
       val check = IpSecurityCheck(middleware)
@@ -320,7 +317,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeWhitelistSetButClientExcludedBlocksAtRouteStep() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val middleware = TestMiddleware(mergeConfig())
       val check = IpSecurityCheck(middleware)
       val rc = routeConfig { ipWhitelist = listOf("9.9.9.9") }
@@ -338,14 +335,13 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeIpWhitelistMatchStillDeniedByRouteCountryMismatch() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val middleware = TestMiddleware(mergeConfig(), geoIpHandler = StubGeoHandler("CN"))
       val check = IpSecurityCheck(middleware)
-      val rc =
-          routeConfig {
-            ipWhitelist = listOf("1.2.3.4")
-            whitelistCountries = listOf("US")
-          }
+      val rc = routeConfig {
+        ipWhitelist = listOf("1.2.3.4")
+        whitelistCountries = listOf("US")
+      }
       val request = requestFor(rc)
 
       val result = check.check(request)
@@ -360,12 +356,11 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeIpWhitelistMatchDoesNotBypassGlobalBlockedCountries() {
     coreRunTest {
-      resetIpBanGlobalState()
-      val config =
-          mergeConfig {
-            geoIpHandler = StubGeoHandler("CN")
-            blockedCountries = setOf("CN")
-          }
+      resetCoreBanState()
+      val config = mergeConfig {
+        geoIpHandler = StubGeoHandler("CN")
+        blockedCountries = setOf("CN")
+      }
       val middleware = TestMiddleware(config, geoIpHandler = StubGeoHandler("CN"))
       val check = IpSecurityCheck(middleware)
       val rc = routeConfig { ipWhitelist = listOf("1.2.3.4") }
@@ -385,12 +380,11 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeWhitelistCountriesMatchSkipsGlobalBlockedCountries() {
     coreRunTest {
-      resetIpBanGlobalState()
-      val config =
-          mergeConfig {
-            geoIpHandler = StubGeoHandler("US")
-            blockedCountries = setOf("US")
-          }
+      resetCoreBanState()
+      val config = mergeConfig {
+        geoIpHandler = StubGeoHandler("US")
+        blockedCountries = setOf("US")
+      }
       val middleware = TestMiddleware(config, geoIpHandler = StubGeoHandler("US"))
       val check = IpSecurityCheck(middleware)
       val rc = routeConfig { whitelistCountries = listOf("US") }
@@ -408,14 +402,13 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun routeIpWhitelistOverridesRouteIpBlacklistSameIp() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val middleware = TestMiddleware(mergeConfig())
       val check = IpSecurityCheck(middleware)
-      val rc =
-          routeConfig {
-            ipWhitelist = listOf("1.2.3.4")
-            ipBlacklist = listOf("1.2.3.4")
-          }
+      val rc = routeConfig {
+        ipWhitelist = listOf("1.2.3.4")
+        ipBlacklist = listOf("1.2.3.4")
+      }
       val request = requestFor(rc)
 
       val result = check.check(request)
@@ -433,15 +426,14 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun globalCloudProviderBlockNamesProviderNotAllowlist() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = mergeConfig { blockCloudProviders = setOf("AWS") }
       val middleware = TestMiddleware(config)
       val check = IpSecurityCheck(middleware)
 
       val cloud = CloudManager.getInstance()
       val savedRanges = cloud.ipRanges.toMap()
-      cloud.ipRanges["AWS"] =
-          (savedRanges["AWS"] ?: emptySet()) + IpNetwork.parse("1.2.3.0/24")
+      cloud.ipRanges["AWS"] = (savedRanges["AWS"] ?: emptySet()) + IpNetwork.parse("1.2.3.0/24")
       try {
         val result = check.check(requestFor(null))
 
@@ -466,12 +458,11 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun globalCountryBlockNamesTheCountry() {
     coreRunTest {
-      resetIpBanGlobalState()
-      val config =
-          mergeConfig {
-            geoIpHandler = StubGeoHandler("RU")
-            blockedCountries = setOf("RU")
-          }
+      resetCoreBanState()
+      val config = mergeConfig {
+        geoIpHandler = StubGeoHandler("RU")
+        blockedCountries = setOf("RU")
+      }
       val middleware = TestMiddleware(config, geoIpHandler = StubGeoHandler("RU"))
       val check = IpSecurityCheck(middleware)
 
@@ -494,7 +485,7 @@ public class IpSecurityGlobalRouteMergeTest {
   @Test
   fun globalBlacklistBlockKeepsExistingReason() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = mergeConfig { blacklist = listOf("1.2.3.4") }
       val middleware = TestMiddleware(config)
       val check = IpSecurityCheck(middleware)

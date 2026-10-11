@@ -4,10 +4,8 @@ import com.guardcore.config.SecurityConfig
 import com.guardcore.core.events.AgentTelemetryMember
 import com.guardcore.core.initialization.HandlerInitializer
 import com.guardcore.decorators.BaseSecurityDecorator
-import com.guardcore.decorators.RouteConfig
 import com.guardcore.handlers.BehaviorRule
 import com.guardcore.handlers.CloudManager
-import com.guardcore.handlers.HandlerAgentSink
 import com.guardcore.handlers.IpBanManager
 import com.guardcore.handlers.RateLimitManager
 import com.guardcore.handlers.RecordingAgent
@@ -31,9 +29,9 @@ import kotlin.test.assertTrue
  * dynamic-rule-manager gating, the composite/event-filter builders, and the redis-unreachable
  * degradation halves.
  *
- * Seam mapping: python mocks every handler; the JVM drives the real singletons with recording
- * fakes at the protocol seams and asserts the same wiring through the managers' public handler
- * fields. The DynamicRuleManager is constructed inside the initializer (python observes it via
+ * Seam mapping: python mocks every handler; the JVM drives the real singletons with recording fakes
+ * at the protocol seams and asserts the same wiring through the managers' public handler fields.
+ * The DynamicRuleManager is constructed inside the initializer (python observes it via
  * class-patching, which has no JVM analog), so its enabled/no-redis halves assert the completion
  * and warning surfaces.
  */
@@ -105,7 +103,9 @@ public class InitializationTest {
       initializeRedisCalls += 1
     }
 
-    override suspend fun initializeAgent(agentHandler: com.guardcore.protocols.AgentHandlerProtocol) {
+    override suspend fun initializeAgent(
+        agentHandler: com.guardcore.protocols.AgentHandlerProtocol,
+    ) {
       initializeAgentCalls += 1
     }
 
@@ -127,7 +127,9 @@ public class InitializationTest {
 
     override suspend fun initializeRedis(redisHandler: RedisHandlerProtocol) {}
 
-    override suspend fun initializeAgent(agentHandler: com.guardcore.protocols.AgentHandlerProtocol) {}
+    override suspend fun initializeAgent(
+        agentHandler: com.guardcore.protocols.AgentHandlerProtocol,
+    ) {}
 
     override fun getCountry(ip: String): String? = null
 
@@ -136,14 +138,15 @@ public class InitializationTest {
     override fun close() {}
   }
 
-  private fun securityConfig(mutate: com.guardcore.config.SecurityConfigBuilder.() -> Unit = {}): SecurityConfig =
-      coreTestConfig {
-        lazyInit = false
-        enableRedis = true
-        enableDynamicRules = false
-        blockCloudProviders = emptySet()
-        mutate()
-      }
+  private fun securityConfig(
+      mutate: com.guardcore.config.SecurityConfigBuilder.() -> Unit = {},
+  ): SecurityConfig = coreTestConfig {
+    lazyInit = false
+    enableRedis = true
+    enableDynamicRules = false
+    blockCloudProviders = emptySet()
+    mutate()
+  }
 
   private fun initializer(
       config: SecurityConfig,
@@ -504,11 +507,12 @@ public class InitializationTest {
     coreRunTest {
       val initializer =
           HandlerInitializer(
-              config = securityConfig {
-                enableDynamicRules = true
-                enableAgent = true
-                agentApiKey = "test-key"
-              },
+              config =
+                  securityConfig {
+                    enableDynamicRules = true
+                    enableAgent = true
+                    agentApiKey = "test-key"
+                  },
               agentHandler = null,
           )
       val capture =
@@ -603,7 +607,8 @@ public class InitializationTest {
       val redis = CountingRedis()
       val rateLimit = RateLimitManager.getInstance(config)
       val decorator = BaseSecurityDecorator(config)
-      val initializer = initializer(config, redis, agent, rateLimit = rateLimit, decorator = decorator)
+      val initializer =
+          initializer(config, redis, agent, rateLimit = rateLimit, decorator = decorator)
 
       initializer.initializeAgentIntegrations()
 
@@ -776,8 +781,7 @@ public class InitializationTest {
   @Test
   fun getInitializationStatusReportsCloudAndGeo() {
     val config = securityConfig()
-    val initializer =
-        HandlerInitializer(config = config, geoIpHandler = StatusOnlyGeo())
+    val initializer = HandlerInitializer(config = config, geoIpHandler = StatusOnlyGeo())
 
     val status = initializer.getInitializationStatus()
 
@@ -826,7 +830,8 @@ public class InitializationTest {
       val config = securityConfig { redisFailOpen = true }
       val redis = FailingInitializeRedis()
       val geo = CountingGeo()
-      val initializer = HandlerInitializer(config = config, redisHandler = redis, geoIpHandler = geo)
+      val initializer =
+          HandlerInitializer(config = config, redisHandler = redis, geoIpHandler = geo)
       val capture =
           com.guardcore.handlers.LogCapture(
               java.util.logging.Logger.getLogger("guard_core.core.initialization"),
@@ -859,8 +864,7 @@ public class InitializationTest {
       resetIpBanGlobalState()
       SusPatternsRegistry.redisHandler = null
       val config = securityConfig { redisFailOpen = false }
-      val initializer =
-          HandlerInitializer(config = config, redisHandler = FailingInitializeRedis())
+      val initializer = HandlerInitializer(config = config, redisHandler = FailingInitializeRedis())
       val capture =
           com.guardcore.handlers.LogCapture(
               java.util.logging.Logger.getLogger("guard_core.core.initialization"),

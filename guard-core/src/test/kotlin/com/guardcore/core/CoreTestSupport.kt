@@ -130,8 +130,8 @@ public class TestMiddleware(
   public var eventBusOverride: MiddlewareEventBusProtocol? = null
 
   /**
-   * Swap-in point for a recording/failing logger (the python tests assign
-   * `mw.logger = MagicMock(side_effect=...)`).
+   * Swap-in point for a recording/failing logger (the python tests assign `mw.logger =
+   * MagicMock(side_effect=...)`).
    */
   public var loggerOverride: Logger? = null
 
@@ -148,6 +148,7 @@ public class TestMiddleware(
 
   override val logger: Logger
     get() = loggerOverride ?: DEFAULT_MIDDLEWARE_LOGGER
+
   override var lastCloudIpRefresh: Int = 0
   override val suspiciousRequestCounts: MutableMap<String, MutableMap<String, Int>> = linkedMapOf()
   override val eventBus: MiddlewareEventBusProtocol
@@ -214,4 +215,14 @@ public fun coreTestConfig(apply: SecurityConfigBuilder.() -> Unit = {}): Securit
 /** runBlocking helper. */
 public fun coreRunTest(block: suspend () -> Unit) {
   kotlinx.coroutines.runBlocking { block() }
+}
+
+/**
+ * Full ban-manager reset for the core tests: the python fixtures call `reset_global_state()`
+ * (and build fresh mocks per test); the JVM must also drop any fault-injection override a
+ * previous test installed on the singleton.
+ */
+public suspend fun resetCoreBanState() {
+  com.guardcore.handlers.resetIpBanGlobalState()
+  com.guardcore.handlers.IpBanManager.getInstance().banIpOverride = null
 }

@@ -1,6 +1,5 @@
 package com.guardcore.core
 
-import com.guardcore.config.SecurityConfig
 import com.guardcore.engine.py.PyRe
 import com.guardcore.engine.py.RegexWorkers
 import com.guardcore.engine.suspatterns.CompiledPatternRow
@@ -32,8 +31,8 @@ import kotlin.test.assertTrue
 
 /**
  * Port of tests/test_core/test_edge_cases.py: the handler/engine edge-case surface (the no-agent
- * rule event, the no-redis request count, the no-cors validated config, the default-pattern
- * removal halves, and the fallback-scan failure-routing contract).
+ * rule event, the no-redis request count, the no-cors validated config, the default-pattern removal
+ * halves, and the fallback-scan failure-routing contract).
  *
  * Seam notes for the two python halves that patch `sus_patterns_handler`:
  * - `test_fallback_pattern_check_unexpected_exception_propagates` (python mocks
@@ -42,14 +41,14 @@ import kotlin.test.assertTrue
  *   inputs), so its contract (only the recursion class is ever swallowed) is carried by
  *   [fallbackPatternCheckRecursionErrorIsLoggedAndSkipped] asserting the scan both skips the
  *   recursion-class failure and continues to completion.
- * - `test_check_value_enhanced_recursion_error_escapes_the_fallback` (python makes
- *   `detect` raise RecursionError): the engine pool delivers in-worker failures as
- *   ExecutionException; [recursionClassFailureEscapesTheEnhancedFailureFallback] pins the real
- *   delivery shape plus the fallback-layer catch.
- * - `test_check_value_enhanced_empty_threats_list` (python mocks detect to return is_threat with
- *   no threats): the empty-threats verdict is unreachable through the real engine (every is_threat
- *   verdict carries at least one threat), so the quadruple shape is pinned on the real threat
- *   path in [fallbackScanStillDetectsSqli].
+ * - `test_check_value_enhanced_recursion_error_escapes_the_fallback` (python makes `detect` raise
+ *   RecursionError): the engine pool delivers in-worker failures as ExecutionException;
+ *   [recursionClassFailureEscapesTheEnhancedFailureFallback] pins the real delivery shape plus the
+ *   fallback-layer catch.
+ * - `test_check_value_enhanced_empty_threats_list` (python mocks detect to return is_threat with no
+ *   threats): the empty-threats verdict is unreachable through the real engine (every is_threat
+ *   verdict carries at least one threat), so the quadruple shape is pinned on the real threat path
+ *   in [fallbackScanStillDetectsSqli].
  */
 public class EdgeCasesTest {
   /** Python `_host_cpu_speed_factor` (test_edge_cases.py:24): self-relative host calibration. */
@@ -79,8 +78,8 @@ public class EdgeCasesTest {
       )
 
   /**
-   * Runs [block] on a small-stack thread: the fallback scan runs on the CALLER thread (python:
-   * the same coroutine), so the recursion-limit analog (StackOverflowError) is provoked
+   * Runs [block] on a small-stack thread: the fallback scan runs on the CALLER thread (python: the
+   * same coroutine), so the recursion-limit analog (StackOverflowError) is provoked
    * deterministically by bounding the stack instead of the input.
    */
   private fun onSmallStack(block: suspend () -> Unit): Throwable? {
@@ -211,17 +210,16 @@ public class EdgeCasesTest {
       manager.compiledPatterns.add(0, row)
       val capture = LogCapture(java.util.logging.Logger.getLogger("guard_core"))
       try {
-        val failure =
-            onSmallStack {
-              val (detected, trigger) =
-                  DetectionScan.fallbackPatternCheck(
-                      "ab".repeat(5000),
-                      "198.51.100.60",
-                      "request_body",
-                  )
-              assertEquals(false, detected)
-              assertEquals("", trigger)
-            }
+        val failure = onSmallStack {
+          val (detected, trigger) =
+              DetectionScan.fallbackPatternCheck(
+                  "ab".repeat(5000),
+                  "198.51.100.60",
+                  "request_body",
+              )
+          assertEquals(false, detected)
+          assertEquals("", trigger)
+        }
         assertNull(failure, "the recursion-class failure must be skipped, not propagated")
 
         val warnings =
@@ -268,14 +266,13 @@ public class EdgeCasesTest {
       val row = craftedRow()
       manager.compiledPatterns.add(0, row)
       try {
-        val escaped =
-            onSmallStack {
-              DetectionScan.fallbackPatternCheck(
-                  "ab".repeat(5000),
-                  "198.51.100.61",
-                  "request_body",
-              )
-            }
+        val escaped = onSmallStack {
+          DetectionScan.fallbackPatternCheck(
+              "ab".repeat(5000),
+              "198.51.100.61",
+              "request_body",
+          )
+        }
         assertNull(escaped)
       } finally {
         manager.compiledPatterns.remove(row)
@@ -318,13 +315,17 @@ public class EdgeCasesTest {
     coreRunTest {
       PenetrationDetection.configureDetection(coreTestConfig())
 
-      val (detected, trigger, threats, logOverride) =
+      val hit =
           DetectionScan.checkValueEnhanced(
               "' OR '1'='1",
               "request_body",
               "198.51.100.63",
               "corr-2",
           )
+      val detected = hit.detected
+      val trigger = hit.trigger
+      val threats = hit.threats
+      val logOverride = hit.logOverride
 
       assertTrue(detected)
       assertTrue(trigger.isNotEmpty())

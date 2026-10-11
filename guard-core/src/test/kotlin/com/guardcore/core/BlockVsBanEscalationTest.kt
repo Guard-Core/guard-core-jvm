@@ -4,7 +4,6 @@ import com.guardcore.core.checks.implementations.IpSecurityCheck
 import com.guardcore.core.checks.implementations.UserAgentCheck
 import com.guardcore.decorators.RouteConfig
 import com.guardcore.handlers.IpBanManager
-import com.guardcore.handlers.resetIpBanGlobalState
 import java.util.logging.Level
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,11 +20,20 @@ import kotlin.test.assertTrue
  * the real engine with the payload on the request path (the counted categories are the engine's
  * own), the no-threat halves reach the identical "not_enabled" verdict through the disabled
  * config/route knobs, and the ban mock is the record-then-throw `banIpOverride` seam. The python
- * file calls the private `_check_global_ip_restrictions` / `_check_route_ip_restrictions`
- * directly; those steps are reached through `check()` with the route config absent (global step
- * decides) or carrying the block (route step decides), which drives the identical code path.
+ * file calls the private `_check_global_ip_restrictions` / `_check_route_ip_restrictions` directly;
+ * those steps are reached through `check()` with the route config absent (global step decides) or
+ * carrying the block (route step decides), which drives the identical code path.
  */
 public class BlockVsBanEscalationTest {
+  /**
+   * python rebuilds every mock per test; the ban fault-injection seam lives on the process
+   * singleton, so it is dropped after each test or it intercepts real bans in later classes.
+   */
+  @org.junit.jupiter.api.AfterEach
+  fun dropBanOverride() {
+    com.guardcore.handlers.IpBanManager.getInstance().banIpOverride = null
+  }
+
   private val xssPath = "/?q=<script>alert(1)</script>"
   private val sqliPath = "/?q=' OR '1'='1"
 
@@ -73,8 +81,7 @@ public class BlockVsBanEscalationTest {
   private fun middleware(
       config: com.guardcore.config.SecurityConfig,
       logger: java.util.logging.Logger? = null,
-  ): TestMiddleware =
-      TestMiddleware(config).also { if (logger != null) it.loggerOverride = logger }
+  ): TestMiddleware = TestMiddleware(config).also { if (logger != null) it.loggerOverride = logger }
 
   /** python `_make_request`: preset identity state, badbot UA, and the threat payload path. */
   private fun request(
@@ -113,7 +120,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun globalIpBlockWithThreatIncrementsCounter() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -138,7 +145,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun globalIpBlockWithThreatRepeatedTriggersBan() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -164,7 +171,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun globalIpBlockNoThreatNoCounterChange() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -190,7 +197,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun globalIpBlockPassiveModeNoEscalation() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = true
         enableIpBanning = true
@@ -219,7 +226,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun globallyWhitelistedIpBlockedByRouteWhitelistIsNotWhitelisted() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -249,7 +256,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun globalWhitelistBlockedByStricterRouteWhitelistEscalates() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -268,7 +275,10 @@ public class BlockVsBanEscalationTest {
       assertNotNull(result)
       assertEquals(403, result.statusCode)
       assertEquals(false, request.state.getAttr("is_whitelisted"))
-      assertEquals<Map<String, Int>?>(mapOf("sqli" to 1), mw.suspiciousRequestCounts["203.0.113.55"])
+      assertEquals<Map<String, Int>?>(
+          mapOf("sqli" to 1),
+          mw.suspiciousRequestCounts["203.0.113.55"],
+      )
       assertEquals(
           listOf(Triple("203.0.113.55", config.autoBanDuration, "penetration_attempt")),
           banCalls,
@@ -281,7 +291,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun globalWhitelistBlockedByRouteBlacklistStillEscalates() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -299,7 +309,10 @@ public class BlockVsBanEscalationTest {
 
       assertNotNull(result)
       assertEquals(403, result.statusCode)
-      assertEquals<Map<String, Int>?>(mapOf("sqli" to 1), mw.suspiciousRequestCounts["203.0.113.55"])
+      assertEquals<Map<String, Int>?>(
+          mapOf("sqli" to 1),
+          mw.suspiciousRequestCounts["203.0.113.55"],
+      )
       assertEquals(
           listOf(Triple("203.0.113.55", config.autoBanDuration, "penetration_attempt")),
           banCalls,
@@ -312,7 +325,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun routeBlacklistWithoutGlobalWhitelistEscalatesAsControl() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -329,7 +342,10 @@ public class BlockVsBanEscalationTest {
 
       assertNotNull(result)
       assertEquals(403, result.statusCode)
-      assertEquals<Map<String, Int>?>(mapOf("sqli" to 1), mw.suspiciousRequestCounts["203.0.113.55"])
+      assertEquals<Map<String, Int>?>(
+          mapOf("sqli" to 1),
+          mw.suspiciousRequestCounts["203.0.113.55"],
+      )
       assertEquals(
           listOf(Triple("203.0.113.55", config.autoBanDuration, "penetration_attempt")),
           banCalls,
@@ -342,7 +358,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun globalWhitelistAndRouteWhitelistBothContainingIpIsAllowed() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -372,7 +388,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun routeIpBlockWithThreatIncrementsCounter() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -397,7 +413,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun routeIpBlockNoThreatNoCounterChange() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -408,11 +424,10 @@ public class BlockVsBanEscalationTest {
       val check = IpSecurityCheck(mw)
       val banCalls = mutableListOf<Triple<String, Int, String>>()
       recordingBan(banCalls)
-      val rc =
-          routeConfig {
-            ipBlacklist = listOf("24.5.0.1")
-            enableSuspiciousDetection = false
-          }
+      val rc = routeConfig {
+        ipBlacklist = listOf("24.5.0.1")
+        enableSuspiciousDetection = false
+      }
       val request = request(clientIp = "24.5.0.1", routeConfig = rc)
 
       val result = check.check(request)
@@ -428,7 +443,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun routeIpBlockPassiveModeNoEscalation() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = true
         enableIpBanning = true
@@ -457,7 +472,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun userAgentBlockWithThreatIncrementsCounter() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -481,7 +496,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun userAgentBlockWithThreatRepeatedTriggersBan() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -506,7 +521,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun userAgentBlockNoThreatNoCounterChange() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -532,7 +547,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun userAgentBlockPassiveModeNoEscalation() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = true
         enableIpBanning = true
@@ -560,7 +575,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun userAgentBlockNoClientIpSkipsEscalation() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -590,7 +605,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun noDoubleCountBlockedProbeIncrementsOnce() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -609,7 +624,9 @@ public class BlockVsBanEscalationTest {
           "a blocked probe increments exactly once",
       )
       assertNotNull(
-          request.state.getAttr(com.guardcore.core.checks.ChecksHelpers.DETECTION_RESULT_STATE_ATTR),
+          request.state.getAttr(
+              com.guardcore.core.checks.ChecksHelpers.DETECTION_RESULT_STATE_ATTR,
+          ),
           "the single scan is cached in the request state",
       )
     }
@@ -620,7 +637,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun globalIpBlockStillReturns403WhenBanIpRaises() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -650,7 +667,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun userAgentBlockStillReturns403WhenBanIpRaises() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true
@@ -680,7 +697,7 @@ public class BlockVsBanEscalationTest {
   @Test
   fun globalIpBlockSurvivesBanAndEventBusBothFailing() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         passiveMode = false
         enableIpBanning = true

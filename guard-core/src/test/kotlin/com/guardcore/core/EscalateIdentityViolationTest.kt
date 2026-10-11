@@ -3,16 +3,12 @@ package com.guardcore.core
 import com.guardcore.core.checks.ChecksHelpers
 import com.guardcore.decorators.RouteConfig
 import com.guardcore.handlers.IpBanManager
-import com.guardcore.handlers.resetIpBanGlobalState
 import com.guardcore.protocols.GuardRequest
-import com.guardcore.protocols.GuardResponse
 import com.guardcore.protocols.MiddlewareEventBusProtocol
 import java.util.logging.Level
-import java.util.logging.LogRecord
 import java.util.logging.Logger
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -21,13 +17,22 @@ import kotlin.test.assertTrue
  *
  * Seam mapping: python monkeypatches `detect_penetration_patterns` and passes an AsyncMock ban
  * manager. The JVM drives the real engine (the request body carries the payload: the detected
- * categories ARE the real ones, which is exactly what the file pins) and the real
- * [IpBanManager] with its `banIpOverride` fault-injection seam as the recording ban mock. The
- * `_MAX_TRACKED_SUSPICIOUS_IPS` cap is a constant here (10,000), so the two capacity halves run
- * at real scale over a prefilled map (the python tests prefill the counts map too; only the cap
- * value differs).
+ * categories ARE the real ones, which is exactly what the file pins) and the real [IpBanManager]
+ * with its `banIpOverride` fault-injection seam as the recording ban mock. The
+ * `_MAX_TRACKED_SUSPICIOUS_IPS` cap is a constant here (10,000), so the two capacity halves run at
+ * real scale over a prefilled map (the python tests prefill the counts map too; only the cap value
+ * differs).
  */
 public class EscalateIdentityViolationTest {
+  /**
+   * python rebuilds every mock per test; the ban fault-injection seam lives on the process
+   * singleton, so it is dropped after each test or it intercepts real bans in later classes.
+   */
+  @org.junit.jupiter.api.AfterEach
+  fun dropBanOverride() {
+    com.guardcore.handlers.IpBanManager.getInstance().banIpOverride = null
+  }
+
   /** The payload rides the request path: the scan surface the real engine fires on. */
   private val xssPath = "/?q=<script>alert(1)</script>"
   private val mixedPath = "/?q=<script>alert(1)</script> UNION SELECT * FROM users"
@@ -139,7 +144,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun whitelistedIpIsNeverEscalated() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -161,7 +166,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun falsyClientIpIsNoop() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -184,7 +189,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun noThreatNoCounterChangeNoBan() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -207,7 +212,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun disabledByDecoratorIsNoop() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -232,7 +237,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun neverReadsTheDetectionPipelineWhenNotConfigured() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -255,13 +260,19 @@ public class EscalateIdentityViolationTest {
   @Test
   fun incrementsTheRealDetectedThreatCategoryNotTheSyntheticLabel() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig { enableIpBanning = false }
       val mw = middleware(config)
       val banCalls = mutableListOf<Triple<String, Int, String>>()
       recordingBan(banCalls)
 
-      escalate(mw, config, "2.2.2.2", violationCategory = "user_agent", triggerInfo = "Blocked user agent: curl")
+      escalate(
+          mw,
+          config,
+          "2.2.2.2",
+          violationCategory = "user_agent",
+          triggerInfo = "Blocked user agent: curl",
+      )
 
       assertEquals<Map<String, Int>?>(mapOf("xss" to 1), mw.suspiciousRequestCounts["2.2.2.2"])
       assertEquals(0, banCalls.size)
@@ -273,7 +284,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun incrementsEveryRealDetectedCategoryInOneCall() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig { enableIpBanning = false }
       val mw = middleware(config)
       val banCalls = mutableListOf<Triple<String, Int, String>>()
@@ -288,7 +299,10 @@ public class EscalateIdentityViolationTest {
           req = request(urlPath = mixedPath),
       )
 
-      assertEquals<Map<String, Int>?>(mapOf("xss" to 1, "sqli" to 1), mw.suspiciousRequestCounts["2.2.2.3"])
+      assertEquals<Map<String, Int>?>(
+          mapOf("xss" to 1, "sqli" to 1),
+          mw.suspiciousRequestCounts["2.2.2.3"],
+      )
     }
   }
 
@@ -302,7 +316,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun ipBanningDisabledNoBan() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = false
         autoBanThreshold = 1
@@ -323,7 +337,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun belowFlatThresholdNoBan() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 5
@@ -344,7 +358,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun flatThresholdMetAfterRepeatedViolations() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 2
@@ -367,7 +381,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun firstViolationBansImmediatelyWhenThresholdIsOne() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -388,19 +402,26 @@ public class EscalateIdentityViolationTest {
   @Test
   fun perCategoryBanConfigOverridesAHighFlatThreshold() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1000
-        threatBanConfig = mapOf(
-            "xss" to com.guardcore.config.ThreatBanConfig(threshold = 1, duration = 99999),
-        )
+        threatBanConfig =
+            mapOf(
+                "xss" to com.guardcore.config.ThreatBanConfig(threshold = 1, duration = 99999),
+            )
       }
       val mw = middleware(config)
       val banCalls = mutableListOf<Triple<String, Int, String>>()
       recordingBan(banCalls)
 
-      escalate(mw, config, "9.9.9.9", violationCategory = "ip_blocked", triggerInfo = "IP blocked by blocked_countries")
+      escalate(
+          mw,
+          config,
+          "9.9.9.9",
+          violationCategory = "ip_blocked",
+          triggerInfo = "IP blocked by blocked_countries",
+      )
 
       assertEquals(
           listOf(Triple("9.9.9.9", 99999, "penetration_attempt:xss")),
@@ -415,14 +436,15 @@ public class EscalateIdentityViolationTest {
   @Test
   fun perCategoryBanTakesPriorityOverFlatBan() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
         autoBanDuration = 60
-        threatBanConfig = mapOf(
-            "xss" to com.guardcore.config.ThreatBanConfig(threshold = 1, duration = 99999),
-        )
+        threatBanConfig =
+            mapOf(
+                "xss" to com.guardcore.config.ThreatBanConfig(threshold = 1, duration = 99999),
+            )
       }
       val mw = middleware(config)
       val banCalls = mutableListOf<Triple<String, Int, String>>()
@@ -445,7 +467,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun mutedCheckLogsSuppressesLog() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -456,8 +478,7 @@ public class EscalateIdentityViolationTest {
 
       // Muted: the threshold-ban activity log is suppressed.
       val mutedMiddleware = TestMiddleware(config)
-      val mutedCapture =
-          com.guardcore.handlers.LogCapture(mutedMiddleware.logger, Level.CONFIG)
+      val mutedCapture = com.guardcore.handlers.LogCapture(mutedMiddleware.logger, Level.CONFIG)
       try {
         ChecksHelpers.escalateIdentityViolation(
             mutedMiddleware,
@@ -474,7 +495,9 @@ public class EscalateIdentityViolationTest {
         assertEquals(1, banCalls.size)
         assertEquals(
             0,
-            mutedCapture.records.filter { it.level == Level.WARNING || it.level == Level.SEVERE }.size,
+            mutedCapture.records
+                .filter { it.level == Level.WARNING || it.level == Level.SEVERE }
+                .size,
         )
       } finally {
         mutedCapture.release()
@@ -513,7 +536,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun penetrationAttemptEventEmittedWhenBanned() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -537,7 +560,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun penetrationAttemptEventEmittedWhenNotBanned() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig { enableIpBanning = false }
       val mw = middleware(config)
       val banCalls = mutableListOf<Triple<String, Int, String>>()
@@ -556,7 +579,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun penetrationAttemptEventStillCarriesTheSyntheticIdentityLabel() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig { enableIpBanning = false }
       val mw = middleware(config)
       val banCalls = mutableListOf<Triple<String, Int, String>>()
@@ -575,7 +598,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun banFailureIsSwallowedLoggedAndMadeVisible() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -610,7 +633,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun redisErrorDuringBanIsSwallowedLoggedAndMadeVisible() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -638,7 +661,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun banAndEventBusBothFailingDoesNotRaise() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -663,7 +686,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun aBrokenLogSinkNeverEscapes() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig {
         enableIpBanning = true
         autoBanThreshold = 1
@@ -701,7 +724,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun boundsSuspiciousRequestCountsSize() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig { enableIpBanning = false }
       val mw = middleware(config)
       val counts = mw.suspiciousRequestCounts
@@ -727,7 +750,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun touchingAnEntryProtectsItFromAFreshIpFlood() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig { enableIpBanning = false }
       val mw = middleware(config)
       val counts = mw.suspiciousRequestCounts
@@ -766,7 +789,7 @@ public class EscalateIdentityViolationTest {
   @Test
   fun untouchedEntryIsTheFirstEvictedWhenOverCapacity() {
     coreRunTest {
-      resetIpBanGlobalState()
+      resetCoreBanState()
       val config = coreTestConfig { enableIpBanning = false }
       val mw = middleware(config)
       val counts = mw.suspiciousRequestCounts

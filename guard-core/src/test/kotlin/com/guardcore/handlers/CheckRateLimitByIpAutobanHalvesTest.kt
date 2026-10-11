@@ -10,12 +10,21 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.runBlocking
 
 /**
- * The remaining handler-side halves of tests/test_core/test_check_rate_limit_by_ip_autoban.py
- * (the first halves landed in W3's RateLimitManagerTest.CheckRateLimitByIpAutobanTest): the
- * loopback self-DoS refusal, the rejected-input no-counter guarantee, the redis-backed over-limit
- * feed, and the autoban-counter LRU eviction at the production cap.
+ * The remaining handler-side halves of tests/test_core/test_check_rate_limit_by_ip_autoban.py (the
+ * first halves landed in W3's RateLimitManagerTest.CheckRateLimitByIpAutobanTest): the loopback
+ * self-DoS refusal, the rejected-input no-counter guarantee, the redis-backed over-limit feed, and
+ * the autoban-counter LRU eviction at the production cap.
  */
 public class CheckRateLimitByIpAutobanHalvesTest {
+  /**
+   * python rebuilds every mock per test; the ban fault-injection seam lives on the process
+   * singleton, so it is dropped after each test or it intercepts real bans in later classes.
+   */
+  @org.junit.jupiter.api.AfterEach
+  fun dropBanOverride() {
+    com.guardcore.handlers.IpBanManager.getInstance().banIpOverride = null
+  }
+
   private fun autobanConfig(mutate: SecurityConfigBuilder.() -> Unit = {}): SecurityConfig =
       SecurityConfigBuilder()
           .apply {
@@ -98,12 +107,11 @@ public class CheckRateLimitByIpAutobanHalvesTest {
   fun redisBackedOverLimitFeedsAutobanCounter() {
     runTestBlock {
       resetAll()
-      val config =
-          autobanConfig {
-            enableRedis = true
-            autoBanThreshold = 1
-            autoBanDuration = 111
-          }
+      val config = autobanConfig {
+        enableRedis = true
+        autoBanThreshold = 1
+        autoBanDuration = 111
+      }
       val banCalls = mutableListOf<Triple<String, Int, String>>()
       recordingBan(banCalls, config)
 

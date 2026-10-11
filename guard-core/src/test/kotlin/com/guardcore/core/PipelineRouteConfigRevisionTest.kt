@@ -26,8 +26,8 @@ import kotlin.test.assertTrue
  * The python middleware is a MagicMock carrying a real RouteConfigResolver and the decorator; the
  * JVM composes the same shape over [TestMiddleware] with a delegating wrapper (the W4a
  * EmptyRoutesMiddleware idiom). The rebuild spy is the constructor seam the W4a rebuild-policy
- * tests established: the pipeline is built exactly like [ChecksFactory.buildDefaultPipeline] with
- * a counting rebuildChecks lambda.
+ * tests established: the pipeline is built exactly like [ChecksFactory.buildDefaultPipeline] with a
+ * counting rebuildChecks lambda.
  */
 public class PipelineRouteConfigRevisionTest {
   /** python `_neutral_config`: penetration detection + rate limiting off. */
@@ -77,7 +77,11 @@ public class PipelineRouteConfigRevisionTest {
             config,
             resolver =
                 RouteConfigResolver(
-                    RoutingContext(config = config, logger = Logger.getLogger("test.revision"), guardDecorator = decorator),
+                    RoutingContext(
+                        config = config,
+                        logger = Logger.getLogger("test.revision"),
+                        guardDecorator = decorator,
+                    ),
                 ),
         )
     return DecoratorMiddleware(inner, decorator)
@@ -117,8 +121,9 @@ public class PipelineRouteConfigRevisionTest {
   }
 
   /** python `_blocking_validator`: a validator that blocks with a 418. */
-  private fun blockingValidator(): suspend (com.guardcore.protocols.GuardRequest) -> Any? =
-      { TestResponse(418, "blocked-by-custom-validator".encodeToByteArray()) }
+  private fun blockingValidator(): suspend (com.guardcore.protocols.GuardRequest) -> Any? = {
+    TestResponse(418, "blocked-by-custom-validator".encodeToByteArray())
+  }
 
   // ------------------------------- test_pipeline_route_config_revision.py:66-86
 
@@ -160,8 +165,7 @@ public class PipelineRouteConfigRevisionTest {
       val newRc = decorator.ensureRouteConfig("routeB")
       newRc.requiredHeaders["X-Api-Key"] = "required"
 
-      val result =
-          pipeline.execute(requestWithRoute("198.51.100.202", "routeB"))
+      val result = pipeline.execute(requestWithRoute("198.51.100.202", "routeB"))
 
       assertTrue("required_headers" in pipeline.getCheckNames())
       assertNotNull(result)
