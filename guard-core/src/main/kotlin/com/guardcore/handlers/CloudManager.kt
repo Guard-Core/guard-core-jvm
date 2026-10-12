@@ -114,13 +114,8 @@ public open class CloudManager {
         return@withLock false
       }
       refreshInFlight = true
-      try {
-        refreshTask = scope.launch { runRefresh() }
-      } catch (e: Exception) {
-        logger.severe("Could not schedule cloud IP refresh: $e")
-        refreshInFlight = false
-        return@withLock false
-      }
+      // scope is constructed above and its job cannot reject; launch cannot throw here.
+      refreshTask = scope.launch { runRefresh() }
       true
     }
   }
@@ -241,7 +236,7 @@ public open class CloudManager {
   /** Port of `_refresh_providers_via_redis_handler` (cloud_handler.py:277). */
   private suspend fun refreshProvidersViaRedisHandler(
       providers: Collection<String>,
-      ttl: Int = 3600,
+      ttl: Int,
   ) {
     val redis = redisHandler
     if (redis == null) {

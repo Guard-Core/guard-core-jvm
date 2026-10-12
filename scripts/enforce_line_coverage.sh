@@ -27,7 +27,10 @@ if [ ! -f "$JACOCO_CLI" ]; then
     -o "$JACOCO_CLI" \
     "https://repo1.maven.org/maven2/org/jacoco/org.jacoco.cli/${JACOCO_VERSION}/org.jacoco.cli-${JACOCO_VERSION}-nodeps.jar"
 fi
-ACTUAL_SHA256=$(shasum -a 256 "$JACOCO_CLI" | awk '{print $1}')
+# shasum is macOS-first; fall back to sha256sum on the ubuntu CI image.
+ACTUAL_SHA256=$(
+  (shasum -a 256 "$JACOCO_CLI" 2>/dev/null || sha256sum "$JACOCO_CLI") | awk '{print $1}'
+)
 if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
   echo "jacococli sha256 mismatch: $ACTUAL_SHA256 != $EXPECTED_SHA256" >&2
   exit 1

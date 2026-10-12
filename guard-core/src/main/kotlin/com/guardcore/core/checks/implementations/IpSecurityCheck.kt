@@ -229,7 +229,7 @@ public class IpSecurityCheck(
   private suspend fun checkGlobalIpRestrictions(
       request: GuardRequest,
       clientIp: String,
-      routeConfig: RouteConfig? = null,
+      routeConfig: RouteConfig?,
       escalate: Boolean = true,
       precomputed: Triple<AccessControl.IpAccessResult, Boolean, Boolean>? = null,
   ): GuardResponse? {

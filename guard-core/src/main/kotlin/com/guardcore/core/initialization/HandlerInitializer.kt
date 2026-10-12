@@ -182,44 +182,6 @@ public class HandlerInitializer(
     }
   }
 
-  /** The composite handler as the agent protocol (python passes the composite as agent_handler). */
-  private fun compositeSinkAgentProtocol(): com.guardcore.protocols.AgentHandlerProtocol? {
-    val composite = compositeHandler ?: return null
-    return object : com.guardcore.protocols.AgentHandlerProtocol {
-      override suspend fun initializeRedis(
-          redisHandler: com.guardcore.protocols.RedisHandlerProtocol,
-      ) {
-        composite.initializeRedis(redisHandler)
-      }
-
-      override suspend fun sendEvent(event: Any?) {
-        @Suppress("UNCHECKED_CAST")
-        composite.sendEvent((event as? Map<String, Any?>) ?: mapOf<String, Any?>())
-      }
-
-      override suspend fun sendMetric(metric: Any?) {
-        @Suppress("UNCHECKED_CAST")
-        composite.sendMetric((metric as? Map<String, Any?>) ?: mapOf<String, Any?>())
-      }
-
-      override suspend fun start() {
-        composite.start()
-      }
-
-      override suspend fun stop() {
-        composite.stop()
-      }
-
-      override suspend fun flushBuffer() {
-        composite.flushBuffer()
-      }
-
-      override suspend fun getDynamicRules(): Any? = composite.getDynamicRules()
-
-      override suspend fun healthCheck(): Boolean = composite.healthCheck()
-    }
-  }
-
   // ---- _handler_initializer_steps.py surface ----
 
   /** Python async `_run_lazy_init` (steps:28). */
