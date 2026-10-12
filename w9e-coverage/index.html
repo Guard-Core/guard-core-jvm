@@ -1,0 +1,777 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Kotlin/JVM port of the guard-core engine - detection, rate limiting, IP banning, and cloud provider blocking for the JVM">
+      
+      
+        <meta name="author" content="Renn F">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>W9e coverage report (the 100 percent push, batch 3 - IN FLIGHT) - guard-core-jvm</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#w9e-coverage-report-the-100-percent-push-batch-3-in-flight" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="guard-core-jvm" class="md-header__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            guard-core-jvm
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              W9e coverage report (the 100 percent push, batch 3 - IN FLIGHT)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="amber"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="guard-core-jvm" class="md-nav__button md-logo" aria-label="guard-core-jvm" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    guard-core-jvm
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Guard-Core/guard-core-jvm" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Guard-Core/guard-core-jvm
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../detection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Detection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../adapters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Adapters
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../release-notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#beforeafter-per-module-merged-cross-module-jacoco" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before/after per module (merged cross-module JaCoCo)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tests-added-this-batch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests added this batch
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bugs-found-and-fixed-byte-exact-with-regression-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bugs found and fixed (byte-exact, with regression tests)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#residual-worklist-the-honest-remainder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Residual worklist (the honest remainder)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="w9e-coverage-report-the-100-percent-push-batch-3-in-flight">W9e coverage report (the 100 percent push, batch 3 - IN FLIGHT)</h1>
+<p>Measured 2026-10-13 with the W8d/W9a merged method: ALL module exec files
+counted against ALL kotlin classes (per-module reports UNDERCOUNT because the
+conformance module exercises facade/engine code from another JVM). Reproduce:</p>
+<div class="highlight"><pre><span></span><code>./gradlew cleanTest test --no-daemon
+MERGE_ONLY=1 scripts/enforce_line_coverage.sh /tmp/w9e
+</code></pre></div>
+<h2 id="beforeafter-per-module-merged-cross-module-jacoco">Before/after per module (merged cross-module JaCoCo)</h2>
+<table>
+<thead>
+<tr>
+<th>module</th>
+<th>W9d baseline (master 7ae562c)</th>
+<th>after W9e (this batch)</th>
+<th>missed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>guard-core-engine</td>
+<td>97.02% (220 missed)</td>
+<td>98.47%</td>
+<td>113</td>
+</tr>
+<tr>
+<td>guard-core (facade)</td>
+<td>94.67% (784 missed)</td>
+<td>95.93%</td>
+<td>599</td>
+</tr>
+<tr>
+<td>guard-core-conformance (runners)</td>
+<td>90.76% (116 missed)</td>
+<td>99.76%</td>
+<td>3</td>
+</tr>
+<tr>
+<td>workspace total</td>
+<td>95.20% (22,219/23,339)</td>
+<td>96.94% (22,633/23,348)</td>
+<td>715</td>
+</tr>
+</tbody>
+</table>
+<p>Net: 405 lines closed this batch (1,120 -&gt; 715) with 91 new test methods over
+7 new JUnit classes. The push-to-100% ruling (spec 14.2) remains OPEN: the
+batch landed mid-wave and the next slice closes the remaining 721 lines (the
+per-class worklist is printed by the gate itself:</p>
+<div class="highlight"><pre><span></span><code>MERGE_ONLY=1 scripts/enforce_line_coverage.sh /tmp/w9e
+</code></pre></div>
+<p>).</p>
+<h2 id="tests-added-this-batch">Tests added this batch</h2>
+<ul>
+<li>HarnessArmsW9eTest (conformance): the PipelineHarness seeded arms (the
+  RecordingEventBus https/decorator surfaces, the StubGeoHandler lifecycle,
+  the StubRouteResolver cloud-provider arm, the redirect/https/applyModifier
+  factory arms, the middleware surface getters, the CaseInsensitiveHeaders
+  full map surface, the seeded route/config keys incl. the geo_rate_limits
+  and global-behavior default-action arms, the process_response stage and
+  the unknown-stage guard) + the EventsHarness seeded arms (the config and
+  route key tables, the routes-elvis arm, the decorator sender guard, the
+  redis_connect_error arm both ways, the script-reload 429 path over a new
+  step-key seam) + the comparison-runner arms (the PatternSafety probe
+  chain-module table, the vacuous-corpus guard, the CostBudgetRunner
+  default-arg loaders and the empty-budget guard, the DetectRunner
+  threat-field mismatch matrix over a scratch corpus rendered from live
+  verdicts, the EventsComparison diff/render tables).</li>
+<li>EngineW9eTailsTest (engine/detection): the ParseSlots category/
+  not-literal/class-item/multi-atom arms, the ReachProbe group-synthesis
+  arms (named groups, flag scopes with negation, unknown forms, brace
+  bounds, unrepresentable escapes), the builder families over crafted
+  crossing patterns, the repeat-prefix state/text/candidate budget
+  rejections, the repeat-unit pair-count budget, the large-bounded-repeat
+  probe, the unreachable-terminator malformed-brace/class/escape arms, the
+  structure-rules nesting-depth rejections, the IntervalSet render, the
+  group-scan ignorecase expansion + cache hit, the JsonNull sentinel, the
+  safe-matcher deadline arms over a redos bomb, the batchCompile skip arms
+  over a duplicate-group-name pattern, and the probe compile guard.</li>
+<li>SusPatternsW9eTailsTest (engine/suspatterns): the pickle signed-int and
+  quoted-escape decoders, the pickle-global marker scan advance, the
+  recon-path probe contexts, the backtick-pair verdict windows, the manager
+  add/remove default and custom arms over the shared singleton, the
+  candidate-rejection scan loop (benign-then-malicious backtick pairs), the
+  semantic fallback threat over a near-zero threshold, the arbiter deadline
+  injection via firstOverBudgetReason with a nanosecond budget, the
+  construction-timeout verdict, and the file-upload truncation + the
+  date-anchored template arm.</li>
+<li>CoreW9eTailsTest (facade/core + events): the bypass warn-once guard, the
+  response-factory required-seam guards, the process-response behavioral
+  sweep, the decorator violation events on threshold hits, the pipeline
+  redis fail-open arm + toString, the SecurityCheck default-method
+  synthetics, the decorator/rate-limit emit helpers, the fixed-order
+  factory check, the Verifier completion-stage unwrap, the global cloud
+  block-list resolver fallback, the logfire/otel handler lifecycles over
+  installed surfaces, the composite fan-out with a failing member and the
+  default member bodies, the enricher tolerance arms, the metrics filter,
+  and the event-type gate.</li>
+<li>HandlersW9eTailsTest (facade/handlers): the snapshot type-error matrix,
+  the redis URL redaction arms (bracketed hosts, bad ports, userinfo
+  drops), the PyJsonDumps shapes, the JavaBridges default-arg synthetics
+  and the redis initialize bridges, the rate-limit script load + 429 +
+  fail-open + in-memory arms over the live redis, the ipinfo download/
+  refresh/country arms over the test seams, the cloud manager + azure + aws
+  fetcher arms over the http seams, the security-headers disabled/cors
+  arms, the behavior tracker tables and the dispatch arms, the suspatterns
+  registry add/remove arms, the pattern-source escape redaction, the
+  snapshot field table, the seam idempotence, and the ban-migration quiet
+  arms.</li>
+<li>FacadeW9eConfigUtilTest (facade/config + util): the cross-field
+  validator/warn/error arms, the copyWith field-write surface, the tracked
+  route containers, the header/param/body scan component arms, the
+  multipart binary/malformed arms, the pair-redaction decoders, the
+  sanitize arm, the ipv6 parse-error matrix, the py-urllib/py-json
+  delimiter arms, and the difflib ratio/matching arms.</li>
+<li>BuilderW9eSurfaceTest (facade/config): the builder property write/read
+  sweep over the provided-flag custom setters.</li>
+</ul>
+<h2 id="bugs-found-and-fixed-byte-exact-with-regression-tests">Bugs found and fixed (byte-exact, with regression tests)</h2>
+<ol>
+<li><strong>The template date scan passed its end bound as a deadline</strong>
+   (SusPatternsFileUploadTemplates.finditerWithin): python's
+   <code>_template_after_dates</code> scans with <code>pattern.finditer(content, pos,
+   endpos)</code> - the bound is an ENDPOS. The port called
+   <code>search(text, searchFrom, to.toLong())</code>, feeding the bound as the
+   DEADLINE, so every scan expired immediately and the date-anchored
+   re-anchor of <code>template_expression_matches</code> was INERT (the corpus never
+   exercises a date between two frames). Fixed with the endpos-bounded
+   search overload; regression: the dated-template arms in
+   SusPatternsW9eTailsTest.</li>
+</ol>
+<h2 id="residual-worklist-the-honest-remainder">Residual worklist (the honest remainder)</h2>
+<p>715 lines remain (facade 599, engine 113, conformance 3). Dominants from the
+gate's per-class print: the manager event-armed tails (IpInfoManager,
+CloudManager, DynamicRuleManager, RateLimitManager, SecurityHeadersManager),
+the builder/copy field-write sweeps, the decorator factory singles, the
+per-check arms (HttpsEnforcementCheck, the per-check early returns), the
+HandlerInitializer initialize arms, the SecurityEventBus forwarded-header and
+agent-failure arms, and in the engine the timing-race and defensive-catch
+arms (arbiter/matcher/stray deadlines, the thread-CPU fallback) that are
+exclude candidates with written reasons, plus the PyRe scoped-emitter
+fail-closed arm for node kinds the sre port never emits.</p>
+<p>The gate is NOT wired into ci.yml in this batch: the workspace holds at 721
+missed, and the W9b rule stands (the red-gate-on-master rule: the
+byte-for-byte block in docs/w9b-coverage.md lands only when the enforcement
+passes locally across repeated runs).</p>
+<p>CORPUS GATE: unchanged by this batch - 375 cases + 9 budget workloads,
+0 failing, 8 ledgered (verified with <code>--rerun</code> on
+:guard-core-conformance:fullCorpusGate after the harness seam and the
+finditerWithin fix; the seeded step keys the pinned corpus never sets keep
+the runner behavior byte-identical).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["content.code.copy", "navigation.sections"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
