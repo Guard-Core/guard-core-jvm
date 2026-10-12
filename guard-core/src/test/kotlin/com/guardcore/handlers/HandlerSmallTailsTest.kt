@@ -2,10 +2,10 @@ package com.guardcore.handlers
 
 import com.guardcore.config.EventTypes
 import com.guardcore.config.SecurityConfigBuilder
-import kotlin.test.assertFailsWith
 import com.guardcore.protocols.GuardResponse
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -36,10 +36,26 @@ public class HandlerSmallTailsTest {
   @Test
   fun testLogPassiveModeActionArms() {
     val t = tracker(passive = true)
-    t.logPassiveModeAction(BehaviorRule(ruleType = "usage", threshold = 1, action = "alert"), "1.2.3.4", "details")
-    t.logPassiveModeAction(BehaviorRule(ruleType = "usage", threshold = 1, action = "ban"), "1.2.3.4", "details")
-    t.logPassiveModeAction(BehaviorRule(ruleType = "usage", threshold = 1, action = "log"), "1.2.3.4", "details")
-    t.logPassiveModeAction(BehaviorRule(ruleType = "usage", threshold = 1, action = "throttle"), "1.2.3.4", "details")
+    t.logPassiveModeAction(
+        BehaviorRule(ruleType = "usage", threshold = 1, action = "alert"),
+        "1.2.3.4",
+        "details",
+    )
+    t.logPassiveModeAction(
+        BehaviorRule(ruleType = "usage", threshold = 1, action = "ban"),
+        "1.2.3.4",
+        "details",
+    )
+    t.logPassiveModeAction(
+        BehaviorRule(ruleType = "usage", threshold = 1, action = "log"),
+        "1.2.3.4",
+        "details",
+    )
+    t.logPassiveModeAction(
+        BehaviorRule(ruleType = "usage", threshold = 1, action = "throttle"),
+        "1.2.3.4",
+        "details",
+    )
   }
 
   @Test
@@ -51,22 +67,42 @@ public class HandlerSmallTailsTest {
       // custom action short-circuits
       var customRan = false
       val custom =
-          BehaviorRule(ruleType = "usage", threshold = 1, action = "log", customAction = { _, _, _ -> customRan = true })
+          BehaviorRule(
+              ruleType = "usage",
+              threshold = 1,
+              action = "log",
+              customAction = { _, _, _ -> customRan = true },
+          )
       assertEquals("log", t.executeActiveModeAction(custom, "1.2.3.4", "/e", "details"))
       assertTrue(customRan)
       // alert logs and returns the action
       assertEquals(
           "alert",
-          t.executeActiveModeAction(BehaviorRule(ruleType = "usage", threshold = 1, action = "alert"), "1.2.3.4", "/e", "d"),
+          t.executeActiveModeAction(
+              BehaviorRule(ruleType = "usage", threshold = 1, action = "alert"),
+              "1.2.3.4",
+              "/e",
+              "d",
+          ),
       )
       // throttle and log arms
       assertEquals(
           "throttle",
-          t.executeActiveModeAction(BehaviorRule(ruleType = "usage", threshold = 1, action = "throttle"), "1.2.3.4", "/e", "d"),
+          t.executeActiveModeAction(
+              BehaviorRule(ruleType = "usage", threshold = 1, action = "throttle"),
+              "1.2.3.4",
+              "/e",
+              "d",
+          ),
       )
       assertEquals(
           "log",
-          t.executeActiveModeAction(BehaviorRule(ruleType = "usage", threshold = 1, action = "log"), "1.2.3.4", "/e", "d"),
+          t.executeActiveModeAction(
+              BehaviorRule(ruleType = "usage", threshold = 1, action = "log"),
+              "1.2.3.4",
+              "/e",
+              "d",
+          ),
       )
     } finally {
       IpBanManager.resetInstance()
@@ -82,7 +118,12 @@ public class HandlerSmallTailsTest {
       val recording = RecordingAgent()
       recording.failWith = IllegalStateException("sink down")
       t.agentHandler = recording
-      t.applyAction(BehaviorRule(ruleType = "usage", threshold = 1, action = "log"), "1.2.3.4", "/e", "details")
+      t.applyAction(
+          BehaviorRule(ruleType = "usage", threshold = 1, action = "log"),
+          "1.2.3.4",
+          "/e",
+          "details",
+      )
       t.agentHandler = null
       assertTrue(true)
     } finally {
@@ -99,7 +140,13 @@ public class HandlerSmallTailsTest {
     val recording = RecordingAgent()
     recording.failWith = IllegalStateException("down")
     t.agentHandler = recording
-    t.sendBehaviorEvent(EventTypes.EVENT_BEHAVIOR_VIOLATION, "1.2.3.4", "logged_only", "reason", metadata = mapOf("k" to 1))
+    t.sendBehaviorEvent(
+        EventTypes.EVENT_BEHAVIOR_VIOLATION,
+        "1.2.3.4",
+        "logged_only",
+        "reason",
+        metadata = mapOf("k" to 1),
+    )
     t.agentHandler = null
     assertTrue(true)
   }
@@ -109,8 +156,7 @@ public class HandlerSmallTailsTest {
   // ------------------------------------------------------------------
 
   private class FakeBoundedResponse(private val bodyText: String) :
-      GuardResponse,
-      com.guardcore.protocols.BoundedResponseBodyReader {
+      GuardResponse, com.guardcore.protocols.BoundedResponseBodyReader {
     override val statusCode: Int = 404
     override val headers: MutableMap<String, String> = mutableMapOf()
     override val body: ByteArray? = null
@@ -158,9 +204,17 @@ public class HandlerSmallTailsTest {
     assertEquals(false, t2.checkResponsePattern(FakeBoundedResponse("other"), "found"))
     assertEquals(true, t2.checkResponsePattern(FakeBoundedResponse("x"), "status:404"), "status")
     assertEquals(false, t2.checkResponsePattern(FakeBoundedResponse(""), "found"))
-    assertEquals(true, t2.checkResponsePattern(FakeBoundedResponse("""{"a": 1}"""), "json:a == 1"), "json")
+    assertEquals(
+        true,
+        t2.checkResponsePattern(FakeBoundedResponse("""{"a": 1}"""), "json:a == 1"),
+        "json",
+    )
     assertEquals(false, t2.checkResponsePattern(FakeBoundedResponse("not json"), "json:a == 1"))
-    assertEquals(true, t2.checkResponsePattern(FakeBoundedResponse("abc123"), "regex:abc\\d+"), "regex")
+    assertEquals(
+        true,
+        t2.checkResponsePattern(FakeBoundedResponse("abc123"), "regex:abc\\d+"),
+        "regex",
+    )
     assertEquals(false, t2.checkResponsePattern(PlainResponse(), "status:404"))
     assertNull(t2.checkResponsePattern(PlainResponse(), "unreachable-body"))
   }
@@ -184,7 +238,12 @@ public class HandlerSmallTailsTest {
     // detect with the default context + the pattern_matched fallback arms
     val verdict = SusPatternsRegistry.detect("ben content", "9.9.9.9")
     assertNotNull(verdict)
-    val hit = SusPatternsRegistry.detect("1 UNION SELECT username, password FROM users--", "9.9.9.9", correlationId = "corr")
+    val hit =
+        SusPatternsRegistry.detect(
+            "1 UNION SELECT username, password FROM users--",
+            "9.9.9.9",
+            correlationId = "corr",
+        )
     assertEquals(true, hit["is_threat"] == true || hit["detected"] == true || hit.isNotEmpty())
     SusPatternsRegistry.clearCustomPatternsForCorpus()
   }
@@ -195,18 +254,34 @@ public class HandlerSmallTailsTest {
 
   @Test
   fun testAzureServiceTagsUrlHelpers() {
-    val sortKey = CloudAzureFetch.serviceTagsSortKey("https://download.microsoft.com/download/ServiceTags_Public_20240101.json")
+    val sortKey =
+        CloudAzureFetch.serviceTagsSortKey(
+            "https://download.microsoft.com/download/ServiceTags_Public_20240101.json",
+        )
     assertEquals(true, sortKey.first)
-    val noDate = CloudAzureFetch.serviceTagsSortKey("https://download.microsoft.com/download/x/nodate.json")
+    val noDate =
+        CloudAzureFetch.serviceTagsSortKey("https://download.microsoft.com/download/x/nodate.json")
     assertEquals(false, noDate.first)
     // failover link extraction trusts only azure download hosts
-    val html = "<a id=\"failoverLink\" href=\"https://download.microsoft.com/download/ServiceTags_Public_20240202.json\">x</a>"
-    assertEquals("https://download.microsoft.com/download/ServiceTags_Public_20240202.json", CloudAzureFetch.extractFailoverLinkUrl(html))
-    assertNull(CloudAzureFetch.extractFailoverLinkUrl("<a id=\"failoverLink\" href=\"https://evil.example/x\">y</a>"))
+    val html =
+        "<a id=\"failoverLink\" href=\"https://download.microsoft.com/download/ServiceTags_Public_20240202.json\">x</a>"
+    assertEquals(
+        "https://download.microsoft.com/download/ServiceTags_Public_20240202.json",
+        CloudAzureFetch.extractFailoverLinkUrl(html),
+    )
+    assertNull(
+        CloudAzureFetch.extractFailoverLinkUrl(
+            "<a id=\"failoverLink\" href=\"https://evil.example/x\">y</a>",
+        ),
+    )
     assertNull(CloudAzureFetch.extractFailoverLinkUrl("<p>nothing</p>"))
     // generic json url extraction
-    val generic = "<a href=\"https://download.microsoft.com/download/ServiceTags_Public_20240303.json\">z</a>"
-    assertEquals("https://download.microsoft.com/download/ServiceTags_Public_20240303.json", CloudAzureFetch.extractGenericJsonUrl(generic))
+    val generic =
+        "<a href=\"https://download.microsoft.com/download/ServiceTags_Public_20240303.json\">z</a>"
+    assertEquals(
+        "https://download.microsoft.com/download/ServiceTags_Public_20240303.json",
+        CloudAzureFetch.extractGenericJsonUrl(generic),
+    )
     assertNull(CloudAzureFetch.extractGenericJsonUrl("<a href=\"https://evil.example/x\">z</a>"))
   }
 
@@ -286,12 +361,15 @@ public class HandlerSmallTailsTest {
   fun testDynamicRuleEventSendersWithFailingSink() = runBlocking {
     DynamicRuleManager.resetInstance()
     try {
-      val manager = DynamicRuleManager.getInstance(
-          SecurityConfigBuilder().apply {
-            enableRedis = false
-            enableDynamicRules = false
-          }.build(),
-      )
+      val manager =
+          DynamicRuleManager.getInstance(
+              SecurityConfigBuilder()
+                  .apply {
+                    enableRedis = false
+                    enableDynamicRules = false
+                  }
+                  .build(),
+          )
       val recording = RecordingAgent()
       recording.failWith = IllegalStateException("down")
       val rules =

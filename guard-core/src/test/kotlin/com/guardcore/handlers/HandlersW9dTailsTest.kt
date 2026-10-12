@@ -1,7 +1,6 @@
 package com.guardcore.handlers
 
 import com.guardcore.config.ConfigSeams
-import com.guardcore.config.SecurityConfig
 import com.guardcore.config.SecurityConfigBuilder
 import java.net.URI
 import java.net.http.HttpResponse
@@ -16,9 +15,9 @@ import kotlinx.coroutines.runBlocking
 
 /**
  * W9d handler-tail coverage: the CloudManager refresh/store arms over the fetcher httpGet
- * overrides, the RedisManager URL redaction and operation-serialization tails, the
- * RateLimitManager script-load and failure arms, the IpInfoManager download retry loop over the
- * httpSendOverride seam, and the SecurityHeadersManager cache/CORS tails.
+ * overrides, the RedisManager URL redaction and operation-serialization tails, the RateLimitManager
+ * script-load and failure arms, the IpInfoManager download retry loop over the httpSendOverride
+ * seam, and the SecurityHeadersManager cache/CORS tails.
  */
 
 /** A minimal HttpResponse fake for the IpInfoManager download seam (the aiohttp mock analog). */
@@ -27,13 +26,20 @@ public class FakeIpInfoHttpResponse(
     private val body: ByteArray,
 ) : HttpResponse<ByteArray> {
   override fun statusCode(): Int = status
+
   override fun body(): ByteArray = body
+
   override fun headers() = java.net.http.HttpHeaders.of(mapOf(), { _, _ -> true })
+
   override fun uri(): URI = URI.create("https://ipinfo.io/data/free/country_asn.mmdb")
+
   override fun previousResponse() = java.util.Optional.empty<HttpResponse<ByteArray>>()
+
   override fun request(): java.net.http.HttpRequest =
       java.net.http.HttpRequest.newBuilder().uri(uri()).build()
+
   override fun sslSession() = java.util.Optional.empty<javax.net.ssl.SSLSession>()
+
   override fun version() = java.net.http.HttpClient.Version.HTTP_1_1
 }
 
@@ -83,10 +89,12 @@ public class HandlersW9dTailsTest {
       var ran = false
       val gate = kotlinx.coroutines.CompletableDeferred<Unit>()
       val scheduled =
-          manager.scheduleRefresh(refresh = {
-            gate.await()
-            ran = true
-          })
+          manager.scheduleRefresh(
+              refresh = {
+                gate.await()
+                ran = true
+              },
+          )
       assertTrue(scheduled)
       // single-flight: a second schedule while one is in flight is rejected
       val second = manager.scheduleRefresh(refresh = {})
@@ -147,10 +155,12 @@ public class HandlersW9dTailsTest {
     RedisManager.resetInstance()
     try {
       val config =
-          SecurityConfigBuilder().apply {
-            enableRedis = false
-            redisMaxConnections = 3
-          }.build()
+          SecurityConfigBuilder()
+              .apply {
+                enableRedis = false
+                redisMaxConnections = 3
+              }
+              .build()
       val first = RedisManager.getInstance(config)
       // second getInstance returns the existing manager with refreshed config
       val second = RedisManager.getInstance(config)
@@ -175,8 +185,7 @@ public class HandlersW9dTailsTest {
   fun testRateLimitManagerSingletonAndInMemoryCount() = runBlocking {
     RateLimitManager.resetInstance()
     try {
-      val config =
-          SecurityConfigBuilder().apply { enableRedis = false }.build()
+      val config = SecurityConfigBuilder().apply { enableRedis = false }.build()
       val first = RateLimitManager.getInstance(config)
       val second = RateLimitManager.getInstance(config)
       assertTrue(first === second)
@@ -185,7 +194,8 @@ public class HandlersW9dTailsTest {
       val count = inMemoryRequestCount(store, "9.9.9.9", now - 60.0, now, endpointPath = "/x")
       assertEquals(0, count)
       // the first hit was recorded, so the second call counts it
-      val count2 = inMemoryRequestCount(store, "9.9.9.9", now - 60.0, now + 1.0, endpointPath = "/x")
+      val count2 =
+          inMemoryRequestCount(store, "9.9.9.9", now - 60.0, now + 1.0, endpointPath = "/x")
       assertEquals(1, count2)
     } finally {
       RateLimitManager.resetInstance()
@@ -225,8 +235,7 @@ public class HandlersW9dTailsTest {
       assertNotNull(second.getStatus())
       val record = MmdbCountryRecord("DE")
       assertEquals("DE", record.country)
-      val dir =
-          kotlin.io.path.createTempDirectory("w9d-ipinfo")
+      val dir = kotlin.io.path.createTempDirectory("w9d-ipinfo")
       val dbPath = dir.resolve("db.mmdb")
       val manager = IpInfoManager.getInstance("tok", dbPath, 60)
       assertFailsWith<Exception> { manager.writeDatabaseAtomically(ByteArray(4)) }

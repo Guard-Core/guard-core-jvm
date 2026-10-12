@@ -1,24 +1,21 @@
 package com.guardcore.core
 
 import com.guardcore.config.SecurityConfigBuilder
+import com.guardcore.core.events.AgentTelemetryMember
 import com.guardcore.core.events.CompositeAgentHandler
+import com.guardcore.core.events.EnrichmentContext
 import com.guardcore.core.events.EventEnricher
+import com.guardcore.core.events.EventFilter
 import com.guardcore.core.events.LogfireHandler
 import com.guardcore.core.events.MetricsCollector
 import com.guardcore.core.events.OtelHandler
 import com.guardcore.core.events.SecurityEventBus
 import com.guardcore.core.initialization.HandlerInitializer
 import com.guardcore.decorators.BaseSecurityDecorator
-import com.guardcore.decorators.RouteConfig
-import com.guardcore.handlers.RecordingAgent
 import com.guardcore.util.ScanRequest
-import com.guardcore.core.events.EnrichmentContext
-import com.guardcore.core.events.AgentTelemetryMember
-import com.guardcore.core.events.EventFilter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -27,7 +24,6 @@ import kotlin.test.assertTrue
  * CompositeAgentHandler lifecycle with a failing member, the otel/logfire surfaces, the enricher
  * tails, and the decorator base event surface.
  */
-
 private class RecordingLogfireSurface : LogfireHandler.LogfireSurface {
   override fun isConfigured(): Boolean = true
 
@@ -40,7 +36,6 @@ private class RecordingLogfireSurface : LogfireHandler.LogfireSurface {
   override fun info(message: String, attributes: Map<String, Any?>) {}
 }
 
-
 private class RecordingOtelSurface : OtelHandler.OtelSurface {
   override fun startSpan(name: String, attributes: Map<String, Any?>, parentContext: Any?) {}
 
@@ -51,7 +46,8 @@ private class RecordingOtelSurface : OtelHandler.OtelSurface {
   override fun extractTraceContext(carrier: Map<String, String>): Any? = null
 }
 
-private class MemberAgent(val name: String, var failWith: Exception? = null) : AgentTelemetryMember {
+private class MemberAgent(val name: String, var failWith: Exception? = null) :
+    AgentTelemetryMember {
   public val events: MutableList<Map<String, Any?>> = mutableListOf()
   public val metrics: MutableList<Map<String, Any?>> = mutableListOf()
 
@@ -144,7 +140,9 @@ public class CoreW9dTailsTest {
     otel.start()
     assertTrue(logfire.healthCheck())
     assertTrue(otel.healthCheck())
-    logfire.sendMetric(mapOf("kind" to "counter", "name" to "n", "value" to 1.0, "metadata" to mapOf("k" to "v")))
+    logfire.sendMetric(
+        mapOf("kind" to "counter", "name" to "n", "value" to 1.0, "metadata" to mapOf("k" to "v")),
+    )
     otel.sendMetric(mapOf("kind" to "histogram", "name" to "n", "value" to 0.5))
     logfire.stop()
     otel.stop()
@@ -155,7 +153,8 @@ public class CoreW9dTailsTest {
   @Test
   fun testEventEnricherTails() = coreRunTest {
     val enricher = EventEnricher(EnrichmentContext(config()))
-    val base = linkedMapOf<String, Any?>("event_type" to "behavior_violation", "ip_address" to "1.2.3.4")
+    val base =
+        linkedMapOf<String, Any?>("event_type" to "behavior_violation", "ip_address" to "1.2.3.4")
     base["metadata"] = mutableMapOf<String, Any?>("client_ip" to "1.2.3.4")
     val enriched = enricher.enrichEvent(base)
     assertNotNull(enriched)

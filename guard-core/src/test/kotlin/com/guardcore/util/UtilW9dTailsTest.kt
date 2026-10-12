@@ -17,8 +17,8 @@ import kotlinx.coroutines.runBlocking
 /**
  * W9d util tail coverage: the DetectionConfig constant/route arms, the DetectionScan engine
  * fallback arms over the enhancedDetectOverride seam (the python patch.object analog), the
- * BodyContentScan/BodyFormScan surface arms, the surrogateescape multibyte decoders, the
- * redaction defaults, and the BodyReader oversized-declared-body path.
+ * BodyContentScan/BodyFormScan surface arms, the surrogateescape multibyte decoders, the redaction
+ * defaults, and the BodyReader oversized-declared-body path.
  */
 
 /** A request with a bounded body reader (the adapter protocol shape for body prefix reads). */
@@ -63,7 +63,10 @@ public class UtilW9dTailsTest {
   @Test
   fun testDetectionConfigConstantTables() {
     assertTrue("host" in DetectionConfig.DEFAULT_EXCLUDED_HEADERS)
-    assertEquals(DetectionConfig.ADDRESS_HEADER_SKIP_CATEGORIES, DetectionConfig.HEADER_CATEGORY_EXCLUSIONS["via"])
+    assertEquals(
+        DetectionConfig.ADDRESS_HEADER_SKIP_CATEGORIES,
+        DetectionConfig.HEADER_CATEGORY_EXCLUSIONS["via"],
+    )
   }
 
   @Test
@@ -78,9 +81,15 @@ public class UtilW9dTailsTest {
   @Test
   fun testExcludedHeaderSkipCategoriesArms() {
     // mapped table arm
-    assertEquals(setOf("ssrf"), DetectionConfig.excludedHeaderSkipCategories("X-Forwarded-For", "1.2.3.4"))
+    assertEquals(
+        setOf("ssrf"),
+        DetectionConfig.excludedHeaderSkipCategories("X-Forwarded-For", "1.2.3.4"),
+    )
     // address-chain arm
-    assertEquals(setOf("ssrf"), DetectionConfig.excludedHeaderSkipCategories("X-Custom", "1.2.3.4, 5.6.7.8"))
+    assertEquals(
+        setOf("ssrf"),
+        DetectionConfig.excludedHeaderSkipCategories("X-Custom", "1.2.3.4, 5.6.7.8"),
+    )
     // no tokens (empty after filtering)
     assertEquals(emptySet(), DetectionConfig.excludedHeaderSkipCategories("X-Custom", ",,"))
   }
@@ -89,16 +98,25 @@ public class UtilW9dTailsTest {
   fun testExcludedHeaderEffectiveCategoriesArms() {
     assertEquals(
         setOf("sql_injection"),
-        DetectionConfig.excludedHeaderEffectiveCategories("x-forwarded-for", "1.2.3.4", setOf("sql_injection")),
+        DetectionConfig.excludedHeaderEffectiveCategories(
+            "x-forwarded-for",
+            "1.2.3.4",
+            setOf("sql_injection"),
+        ),
     )
     // null enabled categories fall back to the full table minus the skip set
-    val effective = DetectionConfig.excludedHeaderEffectiveCategories("x-forwarded-for", "1.2.3.4", null)!!
+    val effective =
+        DetectionConfig.excludedHeaderEffectiveCategories("x-forwarded-for", "1.2.3.4", null)!!
     assertFalse("ssrf" in effective)
     assertTrue(effective.isNotEmpty())
     // empty effective set short-circuits the header scan
     assertEquals(
         emptySet<String>(),
-        DetectionConfig.excludedHeaderEffectiveCategories("x-custom", "1.2.3.4, 5.6.7.8", setOf("ssrf")),
+        DetectionConfig.excludedHeaderEffectiveCategories(
+            "x-custom",
+            "1.2.3.4, 5.6.7.8",
+            setOf("ssrf"),
+        ),
     )
   }
 
@@ -107,7 +125,14 @@ public class UtilW9dTailsTest {
   // ------------------------------------------------------------------
 
   private fun installDetectOverride(
-      block: (String, String, String, String?, Set<String>?) -> com.guardcore.engine.suspatterns.DetectResult?,
+      block:
+          (
+              String,
+              String,
+              String,
+              String?,
+              Set<String>?,
+          ) -> com.guardcore.engine.suspatterns.DetectResult?,
   ): Unit {
     DetectionScan.enhancedDetectOverride = { content, ip, context, corr, cats ->
       block(content, ip, context, corr, cats)
@@ -522,9 +547,7 @@ public class UtilW9dTailsTest {
     assertTrue(formDetected)
 
     val multipartBody =
-        "--B\r\nContent-Disposition: form-data; name=\"f\"\r\n\r\n" +
-            xss +
-            "\r\n--B--\r\n"
+        "--B\r\nContent-Disposition: form-data; name=\"f\"\r\n\r\n" + xss + "\r\n--B--\r\n"
     val (mpDetected, _, _) =
         BodyContentScan.scanRequestBody(
             multipartBody,
@@ -625,8 +648,7 @@ public class UtilW9dTailsTest {
 
   @Test
   fun testScanMultipartPartNameHit() = runBlocking {
-    val multipartBody =
-        "--B\r\nContent-Disposition: form-data; name=\"safe\"\r\n\r\n1\r\n--B--\r\n"
+    val multipartBody = "--B\r\nContent-Disposition: form-data; name=\"safe\"\r\n\r\n1\r\n--B--\r\n"
     val hit =
         BodyFormScan.scanMultipartPart(
             null,
@@ -744,23 +766,40 @@ public class UtilW9dTailsTest {
   @Test
   fun testDecodeSurrogateEscapeMultibyte() {
     // 3-byte sequence (euro sign) and 4-byte sequences decode to the code points
-    val text = PenetrationDetection.decodeSurrogateEscape(byteArrayOf(0xE2.toByte(), 0x82.toByte(), 0xAC.toByte()))
+    val text =
+        PenetrationDetection.decodeSurrogateEscape(
+            byteArrayOf(0xE2.toByte(), 0x82.toByte(), 0xAC.toByte()),
+        )
     assertEquals("\u20AC", text)
     // regression: F0-led 4-byte sequences (every emoji, U+10000..U+3FFFF) decode as the
     // code point, exactly like python bytes.decode("utf-8", errors="surrogateescape")
-    val emoji = PenetrationDetection.decodeSurrogateEscape(byteArrayOf(0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()))
+    val emoji =
+        PenetrationDetection.decodeSurrogateEscape(
+            byteArrayOf(0xF0.toByte(), 0x9F.toByte(), 0x98.toByte(), 0x80.toByte()),
+        )
     assertEquals("\uD83D\uDE00", emoji)
-    val highAstral = PenetrationDetection.decodeSurrogateEscape(byteArrayOf(0xF3.toByte(), 0xB0.toByte(), 0x80.toByte(), 0x80.toByte()))
+    val highAstral =
+        PenetrationDetection.decodeSurrogateEscape(
+            byteArrayOf(0xF3.toByte(), 0xB0.toByte(), 0x80.toByte(), 0x80.toByte()),
+        )
     assertEquals("\uDB80\uDC00", highAstral)
     // overlong / out-of-range / bare-continuation forms keep the per-byte
     // surrogateescape fallback (PEP 383: byte b -> U+DC00+b)
-    val overlong = PenetrationDetection.decodeSurrogateEscape(byteArrayOf(0xF0.toByte(), 0x80.toByte(), 0x80.toByte(), 0x80.toByte()))
+    val overlong =
+        PenetrationDetection.decodeSurrogateEscape(
+            byteArrayOf(0xF0.toByte(), 0x80.toByte(), 0x80.toByte(), 0x80.toByte()),
+        )
     assertEquals("\uDCF0\uDC80\uDC80\uDC80", overlong)
-    val outOfRange = PenetrationDetection.decodeSurrogateEscape(byteArrayOf(0xF4.toByte(), 0x90.toByte(), 0x80.toByte(), 0x80.toByte()))
+    val outOfRange =
+        PenetrationDetection.decodeSurrogateEscape(
+            byteArrayOf(0xF4.toByte(), 0x90.toByte(), 0x80.toByte(), 0x80.toByte()),
+        )
     assertEquals("\uDCF4\uDC90\uDC80\uDC80", outOfRange)
-    val bareContinuation = PenetrationDetection.decodeSurrogateEscape(byteArrayOf(0x41.toByte(), 0x80.toByte()))
+    val bareContinuation =
+        PenetrationDetection.decodeSurrogateEscape(byteArrayOf(0x41.toByte(), 0x80.toByte()))
     assertEquals("A\uDC80", bareContinuation)
-    val truncated = PenetrationDetection.decodeSurrogateEscape(byteArrayOf(0xE2.toByte(), 0x82.toByte()))
+    val truncated =
+        PenetrationDetection.decodeSurrogateEscape(byteArrayOf(0xE2.toByte(), 0x82.toByte()))
     assertEquals("\uDCE2\uDC82", truncated)
   }
 
@@ -822,7 +861,16 @@ public class UtilW9dTailsTest {
     assertNull(PairHiddenAssign.redactHiddenEncodedPair("plain", 5, "plain", setOf("password")))
     // handleNoLiteralAssign defaults
     val out = StringBuilder()
-    val triple = PairHiddenAssign.handleNoLiteralAssign("x=1 plain", 4, "1 plain", setOf("password"), out, 0, 4)
+    val triple =
+        PairHiddenAssign.handleNoLiteralAssign(
+            "x=1 plain",
+            4,
+            "1 plain",
+            setOf("password"),
+            out,
+            0,
+            4,
+        )
     assertEquals(4, triple.first)
   }
 
@@ -861,8 +909,7 @@ public class UtilW9dTailsTest {
             }
             .build()
     val body = ByteArray(2048) { 'x'.code.toByte() }
-    val request =
-        BoundedScanRequest(headers = mapOf("Content-Length" to "2048"), bodyBytes = body)
+    val request = BoundedScanRequest(headers = mapOf("Content-Length" to "2048"), bodyBytes = body)
     // the fetch includes the straddle-overlap window (config cap + overlap)
     val capped = BodyReader.readCappedBody(request, config, "9.9.9.9")!!
     assertTrue(capped.size >= 1024)
@@ -873,7 +920,15 @@ public class UtilW9dTailsTest {
 
   @Test
   fun testSafeReadTimeoutReturnsNull() = runBlocking {
-    assertNull(BodyReader.safeRead({ kotlinx.coroutines.delay(500); ByteArray(1) }, 0.01))
+    assertNull(
+        BodyReader.safeRead(
+            {
+              kotlinx.coroutines.delay(500)
+              ByteArray(1)
+            },
+            0.01,
+        ),
+    )
   }
 
   // ------------------------------------------------------------------

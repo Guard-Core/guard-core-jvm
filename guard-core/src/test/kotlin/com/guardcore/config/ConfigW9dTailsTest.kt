@@ -1,7 +1,6 @@
 package com.guardcore.config
 
 import com.guardcore.errors.ConfigValidationError
-import com.guardcore.protocols.GeoIPHandler
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -12,7 +11,6 @@ import kotlin.test.assertTrue
  * W9d config tail coverage: the builder setter sweep for both booking arms, the fromMap coercion
  * rejection matrix, the hook/verifier appliers, and the SecurityConfig copyWith/valueByName tails.
  */
-
 private fun goodBase(): MutableMap<String, Any?> =
     linkedMapOf(
         "enable_redis" to false,
@@ -85,12 +83,9 @@ public class ConfigW9dTailsTest {
                 mapOf(
                     "on_error" to OnErrorHook { stage, exc, context -> },
                     "on_block" to BlockHook { request, payload -> null },
-                    "custom_request_check" to
-                        CustomRequestCheck { null },
-                    "auth_verifier" to
-                        AuthVerifier { _, _ -> null },
-                    "custom_response_modifier" to
-                        CustomResponseModifier { it },
+                    "custom_request_check" to CustomRequestCheck { null },
+                    "auth_verifier" to AuthVerifier { _, _ -> null },
+                    "custom_response_modifier" to CustomResponseModifier { it },
                     "cloud_ip_store" to "any-store-token",
                     "agent_strict" to true,
                 ),
@@ -130,8 +125,13 @@ public class ConfigW9dTailsTest {
             mapOf("endpoint_rate_limits" to 42),
             mapOf("endpoint_rate_limits" to mapOf("/x" to "bad")),
             mapOf("global_behavior_rules" to listOf(42)),
-            mapOf("global_behavior_rules" to listOf(mapOf("rule_type" to "bogus", "threshold" to 1))),
-            mapOf("global_behavior_rules" to listOf(mapOf("rule_type" to "usage", "threshold" to 1, "action" to "bogus"))),
+            mapOf(
+                "global_behavior_rules" to listOf(mapOf("rule_type" to "bogus", "threshold" to 1)),
+            ),
+            mapOf(
+                "global_behavior_rules" to
+                    listOf(mapOf("rule_type" to "usage", "threshold" to 1, "action" to "bogus")),
+            ),
             mapOf("global_behavior_rules" to listOf(mapOf("rule_type" to "usage"))),
             mapOf("threat_ban_config" to 42),
             mapOf("threat_ban_config" to mapOf("sqli" to "bad")),
@@ -149,7 +149,8 @@ public class ConfigW9dTailsTest {
                 mapOf(
                     "custom_error_responses" to mapOf(404 to "not found"),
                     "otel_resource_attributes" to mapOf("k" to "v"),
-                    "threat_ban_config" to mapOf("sqli" to mapOf("threshold" to 3, "duration" to 60)),
+                    "threat_ban_config" to
+                        mapOf("sqli" to mapOf("threshold" to 3, "duration" to 60)),
                     "global_behavior_rules" to
                         listOf(
                             mapOf(

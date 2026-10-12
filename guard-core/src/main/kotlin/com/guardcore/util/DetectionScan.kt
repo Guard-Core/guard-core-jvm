@@ -14,8 +14,8 @@ import com.guardcore.handlers.DetectionScanRedaction
 public object DetectionScan {
   /**
    * Test seam mirroring the python tests' `patch.object` of the shared SusPatternsManager detect:
-   * when set, `checkValueEnhanced` resolves through it instead of the engine singleton
-   * (production code never sets it).
+   * when set, `checkValueEnhanced` resolves through it instead of the engine singleton (production
+   * code never sets it).
    */
   @Volatile
   internal var enhancedDetectOverride:
@@ -26,7 +26,9 @@ public object DetectionScan {
           correlationId: String,
           enabledCategories: Set<String>?,
       ) -> com.guardcore.engine.suspatterns.DetectResult? =
-      { _, _, _, _, _ -> null }
+      { _, _, _, _, _ ->
+        null
+      }
 
   /** Python `_MAX_USER_AGENT_MATCH_LENGTH` (detection_scan.py:194). */
   public const val MAX_USER_AGENT_MATCH_LENGTH: Int = 512

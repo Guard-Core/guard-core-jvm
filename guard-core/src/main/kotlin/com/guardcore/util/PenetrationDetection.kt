@@ -215,7 +215,8 @@ public object PenetrationDetection {
           // (every emoji), which python decodes as the code point.
           4 ->
               isValid =
-                  b >= 0xF0 && b <= 0xF4 &&
+                  b >= 0xF0 &&
+                      b <= 0xF4 &&
                       !(b == 0xF0 && bytes[i + 1].toInt() and 0xFF < 0x90) &&
                       !(b == 0xF4 && bytes[i + 1].toInt() and 0xFF > 0x8F)
         }

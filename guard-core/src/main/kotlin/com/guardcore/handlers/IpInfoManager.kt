@@ -481,6 +481,7 @@ private constructor(
    * client (production code never sets it).
    */
   @Volatile
-  internal var httpSendOverride: ((url: String, headers: Map<String, String>) -> HttpResponse<ByteArray>)? =
+  internal var httpSendOverride:
+      ((url: String, headers: Map<String, String>) -> HttpResponse<ByteArray>)? =
       null
 }

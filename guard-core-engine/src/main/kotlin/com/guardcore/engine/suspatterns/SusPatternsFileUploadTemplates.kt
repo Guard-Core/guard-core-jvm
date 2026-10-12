@@ -330,7 +330,13 @@ public object SusPatternsTemplates {
       // python's endpos TRUNCATES the subject for matching, so the indicator's \Z anchors at
       // the barrier; a java region never moves \Z (absolute end), so the truncation must be
       // applied to the subject itself.
-      if (indicator.search(content.substring(0, barrier), start + opening.length + 1, Long.MAX_VALUE) != null) {
+      if (
+          indicator.search(
+              content.substring(0, barrier),
+              start + opening.length + 1,
+              Long.MAX_VALUE,
+          ) != null
+      ) {
         matches.add(templateFrame(content, opening, closing, start, end, compiled.flags))
       }
     }

@@ -10,9 +10,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * W9d arm closure for the remaining conformance runners: the seeded scratch-corpus error/edge
- * arms for the pattern-safety and cost-budget runners plus the shared classification tables.
- * The pinned corpus under conformance/guard-core-spec-4.1.0/ is never touched.
+ * W9d arm closure for the remaining conformance runners: the seeded scratch-corpus error/edge arms
+ * for the pattern-safety and cost-budget runners plus the shared classification tables. The pinned
+ * corpus under conformance/guard-core-spec-4.1.0/ is never touched.
  */
 class RunnerW9dTailsTest {
   private fun writePatternSafetyCorpus(root: Path, cases: String) {
@@ -56,9 +56,14 @@ class RunnerW9dTailsTest {
     assertFalse(failures[0].observedSafe)
     // the classifier tables: every prefix class + the unclassified fallback
     assertEquals("safe", PatternSafetyRunner.classifySafetyReason("Pattern appears safe"))
-    assertEquals("other", PatternSafetyRunner.classifySafetyReason("no table prefix in this reason"))
+    assertEquals(
+        "other",
+        PatternSafetyRunner.classifySafetyReason("no table prefix in this reason"),
+    )
     // the chain-module table resolves every known class
-    assertTrue(PatternSafetyRunner.chainModuleOf("dangerous_construct").contains("StructuralPrefilters"))
+    assertTrue(
+        PatternSafetyRunner.chainModuleOf("dangerous_construct").contains("StructuralPrefilters"),
+    )
     assertTrue(PatternSafetyRunner.chainModuleOf("compile_failed").contains("PyReParser"))
     assertTrue(PatternSafetyRunner.chainModuleOf("other").contains("unclassified"))
   }
@@ -132,10 +137,14 @@ class RunnerW9dTailsTest {
                   "cost_prose_8kib": {"reference_ms": 1.0, "expected_is_threat": false},
                   "cost_attack_small": {"reference_ms": 1.0, "expected_is_threat": false}}}""",
       )
-      val ledgered = CostBudgetRunner.runAll(huge, ledger = mapOf("cost_attack_small" to "w9d ledger"))
+      val ledgered =
+          CostBudgetRunner.runAll(huge, ledger = mapOf("cost_attack_small" to "w9d ledger"))
       assertEquals(listOf("cost_attack_small"), ledgered.staleLedgerEntries)
       assertTrue(ledgered.overs.isEmpty())
-      assertTrue(ledgered.lines.any { it.contains("STALE ledger entry") }, ledgered.lines.toString())
+      assertTrue(
+          ledgered.lines.any { it.contains("STALE ledger entry") },
+          ledgered.lines.toString(),
+      )
     } finally {
       com.guardcore.engine.suspatterns.SusPatternsManager.shared().configure(null)
     }
