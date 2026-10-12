@@ -438,7 +438,9 @@ public class PerformanceMonitor(
   }
 
   private fun reserveAnomalyEmission(pattern: String): Boolean {
-    val now = System.nanoTime().toDouble()
+    // time.monotonic() analog in SECONDS: the cooldown is in seconds, and the
+    // raw nanotime value made the window 1e9x too small to ever suppress.
+    val now = System.nanoTime().toDouble() / 1_000_000_000.0
     synchronized(lock) {
       val stats = patternStats[pattern] ?: return true
       val lastEmittedAt = stats.lastAnomalyEmittedAt
