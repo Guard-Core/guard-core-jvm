@@ -1,4 +1,4 @@
-# W9e coverage report (the 100 percent push, batch 3 - IN FLIGHT)
+# W9e coverage report (the 100 percent push, batches 3+4 - IN FLIGHT)
 
 Measured 2026-10-13 with the W8d/W9a merged method: ALL module exec files
 counted against ALL kotlin classes (per-module reports UNDERCOUNT because the
@@ -9,12 +9,12 @@ conformance module exercises facade/engine code from another JVM). Reproduce:
 
 ## Before/after per module (merged cross-module JaCoCo)
 
-| module | W9d baseline (master 7ae562c) | after W9e (this batch) | missed |
-|---|---|---|---|
-| guard-core-engine | 97.02% (220 missed) | 98.47% | 113 |
-| guard-core (facade) | 94.67% (784 missed) | 95.93% | 599 |
-| guard-core-conformance (runners) | 90.76% (116 missed) | 99.76% | 3 |
-| workspace total | 95.20% (22,219/23,339) | 96.94% (22,633/23,348) | 715 |
+| module | W9d baseline (master 7ae562c) | after batch 3 (fc48355) | after batch 4 (this branch) | missed |
+|---|---|---|---|---|
+| guard-core-engine | 97.02% (220 missed) | 98.47% | 99.15% (62 reasoned excludes) | 62 |
+| guard-core (facade) | 94.67% (784 missed) | 95.93% | 96.84% | 465 |
+| guard-core-conformance (runners) | 90.76% (116 missed) | 99.76% | 99.76% | 3 |
+| workspace total | 95.20% (1,120 missed) | 96.94% | 97.73% (22,767/23,297) | 530 |
 
 Net: 405 lines closed this batch (1,120 -> 715) with 91 new test methods over
 7 new JUnit classes. The push-to-100% ruling (spec 14.2) remains OPEN: the
