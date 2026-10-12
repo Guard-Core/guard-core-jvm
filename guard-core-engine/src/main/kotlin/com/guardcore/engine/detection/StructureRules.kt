@@ -48,7 +48,9 @@ public fun broadAtomSpan(pattern: String, i: Int): Pair<Int, Boolean> {
     c == '\\' && i + 1 < n -> Pair(i + 2, pattern[i + 1] in BROAD_SHORTHAND_ESCAPE_LETTERS)
     c == '[' -> {
       val j = skipCharClass(pattern, i)
-      Pair(j, isBroadCharClassInner(pattern.substring(i + 1, j - 1)))
+      // python pattern[i + 1 : j - 1] is "" when the slice is reversed.
+      val inner = if (j >= i + 2) pattern.substring(i + 1, j - 1) else ""
+      Pair(j, isBroadCharClassInner(inner))
     }
     c == '.' -> Pair(i + 1, true)
     else -> Pair(i + 1, false)
@@ -69,7 +71,8 @@ private fun broadUnboundedRunAt(pattern: String, depth: Int): Pair<Int, List<Str
         i++
         continue
       }
-      val inner = normalizeGroupInner(pattern.substring(i + 1, j - 1))
+      // python pattern[i + 1 : j - 1] is "" when the slice is reversed.
+      val inner = normalizeGroupInner(if (j >= i + 2) pattern.substring(i + 1, j - 1) else "")
       if (inner != null) {
         var bestCount = -1
         var bestSpans: List<String> = emptyList()
