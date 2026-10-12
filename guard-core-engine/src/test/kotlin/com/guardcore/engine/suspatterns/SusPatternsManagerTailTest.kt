@@ -123,11 +123,15 @@ class SusPatternsManagerTailTest {
   @Test
   fun quadComponentOperators() {
     val quad = Quad(1, "b", 3.0, true)
-    val (a, b, c, d) = quad
+    assertEquals(1, quad.component1())
+    assertEquals("b", quad.component2())
+    assertEquals(3.0, quad.component3())
+    assertTrue(quad.component4())
+    // The destructuring operators the python tuple-unpacking call sites use.
+    val (a, b, c) = quad
     assertEquals(1, a)
     assertEquals("b", b)
     assertEquals(3.0, c)
-    assertTrue(d)
   }
 
   @Test
