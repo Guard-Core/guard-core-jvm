@@ -26,12 +26,9 @@ public object RegexWorkers {
 
   private fun workerLoop() {
     while (true) {
-      val task = tasks.take()
-      try {
-        task.run()
-      } catch (t: Throwable) {
-        // Failures are carried by the future; never kill the worker.
-      }
+      // FutureTask.run captures every Throwable into the future, so the worker loop
+      // cannot be killed by a task failure.
+      tasks.take().run()
     }
   }
 

@@ -31,43 +31,6 @@ private fun parseSymbolQuantifier(inner: String, i: Int): ParsedQuant {
   return ParsedQuant(optional, unbounded, j)
 }
 
-private fun parseBraceQuantifier(inner: String, i: Int): ParsedQuant? {
-  val endBrace = inner.indexOf('}', i)
-  if (endBrace == -1) return null
-  val parts = inner.substring(i + 1, endBrace).split(",")
-  if (parts[0].isEmpty() || !parts[0].all { it.isDigitInternal() }) return null
-  val optional = parts[0].toInt() == 0
-  val unbounded = parts.size > 1 && parts[1].isEmpty()
-  var j = endBrace + 1
-  if (j < inner.length && inner[j] == '?') j++
-  return ParsedQuant(optional, unbounded, j)
-}
-
-private fun parseFlatQuantifiedAtoms(inner: String): List<Pair<Boolean, Boolean>>? {
-  if (inner.contains('(') || inner.contains('|')) return null
-  val atoms = ArrayList<Pair<Boolean, Boolean>>()
-  var i = 0
-  val n = inner.length
-  while (i < n) {
-    i++
-    var optional = false
-    var unbounded = false
-    if (i < n && inner[i] in "*+?") {
-      val parsed = parseSymbolQuantifier(inner, i)
-      optional = parsed.optional
-      unbounded = parsed.unbounded
-      i = parsed.next
-    } else if (i < n && inner[i] == '{') {
-      val parsed = parseBraceQuantifier(inner, i) ?: return null
-      optional = parsed.optional
-      unbounded = parsed.unbounded
-      i = parsed.next
-    }
-    atoms.add(Pair(optional, unbounded))
-  }
-  return atoms
-}
-
 private fun atomsHaveAmbiguousPair(atoms: List<Pair<Boolean, Boolean>>): Boolean {
   for (a in atoms.indices) {
     for (b in atoms.indices) {

@@ -158,7 +158,7 @@ public object PyAst {
             val three = if (i + 2 < n) src.substring(i, i + 3) else ""
             when {
               three == "**=" || three == "//=" || three == ">>=" || three == "<<=" ->
-                  i += 0 // aug ops reject in eval anyway; tokenize as parts
+                  i += 3 // aug assignment rejects in eval mode; consume it so the grammar fails
               two == "**" ||
                   two == "//" ||
                   two == "<<" ||
@@ -404,15 +404,16 @@ public object PyAst {
         return
       }
       while (true) {
-        if (takeOp("*") || takeOp("**")) {
+        if (takeOp("**") || takeOp("*")) {
           parseExpression()
         } else {
-          val before = pos
+          // parseExpression always consumes at least one token or throws, so an empty
+          // argument surfaces as the atom-level "unexpected token" error (the reference's
+          // f(,) is the same rejection).
           parseExpression()
           if (takeOp(":=")) {
-            // walrus: NAME := expr - parseExpression already consumed name
-          } else if (pos == before) {
-            throw SyntaxErrorSignal("call: empty argument")
+            // walrus: NAME := expr - the name is consumed; parse its assigned value.
+            parseExpression()
           } else if (takeOp("=")) {
             parseExpression()
           } else if (peekOp(":")) {
@@ -471,7 +472,6 @@ public object PyAst {
             "None",
             "True",
             "False" -> {}
-            "lambda" -> parseLambdaBody()
             "not" -> throw SyntaxErrorSignal("atom: not")
             else -> {}
           }
@@ -592,19 +592,20 @@ public object PyAst {
       parseComprehensionTarget()
       if (!takeName("in")) throw SyntaxErrorSignal("comprehension: expected in")
       parseOr()
-      if (takeName("if")) {
-        parseOrNoCond()
-      }
-      while (takeName("for") || takeName("if")) {
-        if (peekOp("for") || !atEnd()) {
-          if (peekOp("if")) {
-            pos++
-            parseOrNoCond()
-          } else {
+      parseComprehensionClauses()
+    }
+
+    /** The trailing iterator clauses: any interleaving of `if or_test` and `for target in`. */
+    private fun parseComprehensionClauses() {
+      while (true) {
+        when {
+          takeName("if") -> parseOrNoCond()
+          takeName("for") -> {
             parseComprehensionTarget()
             if (!takeName("in")) throw SyntaxErrorSignal("comprehension: expected in")
             parseOr()
           }
+          else -> return
         }
       }
     }

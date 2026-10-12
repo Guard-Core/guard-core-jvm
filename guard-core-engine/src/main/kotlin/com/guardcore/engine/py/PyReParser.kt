@@ -193,9 +193,6 @@ public class PyReParser(private val src: String, initialFlags: Int) {
       return atom
     }
     if (atom.op == ReOp.AT) throw err("nothing to repeat", pos - q.length)
-    if (atom.op == ReOp.MAX_REPEAT || atom.op == ReOp.MIN_REPEAT) {
-      throw err("multiple repeat", pos - q.length)
-    }
     var lazy = false
     if (!atEnd() && peek() == '?') {
       lazy = true
@@ -262,8 +259,8 @@ public class PyReParser(private val src: String, initialFlags: Int) {
         pos = end + 1
         return Quant(low.value, hmax, pos - start)
       }
+      else -> return null
     }
-    return null
   }
 
   private fun probeQuantifier(): Quant? {
@@ -307,7 +304,6 @@ public class PyReParser(private val src: String, initialFlags: Int) {
       }
       '[' -> return parseCharClass()
       '(' -> return parseGroup()
-      ')' -> return null
       '\\' -> return parseEscapeAtom()
       '.' -> {
         pos++
@@ -399,6 +395,31 @@ public class PyReParser(private val src: String, initialFlags: Int) {
             return ReNode(ReOp.GROUPREF, group)
           }
           throw err("invalid group reference $group", escapeStart + 1)
+        }
+        if (c == 'g') {
+          // sre_parse \g<num> / \g<name>: the spelled-out group-reference form.
+          if (atEnd() || peek() != '<') throw err("bad escape \\g", escapeStart)
+          pos++ // consume the '<'
+          val refStart = pos
+          while (!atEnd() && peek() != '>') pos++
+          if (atEnd()) throw err("missing >, unterminated name", escapeStart)
+          val ref = src.substring(refStart, pos)
+          pos++ // consume the '>'
+          if (ref.isEmpty()) throw err("missing group name", refStart)
+          if (ref[0] in '0'..'9') {
+            if (!ref.all { it in '0'..'9' }) throw err("bad character in group name", refStart)
+            val group = ref.toInt()
+            if (group >= groups) throw err("invalid group reference $group", refStart)
+            if (openGroups.contains(group)) {
+              throw err("cannot refer to an open group", escapeStart)
+            }
+            return ReNode(ReOp.GROUPREF, group)
+          }
+          if (!ref.all { it.isLetterOrDigit() || it == '_' }) {
+            throw err("bad character in group name", refStart)
+          }
+          val idx = groupNames[ref] ?: throw err("unknown group name '$ref'", refStart)
+          return ReNode(ReOp.GROUPREF, idx)
         }
         if (c.isAsciiLetterInternal()) throw err("bad escape \\$c", escapeStart)
         return ReNode(ReOp.LITERAL, c.code)

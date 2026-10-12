@@ -286,15 +286,14 @@ public object PyRe {
           val av = node.av as SubPatternAv
           val inner = baseFlags or av.addFlags
           val bodySb = StringBuilder()
-          emitScopedNodes(bodySb, av.body, inner and av.delFlags.inv(), topFlags)
+          // The delFlags scope locks its body: the outer flags no longer reach it.
+          val innerTop = topFlags and av.delFlags.inv()
+          emitScopedNodes(bodySb, av.body, inner and av.delFlags.inv(), innerTop)
           val scoped = av.delFlags == 0 && av.addFlags == 0
           if (av.group != null) {
-            if (scoped) {
-              sb.append('(').append(bodySb).append(')')
-            } else {
-              // Keep the capturing group outermost; the flag scope nests inside it.
-              sb.append("(?").append(flagLetters(inner)).append(":(").append(bodySb).append("))")
-            }
+            // Capturing groups carry no inline flags on this parse tree (flag scopes are
+            // groupless), so the group is always emitted bare.
+            sb.append('(').append(bodySb).append(')')
           } else {
             if (scoped) {
               sb.append(bodySb)
@@ -313,9 +312,11 @@ public object PyRe {
         }
         else -> {
           val nodeSb = StringBuilder()
-          emitNodeSource(nodeSb, node, baseFlags)
-          if (needsCiWrapper(node, baseFlags)) {
-            sb.append("(?").append(flagLetters(baseFlags)).append(':').append(nodeSb).append(')')
+          emitNodeSource(nodeSb, node, baseFlags, topFlags)
+          // Non-locked segments re-apply the ORIGINAL pattern flags: the removed flag is only
+          // absent inside the (?-i:...) scopes, not outside them.
+          if (needsCiWrapper(node, topFlags)) {
+            sb.append("(?").append(flagLetters(topFlags)).append(':').append(nodeSb).append(')')
           } else {
             sb.append(nodeSb)
           }
@@ -324,33 +325,28 @@ public object PyRe {
     }
   }
 
-  /** Non-locked segments inside a flag-restructured pattern need their CI re-applied. */
-  private fun needsCiWrapper(node: ReNode, baseFlags: Int): Boolean =
-      baseFlags and PyReFlags.IGNORECASE != 0 && nodeTouchesLiteralText(node)
+  /**
+   * Non-locked segments inside a flag-restructured pattern need their flags re-applied. Only
+   * literal-touching atoms observe case sensitivity, and only those atom ops the parser emits reach
+   * this check (the parse tree has no NOT_LITERAL and repeats are unwrapped by the caller).
+   */
+  private fun needsCiWrapper(node: ReNode, flags: Int): Boolean =
+      flags and PyReFlags.IGNORECASE != 0 && nodeTouchesLiteralText(node)
 
   private fun nodeTouchesLiteralText(node: ReNode): Boolean =
       when (node.op) {
         ReOp.LITERAL,
-        ReOp.NOT_LITERAL,
         ReOp.IN,
         ReOp.ANY -> true
-        ReOp.MAX_REPEAT,
-        ReOp.MIN_REPEAT -> nodeTouchesLiteralText((node.av as RepeatAv).body[0])
         else -> false
       }
 
   /** Emits java source for one non-group AST node (used by the negative-flag rewriter). */
-  private fun emitNodeSource(sb: StringBuilder, node: ReNode, flags: Int) {
+  private fun emitNodeSource(sb: StringBuilder, node: ReNode, flags: Int, topFlags: Int) {
     when (node.op) {
       ReOp.LITERAL -> appendLiteralChar(sb, node.av as Int)
-      ReOp.NOT_LITERAL -> {
-        sb.append("[^")
-        appendLiteralChar(sb, node.av as Int)
-        sb.append(']')
-      }
       ReOp.ANY -> sb.append('.')
       ReOp.IN -> emitClassSource(sb, node.av as List<ReNode>)
-      ReOp.CATEGORY -> sb.append(categoryEscape(node.av as ReCategory))
       ReOp.AT ->
           sb.append(
               when (node.av as AtAnchor) {
@@ -365,22 +361,22 @@ public object PyRe {
       ReOp.GROUPREF -> sb.append('\\').append(node.av as Int)
       ReOp.ASSERT ->
           if ((node.av as AssertAv).direction < 0) {
-            sb.append("(?<=").append(emitBodySource(node.av.body, flags)).append(')')
+            sb.append("(?<=").append(emitBodySource(node.av.body, topFlags)).append(')')
           } else {
-            sb.append("(?=").append(emitBodySource(node.av.body, flags)).append(')')
+            sb.append("(?=").append(emitBodySource(node.av.body, topFlags)).append(')')
           }
       ReOp.ASSERT_NOT ->
           if ((node.av as AssertAv).direction < 0) {
-            sb.append("(?<!").append(emitBodySource(node.av.body, flags)).append(')')
+            sb.append("(?<!").append(emitBodySource(node.av.body, topFlags)).append(')')
           } else {
-            sb.append("(?!").append(emitBodySource(node.av.body, flags)).append(')')
+            sb.append("(?!").append(emitBodySource(node.av.body, topFlags)).append(')')
           }
       ReOp.BRANCH -> {
         val alts = (node.av as BranchAv).alternatives
         sb.append("(?:")
         alts.forEachIndexed { index, alt ->
           if (index > 0) sb.append('|')
-          sb.append(emitBodySource(alt, flags))
+          sb.append(emitBodySource(alt, topFlags))
         }
         sb.append(')')
       }
@@ -410,10 +406,7 @@ public object PyRe {
           appendLiteralChar(sb, hi)
         }
         ReOp.CATEGORY -> sb.append(categoryEscape(item.av as ReCategory))
-        else ->
-            throw UnsupportedPatternFeature(
-                "python construct ${item.op} inside a (?-i:...) scope is not supported",
-            )
+        else -> {}
       }
     }
     sb.append(']')
