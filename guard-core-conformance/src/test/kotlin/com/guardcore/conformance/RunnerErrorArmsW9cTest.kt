@@ -48,7 +48,13 @@ class RunnerErrorArmsW9cTest {
     """.trimIndent()
     writeCorpus(root, cases)
     assertEquals(listOf("w9c_seeded"), DetectRunner.detectSuites(root))
-    val failures = DetectRunner.runAll(root)
+    val failures =
+        try {
+          DetectRunner.runAll(root)
+        } finally {
+          // Restore the shared manager: the seeded corpus configured a scratch view.
+          com.guardcore.engine.suspatterns.SusPatternsManager.shared().configure(null)
+        }
     val ids = failures.map { it.caseId }
     assertTrue("flag-mismatch" in ids, ids.toString())
     assertTrue("score-mismatch" in ids, ids.toString())
