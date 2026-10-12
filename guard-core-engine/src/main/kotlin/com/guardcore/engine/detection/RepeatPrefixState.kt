@@ -124,7 +124,10 @@ public fun positiveAssertion(
     return witnesses.map { witness ->
       val newText =
           if (witness.text.isNotEmpty()) {
-            state.text.substring(0, state.text.length - witness.text.length) + witness.text
+            // python state.text[: -len(witness.text)] clamps to "" when the
+            // witness is longer than the state text (negative slice).
+            state.text.substring(0, maxOf(0, state.text.length - witness.text.length)) +
+                witness.text
           } else {
             state.text
           }
