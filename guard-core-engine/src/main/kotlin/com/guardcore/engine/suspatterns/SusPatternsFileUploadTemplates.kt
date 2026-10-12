@@ -411,7 +411,10 @@ public object SusPatternsTemplates {
     val out = ArrayList<com.guardcore.engine.py.PyReMatch>()
     var searchFrom = from
     while (searchFrom <= to) {
-      val match = search(text, searchFrom, to.toLong()) ?: break
+      // python finditer(content, pos, endpos): the upper bound is an ENDPOS, not a deadline.
+      // The reference runs this scan un-deadlined (the DATE_INDICATOR is a constant
+      // lookahead), so the endpos-bounded search carries no deadline either.
+      val match = search(text, searchFrom, to, Long.MAX_VALUE) ?: break
       out.add(match)
       searchFrom =
           if (match.charEnd() > match.charStart()) match.charEnd() else match.charStart() + 1
