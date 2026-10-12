@@ -29,6 +29,13 @@ class EngineW9eTailsTest {
     assertNotNull(patternSlots("[^a]{2,}", 0))
     // repeat of a class with a category item -> emitAtomSource IN + CATEGORY arm
     assertNotNull(patternSlots("[\\da]{2,}", 0))
+    // the negated shorthand class items walk the remaining render arms
+    assertNotNull(patternSlots("\\D{2,}", 0))
+    assertNotNull(patternSlots("\\S{2,}", 0))
+    assertNotNull(patternSlots("\\W{2,}", 0))
+    assertNotNull(patternSlots("[\\D\\S\\W]{2,}", 0))
+    // the any-atom repeat walks the ANY emit arm
+    assertNotNull(patternSlots(".{2,}", 0))
     // multi-atom repeat body -> the NonPairingSlot multi-atom arm
     assertNotNull(patternSlots("(?:ab){2,}", 0))
     // nodeIntervals on a non-pairing node falls through to the empty-interval arm
