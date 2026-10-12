@@ -59,18 +59,20 @@ public object PairHiddenAssign {
   /** Port of `_escaped_gap_length` (pair_hidden_assign.py:57). */
   private fun escapedGapLength(text: String, pos: Int): Int {
     val match = ESCAPED_GAP_REGEX.matchAt(text, pos) ?: return 0
-    val groupNames = listOf("short", "octal", "hex", "u4", "ubrace", "u8", "named")
-    for (name in groupNames) {
-      val body = match.groups[name]?.value ?: continue
-      val decoded =
-          if (name == "short") {
-            shortEscapeDecoder()
-          } else {
-            ESCAPE_DECODERS[name]?.invoke(body)
-          }
-      return if (isGapChar(decoded)) match.value.length else 0
-    }
-    return 0
+    // ESCAPED_GAP_REGEX always matches exactly one named alternative, so exactly one
+    // group carries the body (python's dict-lookup semantics); the loop fall-through
+    // would be unreachable.
+    val name =
+        listOf("short", "octal", "hex", "u4", "ubrace", "u8", "named").first {
+          match.groups[it]?.value != null
+        }
+    val decoded =
+        if (name == "short") {
+          shortEscapeDecoder()
+        } else {
+          ESCAPE_DECODERS[name]?.invoke(match.groups[name]!!.value)
+        }
+    return if (isGapChar(decoded)) match.value.length else 0
   }
 
   /** Port of `_match_hidden_assign_token` (pair_hidden_assign.py:65). */

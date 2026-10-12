@@ -337,7 +337,7 @@ public object RequestLogging {
       request: GuardRequest,
       sensitiveHeaders: Set<String>?,
       sensitiveParams: Set<String>?,
-      sensitiveBodyFields: Set<String>? = null,
+      sensitiveBodyFields: Set<String>?,
   ): Map<String, Any?> {
     val cachedIp = IpExtraction.stateClientIp(request)
     val clientHost: String? = request.clientHost
@@ -421,7 +421,7 @@ public object RequestLogging {
       onBlock: BlockHook?,
       sensitiveParams: Set<String>?,
       sensitiveBodyFields: Set<String>?,
-      sensitiveHeaders: Set<String>? = null,
+      sensitiveHeaders: Set<String>?,
   ) {
     if (logType != "suspicious") return
     if (!passiveMode) {

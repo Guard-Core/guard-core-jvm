@@ -361,14 +361,10 @@ public class PerformanceMonitor(
       } else {
         if (stats.recentTimes.size >= recentTimesMaxlen) stats.recentTimes.removeFirst()
         stats.recentTimes.addLast(executionTime)
-        stats.maxExecutionTime = maxOf(stats.maxExecutionTime, executionTime)
-        stats.minExecutionTime = minOf(stats.minExecutionTime, executionTime)
-        stats.avgExecutionTime =
-            if (stats.recentTimes.isNotEmpty()) {
-              fsum(stats.recentTimesSnapshot()) / stats.recentTimes.size
-            } else {
-              stats.avgExecutionTime
-            }
+        // The append above always lands (recentTimesMaxlen >= DEFAULT_RECENT_TIMES_WINDOW
+        // >= 1), so the window is non-empty here; python's `if stats.recent_times else`
+        // fallback is unreachable for the same reason (monitor.py:117-120).
+        stats.avgExecutionTime = fsum(stats.recentTimesSnapshot()) / stats.recentTimes.size
       }
 
       statisticalAnomaly =
@@ -381,8 +377,8 @@ public class PerformanceMonitor(
   private fun checkAnomalies(
       metric: PerformanceMetric,
       statisticalAnomaly: Map<String, Any>?,
-      agentHandler: AnomalyEventSink? = null,
-      correlationId: String? = null,
+      agentHandler: AnomalyEventSink?,
+      correlationId: String?,
   ) {
     val anomalies = ArrayList<Map<String, Any>>()
 
@@ -415,8 +411,8 @@ public class PerformanceMonitor(
 
   private fun notifyCallbacks(
       anomaly: Map<String, Any>,
-      agentHandler: AnomalyEventSink? = null,
-      correlationId: String? = null,
+      agentHandler: AnomalyEventSink?,
+      correlationId: String?,
   ) {
     val safeAnomaly = sanitizeAnomalyData(anomaly)
     for (callback in anomalyCallbacks.toList()) {

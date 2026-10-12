@@ -672,7 +672,12 @@ public class PyReParser(private val src: String, initialFlags: Int) {
           if (negative) remove = remove or PyReFlags.ASCII else add = add or PyReFlags.ASCII
         }
         'L' -> {
-          if (negative) remove = remove or PyReFlags.LOCALE else add = add or PyReFlags.LOCALE
+          // re.LOCALE is fail-closed for this port (the top-level flag gate raises the same
+          // UnsupportedPatternFeature); a scoped (?L:...) must not leak into the java pattern,
+          // where it would die later as a bare "Unknown inline modifier" compile error.
+          throw com.guardcore.engine.py.PyRe.UnsupportedPatternFeature(
+              "re.LOCALE has no java.util.regex equivalent",
+          )
         }
         'x' -> {
           if (negative) remove = remove or PyReFlags.VERBOSE else add = add or PyReFlags.VERBOSE

@@ -2,7 +2,6 @@ package com.guardcore.util
 
 import com.guardcore.config.ConfigSeams
 import com.guardcore.engine.detection.PatternCompiler
-import com.guardcore.engine.py.PyRe
 import com.guardcore.engine.py.PyReFlags
 import com.guardcore.engine.suspatterns.SusPatternsManager
 import com.guardcore.errors.ConfigValidationError
@@ -73,9 +72,9 @@ public object DetectionEngineWiring {
         val matches =
             try {
               val compiled = compiler.compilePattern(pattern, PyReFlags.DEFAULT)
+              // Long.MAX_VALUE is the engine's no-deadline sentinel: DeadlineCharSequence
+              // never aborts under it (PyRe.kt), so no deadline arm exists here.
               compiled.finditer(subject, Long.MAX_VALUE)
-            } catch (e: PyRe.DeadlineExceededException) {
-              emptyList()
             } catch (e: Exception) {
               // python: create_async_safe_finditer_matcher swallows compile/match errors
               emptyList()

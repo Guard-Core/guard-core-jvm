@@ -41,16 +41,14 @@ public object LoggingUtils {
     while (i < sanitized.length) {
       val ch = sanitized[i]
       when {
-        // Python iterates code points; iterate the same way on the JVM.
+        // Python iterates code points; iterate the same way on the JVM. A surrogate
+        // pair always decodes above the BMP (code >= 0x10000), so the pair branch
+        // only ever takes the backslash-u arm.
         Character.isHighSurrogate(ch) &&
             i + 1 < sanitized.length &&
             Character.isLowSurrogate(sanitized[i + 1]) -> {
           val code = Character.toCodePoint(ch, sanitized[i + 1])
-          if (code in 32..126) {
-            out.appendCodePoint(code)
-          } else {
-            out.append("\\u").append(code.toString(16).padStart(4, '0'))
-          }
+          out.append("\\u").append(code.toString(16).padStart(4, '0'))
           i += 2
         }
         else -> {
