@@ -59,7 +59,9 @@ private fun terminatorCharsAt(text: String, j: Int): Set<Char>? {
   val c = text[j]
   if (c == '[') {
     val end = skipCharClass(text, j)
-    val inner = text.substring(j + 1, end - 1)
+    // python text[j + 1 : end - 1] is "" when the slice is reversed (an
+    // unterminated class); substring would throw.
+    val inner = if (end >= j + 2) text.substring(j + 1, end - 1) else ""
     if (inner.startsWith("^") || inner.isEmpty()) return null
     return inner.toSet()
   }
@@ -76,7 +78,9 @@ private fun broadScanExcludedChars(pattern: String, i: Int): Pair<Int, Set<Char>
   val c = pattern[i]
   if (c == '.') return Pair(i + 1, emptySet())
   val j = skipCharClass(pattern, i)
-  val inner = pattern.substring(i + 1, j - 1)
+  // python pattern[i + 1 : j - 1] is "" when the slice is reversed (an
+  // unterminated class); substring would throw.
+  val inner = if (j >= i + 2) pattern.substring(i + 1, j - 1) else ""
   if (!inner.startsWith("^")) return Pair(j, null)
   return Pair(j, inner.substring(1).toSet())
 }
