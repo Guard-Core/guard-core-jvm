@@ -685,7 +685,11 @@ public object EventsHarness {
       }
       "redis_connect_error" -> {
         redisOpReset(harness)
-        val manager = RedisManager.getInstance(harness.redisOpConfig(EVENTS_REDIS_ERROR_URL))
+        // W9e test seam: step["error_redis_url"] redirects the error URL (the pinned corpus never
+        // sets it). Pointing it at a LIVE redis simulates the guard's failure scenario -
+        // initialize() succeeding where the corpus expects a connection failure.
+        val errorUrl = (step["error_redis_url"] as? String) ?: EVENTS_REDIS_ERROR_URL
+        val manager = RedisManager.getInstance(harness.redisOpConfig(errorUrl))
         manager.initializeAgent(harness.agent)
         try {
           manager.initialize()
@@ -710,6 +714,11 @@ public object EventsHarness {
           manager.checkRateLimit(
               request,
               step["client_ip"].toString(),
+              // W9e test seam: step["rate_limit"]/step["rate_limit_window"] pin the effective
+              // limit (the pinned corpus never sets them; null keeps the config default so the
+              // corpus replay is byte-identical).
+              rateLimit = (step["rate_limit"] as? Number)?.toInt(),
+              rateLimitWindow = (step["rate_limit_window"] as? Number)?.toInt(),
               createErrorResponse = { code: Int, message: String ->
                 harness.middleware.createErrorResponse(code, message)
               },
