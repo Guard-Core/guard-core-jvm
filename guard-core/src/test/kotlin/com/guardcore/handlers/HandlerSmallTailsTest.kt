@@ -276,11 +276,6 @@ public class HandlerSmallTailsTest {
     assertTrue(closeIfUnusable("non-null-connection", "client"))
   }
 
-  private class FakeHasClient {
-    @Suppress("unused")
-    val client: Any = object {}
-  }
-
   @Test
   fun testDetectionScanRedactionArms() {
     val redacted = DetectionScanRedaction.redactPatternSource("(?i)(password|secret)=[a-z]+")
