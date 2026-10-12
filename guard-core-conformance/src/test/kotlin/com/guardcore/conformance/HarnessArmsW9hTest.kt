@@ -1,10 +1,8 @@
 package com.guardcore.conformance
 
-import com.guardcore.handlers.BehaviorRule
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**

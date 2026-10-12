@@ -1,5 +1,6 @@
 package com.guardcore.config
 
+import com.guardcore.errors.ConfigValidationError
 import com.guardcore.protocols.GeoIPHandler
 import com.guardcore.protocols.GuardRequest
 import com.guardcore.protocols.RedisHandlerProtocol
@@ -10,10 +11,8 @@ import com.guardcore.util.PairRedaction
 import com.guardcore.util.RequestLogging
 import com.guardcore.util.py.IpNetwork
 import com.guardcore.util.py.PyJson
-import com.guardcore.errors.ConfigValidationError
 import com.guardcore.util.py.PyUrllib
 import com.guardcore.util.py.parseAddress
-import java.util.logging.Logger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -39,7 +38,9 @@ class ConfigUtilW9hTailsTest {
 
     override suspend fun initializeRedis(redisHandler: RedisHandlerProtocol) {}
 
-    override suspend fun initializeAgent(agentHandler: com.guardcore.protocols.AgentHandlerProtocol) {}
+    override suspend fun initializeAgent(
+        agentHandler: com.guardcore.protocols.AgentHandlerProtocol,
+    ) {}
 
     override suspend fun refresh() {}
 
@@ -124,8 +125,7 @@ class ConfigUtilW9hTailsTest {
             mapOf(
                 "exclude_paths" to listOf("/w9h"),
                 "dynamic_rules_cache_path" to java.nio.file.Path.of("/tmp/w9h-copy.json"),
-                "global_behavior_rules" to
-                    listOf(mapOf("rule_type" to "usage", "threshold" to 1)),
+                "global_behavior_rules" to listOf(mapOf("rule_type" to "usage", "threshold" to 1)),
             ),
         )
     assertEquals(listOf("/w9h"), copied.excludePaths)
@@ -134,8 +134,7 @@ class ConfigUtilW9hTailsTest {
     assertFailsWith<ConfigValidationError> {
       cfg.copyWith(
           mapOf(
-              "global_behavior_rules" to
-                  listOf(mapOf("rule_type" to 5)),
+              "global_behavior_rules" to listOf(mapOf("rule_type" to 5)),
           ),
       )
     }
@@ -255,10 +254,8 @@ class ConfigUtilW9hTailsTest {
             mapOf(
                 "ipinfo_db_path" to "/tmp/ok.mmdb",
                 "ipinfo_db_path" to java.nio.file.Path.of("/tmp/ok2.mmdb"),
-                "threat_ban_config" to
-                    mapOf("xss" to mapOf("threshold" to 5, "duration" to 60)),
-                "global_behavior_rules" to
-                    listOf(mapOf("rule_type" to "usage", "threshold" to 1)),
+                "threat_ban_config" to mapOf("xss" to mapOf("threshold" to 5, "duration" to 60)),
+                "global_behavior_rules" to listOf(mapOf("rule_type" to "usage", "threshold" to 1)),
                 "endpoint_rate_limits" to mapOf("/api" to listOf(5, 60)),
                 "custom_error_responses" to mapOf(404 to "not found"),
             ),
@@ -278,19 +275,26 @@ class ConfigUtilW9hTailsTest {
     override val clientHost: String? = "192.0.2.10"
     override val headers: Map<String, String> = headerMap
     override val queryParams: Map<String, String> = emptyMap()
-    override val state: RequestState = object : RequestState {
-      private val attrs = linkedMapOf<String, Any?>()
-      override fun getAttr(name: String): Any? = attrs[name]
-      override fun setAttr(name: String, value: Any?) {
-        attrs[name] = value
-      }
-    }
+    override val state: RequestState =
+        object : RequestState {
+          private val attrs = linkedMapOf<String, Any?>()
+
+          override fun getAttr(name: String): Any? = attrs[name]
+
+          override fun setAttr(name: String, value: Any?) {
+            attrs[name] = value
+          }
+        }
     override val scope: Map<String, Any?> = emptyMap()
+
     override fun urlReplaceScheme(scheme: String): String = "$scheme://example.com/api"
+
     override suspend fun body(): ByteArray = ByteArray(0)
   }
 
-  /** scanHeaders: the name and value always-scan arms (154-167) and the empty-category gate (174). */
+  /**
+   * scanHeaders: the name and value always-scan arms (154-167) and the empty-category gate (174).
+   */
   @Test
   fun `header scan detection and category gate arms`(): Unit = runBlocking {
     // The NAME carries the trigger (154-155).
@@ -426,7 +430,9 @@ class ConfigUtilW9hTailsTest {
     assertEquals("", split.scheme)
   }
 
-  /** PyDiffLib: the no-arg constructor (49) and the find-longest-match extension loops (129-144). */
+  /**
+   * PyDiffLib: the no-arg constructor (49) and the find-longest-match extension loops (129-144).
+   */
   @Test
   fun `py difflib matcher arms`() {
     val bare = com.guardcore.util.py.SequenceMatcher()
@@ -508,5 +514,6 @@ class ConfigUtilW9hTailsTest {
 
 /** Internal-surface access for the wiring test. */
 public object DetectionEngineWiringTestAccess {
-  public fun straddleProvider(): (() -> Int)? = com.guardcore.util.BodyReader.straddleOverlapBytesProvider
+  public fun straddleProvider(): (() -> Int)? =
+      com.guardcore.util.BodyReader.straddleOverlapBytesProvider
 }

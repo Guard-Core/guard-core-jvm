@@ -2,9 +2,9 @@ package com.guardcore.handlers
 
 import com.guardcore.config.ConfigSeams
 import com.guardcore.config.SecurityConfigBuilder
-import com.guardcore.errors.GuardRedisError
 import com.guardcore.core.TestRequest
 import com.guardcore.engine.suspatterns.SusPatternsManager
+import com.guardcore.errors.GuardRedisError
 import com.guardcore.protocols.GuardRedisConnection
 import com.guardcore.protocols.GuardResponse
 import com.guardcore.protocols.RedisHandlerProtocol
@@ -160,7 +160,12 @@ class HandlersW9hTailsTest {
             },
         ),
     )
-    manager.currentRules = DynamicRules(ruleId = "r2", version = 2, timestamp = java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC))
+    manager.currentRules =
+        DynamicRules(
+            ruleId = "r2",
+            version = 2,
+            timestamp = java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC),
+        )
     assertNull(
         manager.matchEvent(
             object : DynamicRuleEvent {
@@ -342,8 +347,7 @@ class HandlersW9hTailsTest {
     val savedRedis = cloud.redisHandler
     cloud.redisHandler = null
     fetchProviderRangesOverride = { _ ->
-      setOf(com.guardcore.util.py.IpNetwork.parse("10.0.0.0/8")) to
-          mapOf("10.0.0.0/8" to "us-east")
+      setOf(com.guardcore.util.py.IpNetwork.parse("10.0.0.0/8")) to mapOf("10.0.0.0/8" to "us-east")
     }
     try {
       assertTrue(cloud.scheduleRefresh(providers = setOf("AWS"), ttl = 60))
@@ -510,8 +514,7 @@ class HandlersW9hTailsTest {
       if (url.endsWith(".json")) {
         200 to badPrefix.toString()
       } else {
-        200 to
-            "<html><a href=\"https://download.microsoft.com/servicetags/x.json\">dl</a></html>"
+        200 to "<html><a href=\"https://download.microsoft.com/servicetags/x.json\">dl</a></html>"
       }
     }
     try {
@@ -798,7 +801,9 @@ class HandlersW9hTailsTest {
     val manager = IpInfoManager.getInstance("w9h-rc", dbPath, 60)
     try {
       manager.redisHandler = ThrowingRedis()
-      manager.httpSendOverride = { url, _ -> fakeNetResponse(url, 200, "not an mmdb".toByteArray()) }
+      manager.httpSendOverride = { url, _ ->
+        fakeNetResponse(url, 200, "not an mmdb".toByteArray())
+      }
       manager.downloadDatabase()
       assertTrue(Files.exists(dbPath))
     } finally {
@@ -850,7 +855,8 @@ class HandlersW9hTailsTest {
   }
 
   private fun fixture(): java.nio.file.Path =
-      java.nio.file.Paths.get("src/test/resources/maxmind/GeoIP2-Country-Test.mmdb").toAbsolutePath()
+      java.nio.file.Paths.get("src/test/resources/maxmind/GeoIP2-Country-Test.mmdb")
+          .toAbsolutePath()
 
   // ------------------------------------------------------------------ RedisManager
 
@@ -912,10 +918,10 @@ class HandlersW9hTailsTest {
           kotlinx.coroutines.withTimeout(10_000) {
             kotlinx.coroutines.runBlocking {
               runCatching {
-                  operations.transaction { tx ->
-                    tx.zadd("w9h:string-key", 1.0, "member")
-                    tx.zcard("w9h:string-key")
-                  }
+                operations.transaction { tx ->
+                  tx.zadd("w9h:string-key", 1.0, "member")
+                  tx.zcard("w9h:string-key")
+                }
               }
             }
           }
@@ -983,11 +989,10 @@ class HandlersW9hTailsTest {
         )
     live.initialize()
     RateLimitManager.resetInstance()
-    val cfg =
-        config {
-          enableRedis = true
-          redisUrl = "redis://localhost:6379/0"
-        }
+    val cfg = config {
+      enableRedis = true
+      redisUrl = "redis://localhost:6379/0"
+    }
     val manager = RateLimitManager.getInstance(cfg)
     manager.redisHandler = live
     // Seed at least one rate-limit key through the module entry over the live handler.
@@ -1258,21 +1263,24 @@ class HandlersW9hTailsTest {
     assertFailsWith<IllegalArgumentException> {
       loadLastKnownRulesSnapshot(
           """{"schema_version": 1, "rules": {"timestamp": "2026-01-01T00:00:00+00:00",
-             "rule_id": []}}""".replace("\n", " "),
+             "rule_id": []}}"""
+              .replace("\n", " "),
       )
     }
     // A non-primitive version takes the intOf-else throw (218).
     assertFailsWith<IllegalArgumentException> {
       loadLastKnownRulesSnapshot(
           """{"schema_version": 1, "rules": {"timestamp": "2026-01-01T00:00:00+00:00",
-             "rule_id": "x", "version": []}}""".replace("\n", " "),
+             "rule_id": "x", "version": []}}"""
+              .replace("\n", " "),
       )
     }
     // An explicit null boolean parses through the JsonNull arm (228) to the default.
     val rules =
         loadLastKnownRulesSnapshot(
             """{"schema_version": 1, "rules": {"timestamp": "2026-01-01T00:00:00+00:00",
-               "rule_id": "x", "version": 1, "emergency_mode": null}}""".replace("\n", " "),
+               "rule_id": "x", "version": 1, "emergency_mode": null}}"""
+                .replace("\n", " "),
         )
     assertFalse(rules.emergencyMode)
   }
@@ -1353,7 +1361,8 @@ class HandlersW9hTailsTest {
     IpBanManager.resetInstance()
     val manager = IpBanManager.getInstance()
     manager.initializeBanRedis(null)
-    val tracker = BehaviorTracker(config { logSuspiciousLevel = com.guardcore.config.LogLevel.WARNING })
+    val tracker =
+        BehaviorTracker(config { logSuspiciousLevel = com.guardcore.config.LogLevel.WARNING })
     val rule = BehaviorRule(ruleType = "usage", threshold = 1, banDuration = 99)
     val result = tracker.executeBanAction("198.51.100.9", "details", rule)
     assertTrue(result.isNotEmpty())
@@ -1366,8 +1375,7 @@ class HandlersW9hTailsTest {
   /** PyJsonDumps: the control-char and ensureAscii escape arms (51). */
   @Test
   fun `py json dumps escapes control and high chars`() {
-    val payload =
-        PyJsonDumps.dumps(kotlinx.serialization.json.JsonPrimitive("\u0001\u00e9"))
+    val payload = PyJsonDumps.dumps(kotlinx.serialization.json.JsonPrimitive("\u0001\u00e9"))
     assertTrue(payload.contains("\\u0001"))
     assertTrue(payload.contains("é"))
   }

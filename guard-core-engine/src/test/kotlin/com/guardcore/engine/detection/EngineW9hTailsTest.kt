@@ -71,7 +71,10 @@ class EngineW9hTailsTest {
     val content = "eval(1);".repeat(4000)
     val truncated = truncateSafely(preprocessor, content)
     assertTrue(truncated.isNotEmpty())
-    assertTrue(com.guardcore.engine.py.PyUnicode.cpLength(truncated) <= preprocessor.maxFullScanBytes + 512)
+    assertTrue(
+        com.guardcore.engine.py.PyUnicode.cpLength(truncated) <=
+            preprocessor.maxFullScanBytes + 512,
+    )
   }
 
   /** UnreachableTerminator: the class and escape terminator arms (61, 64-66). */
@@ -152,8 +155,7 @@ class EngineW9hTailsTest {
   @Test
   fun `base64 decode printable and fragment arms`() {
     // A long run of bytes that are valid UTF-8 but non-printable (168).
-    val nonPrintable =
-        java.util.Base64.getEncoder().encodeToString(ByteArray(30) { 0x01 })
+    val nonPrintable = java.util.Base64.getEncoder().encodeToString(ByteArray(30) { 0x01 })
     val hits = Base64Decode.decodeBase64Candidates("prefix $nonPrintable suffix")
     assertNotNull(hits)
     // A long run decoding to printable text appends the reassembly (219).
@@ -206,7 +208,10 @@ class EngineW9hTailsTest {
     }
   }
 
-  /** SusPatternsManager: the plain-detect url-decoded view build (814-816) + candidate rejects (215, 550-555). */
+  /**
+   * SusPatternsManager: the plain-detect url-decoded view build (814-816) + candidate rejects (215,
+   * 550-555).
+   */
   @Test
   fun `detect builds the url decoded view and rejects benign candidates`() = {
     val engine = SusPatternsManager.shared()

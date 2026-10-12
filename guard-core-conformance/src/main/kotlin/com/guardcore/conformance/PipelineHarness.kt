@@ -7,7 +7,6 @@ import com.guardcore.config.RuleType
 import com.guardcore.config.SecurityConfig
 import com.guardcore.config.SecurityConfigBuilder
 import com.guardcore.core.behavioral.BehavioralContext
-import com.guardcore.handlers.BehaviorRule
 import com.guardcore.core.behavioral.BehavioralProcessor
 import com.guardcore.core.checks.ChecksFactory
 import com.guardcore.core.checks.SecurityCheckPipeline
@@ -16,6 +15,7 @@ import com.guardcore.core.responses.ErrorResponseFactory
 import com.guardcore.core.responses.ResponseContext
 import com.guardcore.decorators.RouteConfig
 import com.guardcore.decorators.RouteConfigRevision
+import com.guardcore.handlers.BehaviorRule
 import com.guardcore.handlers.BehaviorTracker
 import com.guardcore.handlers.RateLimitManager
 import com.guardcore.handlers.SecurityHeadersManager

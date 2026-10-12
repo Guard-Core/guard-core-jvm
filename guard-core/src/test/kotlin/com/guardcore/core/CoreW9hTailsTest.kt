@@ -5,7 +5,6 @@ import com.guardcore.config.SecurityConfigBuilder
 import com.guardcore.config.ThreatBanConfig
 import com.guardcore.core.behavioral.BehavioralContext
 import com.guardcore.core.behavioral.BehavioralProcessor
-import com.guardcore.core.events.AgentTelemetryMember
 import com.guardcore.core.events.EnrichmentContext
 import com.guardcore.core.events.EventEnricher
 import com.guardcore.core.events.EventFilter
@@ -20,8 +19,8 @@ import com.guardcore.decorators.RouteConfig
 import com.guardcore.handlers.BehaviorRule
 import com.guardcore.handlers.BehaviorTracker
 import com.guardcore.handlers.CloudManager
-import com.guardcore.handlers.DynamicRules
 import com.guardcore.handlers.DynamicRuleManager
+import com.guardcore.handlers.DynamicRules
 import com.guardcore.handlers.IpBanManager
 import com.guardcore.protocols.AgentHandlerProtocol
 import com.guardcore.protocols.GeoIPHandler
@@ -179,11 +178,14 @@ class CoreW9hTailsTest {
   @Test
   fun `initializer composite sinks forward to the composite`(): Unit = runBlocking {
     IpBanManager.resetInstance()
-    val mw = middleware(apply = {
-          enableEnrichment = true
-          enableAgent = true
-          agentApiKey = "w9h"
-        })
+    val mw =
+        middleware(
+            apply = {
+              enableEnrichment = true
+              enableAgent = true
+              agentApiKey = "w9h"
+            },
+        )
     val initializer =
         HandlerInitializer(config = mw.config, redisHandler = null, agentHandler = emptyAgent())
     try {
@@ -217,14 +219,15 @@ class CoreW9hTailsTest {
     }
     val mw = middleware(apply = { blockCloudProviders = setOf("AWS") })
     val geo = RecordingGeo("US").apply { throwOnInitializeRedis = true }
-    val initializer =
-        HandlerInitializer(config = mw.config, redisHandler = mw, geoIpHandler = geo)
+    val initializer = HandlerInitializer(config = mw.config, redisHandler = mw, geoIpHandler = geo)
     initializer.runLazyInit()
     com.guardcore.handlers.fetchProviderRangesOverride = null
     CloudManager.resetInstance()
   }
 
-  /** resolveCloudIpStore's factory and junk arms (256-258, 260) + the no-redis loader (285, 288). */
+  /**
+   * resolveCloudIpStore's factory and junk arms (256-258, 260) + the no-redis loader (285, 288).
+   */
   @Test
   fun `cloud ip store resolution arms`(): Unit = runBlocking {
     CloudManager.resetInstance()
@@ -256,11 +259,14 @@ class CoreW9hTailsTest {
   @Test
   fun `initializer wires the geo agent protocol`(): Unit = runBlocking {
     IpBanManager.resetInstance()
-    val mw = middleware(apply = {
-          enableEnrichment = true
-          enableAgent = true
-          agentApiKey = "w9h"
-        })
+    val mw =
+        middleware(
+            apply = {
+              enableEnrichment = true
+              enableAgent = true
+              agentApiKey = "w9h"
+            },
+        )
     val geo = RecordingGeo("US")
     val initializer =
         HandlerInitializer(config = mw.config, redisHandler = null, geoIpHandler = geo)
@@ -282,13 +288,14 @@ class CoreW9hTailsTest {
   @Test
   fun `initializer wires dynamic rule telemetry`(): Unit = runBlocking {
     IpBanManager.resetInstance()
-    val mw = middleware(
-        apply = {
-          enableDynamicRules = true
-          enableAgent = true
-          agentApiKey = "w9h"
-        },
-    )
+    val mw =
+        middleware(
+            apply = {
+              enableDynamicRules = true
+              enableAgent = true
+              agentApiKey = "w9h"
+            },
+        )
     val initializer =
         HandlerInitializer(config = mw.config, redisHandler = null, agentHandler = emptyAgent())
     try {
@@ -380,8 +387,7 @@ class CoreW9hTailsTest {
     behaving.enrichEvent(event5)
 
     // The tolerance arms: a polluted tracker bag and a read-only metric bag (99-100, 109-110).
-    @Suppress("UNCHECKED_CAST")
-    val polluted = tracker.usageCounts as MutableMap<String, Any>
+    @Suppress("UNCHECKED_CAST") val polluted = tracker.usageCounts as MutableMap<String, Any>
     polluted["/e"] = "garbage"
     val event6 =
         linkedMapOf<String, Any?>(
@@ -396,7 +402,9 @@ class CoreW9hTailsTest {
 
   // ------------------------------------------------------------------ SecurityEventBus
 
-  /** The trace-header forwarding arm (54), the send-failure arm (132-133), and the sink (224-241). */
+  /**
+   * The trace-header forwarding arm (54), the send-failure arm (132-133), and the sink (224-241).
+   */
   @Test
   fun `event bus forwards trace headers and survives sink failures`(): Unit = runBlocking {
     val mw = middleware()
@@ -452,7 +460,9 @@ class CoreW9hTailsTest {
 
   // ------------------------------------------------------------------ BehavioralProcessor
 
-  /** The decorator-violation arm (130-139), the middleware default (27), and the counts arm (207). */
+  /**
+   * The decorator-violation arm (130-139), the middleware default (27), and the counts arm (207).
+   */
   @Test
   fun `behavioral processor decorator and middleware arms`(): Unit = runBlocking {
     val mw = middleware()
@@ -499,7 +509,10 @@ class CoreW9hTailsTest {
 
   // ------------------------------------------------------------------ Decorators
 
-  /** The decorator factory defaults and the honeypot parse arms (36, 171, 239-240, 329-349, 421, 437, 452). */
+  /**
+   * The decorator factory defaults and the honeypot parse arms (36, 171, 239-240, 329-349, 421,
+   * 437, 452).
+   */
   @Test
   fun `security decorator factory and honeypot arms`(): Unit = runBlocking {
     val decorator = com.guardcore.decorators.SecurityDecorator(config())
@@ -569,24 +582,29 @@ class CoreW9hTailsTest {
 
   // ------------------------------------------------------------------ Checks
 
-  /** RateLimitCheck: the geo-rate-limit arms (127, 231, 235), passive mode (145), and guards (299, 306). */
+  /**
+   * RateLimitCheck: the geo-rate-limit arms (127, 231, 235), passive mode (145), and guards (299,
+   * 306).
+   */
   @Test
   fun `rate limit check geo and guard arms`(): Unit = runBlocking {
     IpBanManager.resetInstance()
     val geo = RecordingGeo("US")
-    val mw = middleware(
-        apply = {
-          enableRateLimiting = true
-          geoIpHandler = geo
-        },
-        routes =
-            mapOf(
-                "/geo" to RouteConfig().apply { geoRateLimits = linkedMapOf("US" to (1 to 60)) },
-                "/geo-none" to
-                    RouteConfig().apply { geoRateLimits = linkedMapOf("CA" to (1 to 60)) },
-                "/bypass" to RouteConfig().apply { bypassedChecks.add("rate_limit") },
-            ),
-    )
+    val mw =
+        middleware(
+            apply = {
+              enableRateLimiting = true
+              geoIpHandler = geo
+            },
+            routes =
+                mapOf(
+                    "/geo" to
+                        RouteConfig().apply { geoRateLimits = linkedMapOf("US" to (1 to 60)) },
+                    "/geo-none" to
+                        RouteConfig().apply { geoRateLimits = linkedMapOf("CA" to (1 to 60)) },
+                    "/bypass" to RouteConfig().apply { bypassedChecks.add("rate_limit") },
+                ),
+        )
     val check = com.guardcore.core.checks.implementations.RateLimitCheck(mw)
     // The geo route with a matching country takes the geoRateLimits table (231) and the
     // endpoint-less apply call (127).
@@ -604,14 +622,15 @@ class CoreW9hTailsTest {
   @Test
   fun `rate limit check passive mode returns null`(): Unit = runBlocking {
     IpBanManager.resetInstance()
-    val mw = middleware(
-        apply = {
-          enableRateLimiting = true
-          passiveMode = true
-          rateLimit = 1
-          rateLimitWindow = 60
-        },
-    )
+    val mw =
+        middleware(
+            apply = {
+              enableRateLimiting = true
+              passiveMode = true
+              rateLimit = 1
+              rateLimitWindow = 60
+            },
+        )
     val check = com.guardcore.core.checks.implementations.RateLimitCheck(mw)
     val route = RouteConfig()
     check.check(requestWithRoute(route))
@@ -625,15 +644,16 @@ class CoreW9hTailsTest {
     val savedOverride = cloud.isCloudIpOverride
     cloud.isCloudIpOverride = { _, _ -> false }
     try {
-      val mw = middleware(
-          apply = {},
-          routes =
-              mapOf(
-                  "/bypass" to RouteConfig().apply { bypassedChecks.add("clouds") },
-                  "/providers" to
-                      RouteConfig().apply { blockCloudProviders = linkedSetOf("AWS") },
-              ),
-      )
+      val mw =
+          middleware(
+              apply = {},
+              routes =
+                  mapOf(
+                      "/bypass" to RouteConfig().apply { bypassedChecks.add("clouds") },
+                      "/providers" to
+                          RouteConfig().apply { blockCloudProviders = linkedSetOf("AWS") },
+                  ),
+          )
       val check = com.guardcore.core.checks.implementations.CloudProviderCheck(mw)
       assertNull(check.check(requestWithRoute(routeOf(mw, "/bypass"), path = "/bypass")))
       assertNull(check.check(requestWithRoute(routeOf(mw, "/providers"), path = "/providers")))
@@ -662,14 +682,16 @@ class CoreW9hTailsTest {
   /** RequiredHeadersCheck: the authorization and plain violation reasons (20-21, 23). */
   @Test
   fun `required headers violation reasons`(): Unit = runBlocking {
-    val mw = middleware(
-        apply = {},
-        routes =
-            mapOf(
-                "/auth" to RouteConfig().apply { requiredHeaders["Authorization"] = "required" },
-                "/key" to RouteConfig().apply { requiredHeaders["X-Api-Key"] = "required" },
-            ),
-    )
+    val mw =
+        middleware(
+            apply = {},
+            routes =
+                mapOf(
+                    "/auth" to
+                        RouteConfig().apply { requiredHeaders["Authorization"] = "required" },
+                    "/key" to RouteConfig().apply { requiredHeaders["X-Api-Key"] = "required" },
+                ),
+        )
     val check = com.guardcore.core.checks.implementations.RequiredHeadersCheck(mw)
     val authBlocked = check.check(requestWithRoute(routeOf(mw, "/auth"), path = "/auth"))
     assertNotNull(authBlocked)
@@ -689,13 +711,14 @@ class CoreW9hTailsTest {
   @Test
   fun `suspicious activity banned arm over threshold counts`(): Unit = runBlocking {
     IpBanManager.resetInstance()
-    val mw = middleware(
-        apply = {
-          enableIpBanning = true
-          autoBanThreshold = 1
-          threatBanConfig = mapOf<String, ThreatBanConfig>("xss" to ThreatBanConfig(1, 60))
-        },
-    )
+    val mw =
+        middleware(
+            apply = {
+              enableIpBanning = true
+              autoBanThreshold = 1
+              threatBanConfig = mapOf<String, ThreatBanConfig>("xss" to ThreatBanConfig(1, 60))
+            },
+        )
     val check = com.guardcore.core.checks.implementations.SuspiciousActivityCheck(mw)
     // Seed the ip's category counts past the threshold and the cached detection result
     // with a matching threat, so the active-mode ban resolves (89).
@@ -739,10 +762,11 @@ class CoreW9hTailsTest {
   /** AuthenticationCheck's unsupported-verifier arm (132). */
   @Test
   fun `authentication check rejects unsupported verifier`(): Unit = runBlocking {
-    val mw = middleware(
-        apply = {},
-        routes = mapOf("/api" to RouteConfig().apply { authRequired = "basic" }),
-    )
+    val mw =
+        middleware(
+            apply = {},
+            routes = mapOf("/api" to RouteConfig().apply { authRequired = "basic" }),
+        )
     val check = com.guardcore.core.checks.implementations.AuthenticationCheck(mw)
     val request =
         requestWithRoute(
@@ -757,14 +781,15 @@ class CoreW9hTailsTest {
   /** HttpsEnforcementCheck's proxy-CIDR arm (51) and the missing-factory throw (61-62). */
   @Test
   fun `https enforcement proxy and factory arms`(): Unit = runBlocking {
-    val mw = middleware(
-        apply = {
-          enforceHttps = true
-          trustXForwardedProto = true
-          trustedProxies = listOf("10.0.0.0/8")
-        },
-        routes = mapOf("/api" to RouteConfig().apply { requireHttps = true }),
-    )
+    val mw =
+        middleware(
+            apply = {
+              enforceHttps = true
+              trustXForwardedProto = true
+              trustedProxies = listOf("10.0.0.0/8")
+            },
+            routes = mapOf("/api" to RouteConfig().apply { requireHttps = true }),
+        )
     val check = com.guardcore.core.checks.implementations.HttpsEnforcementCheck(mw)
     // A request over a trusted proxy with a forwarded proto resolves https (51).
     val forwarded =
@@ -837,10 +862,11 @@ class CoreW9hTailsTest {
   /** RequestSizeContentCheck's within-limit arm (37). */
   @Test
   fun `request size within limit passes`(): Unit = runBlocking {
-    val mw = middleware(
-        apply = {},
-        routes = mapOf("/api" to RouteConfig().apply { maxRequestSize = 1000 }),
-    )
+    val mw =
+        middleware(
+            apply = {},
+            routes = mapOf("/api" to RouteConfig().apply { maxRequestSize = 1000 }),
+        )
     val check = com.guardcore.core.checks.implementations.RequestSizeContentCheck(mw)
     assertNull(
         check.check(
@@ -1000,7 +1026,10 @@ class CoreW9hTailsTest {
     assertTrue(tracked.containsAll(listOf("AWS")))
   }
 
-  /** RequestValidator: the logger surface (35), the proxy-equality arm (68-69), and the wrap window (90). */
+  /**
+   * RequestValidator: the logger surface (35), the proxy-equality arm (68-69), and the wrap window
+   * (90).
+   */
   @Test
   fun `request validator proxy and time window arms`(): Unit = runBlocking {
     val mw = middleware(apply = { trustedProxies = listOf("192.0.2.10") })
@@ -1072,7 +1101,8 @@ class CoreW9hTailsTest {
     com.guardcore.handlers.HandlerSeams.register()
     val geo = ConfigSeamsHolder.geoIpHandlerFactory?.invoke("w9h-token", null, 3600)
     assertNotNull(geo)
-    val details = com.guardcore.util.AccessControl.cloudIpChecker?.invoke("203.0.113.1", setOf("AWS"))
+    val details =
+        com.guardcore.util.AccessControl.cloudIpChecker?.invoke("203.0.113.1", setOf("AWS"))
     assertNull(details)
   }
 
