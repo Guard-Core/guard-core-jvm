@@ -1,19 +1,14 @@
 package com.guardcore.decorators
 
-import com.guardcore.config.SecurityConfig
 import com.guardcore.config.SecurityConfigBuilder
-import com.guardcore.core.TestMiddleware
-import com.guardcore.core.TestRequest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
- * W9c arm closure for the decorators package: the RouteConfig tracked containers (revision bumps
- * on every mutation), the StampedRoute tails, and the SecurityDecorator factory surfaces.
+ * W9c arm closure for the decorators package: the RouteConfig tracked containers (revision bumps on
+ * every mutation), the StampedRoute tails, and the SecurityDecorator factory surfaces.
  */
 class RouteConfigTrackedTest {
   @Test
@@ -87,7 +82,8 @@ class SecurityDecoratorW9cTest {
   fun testEveryFactorySurface() {
     // Route ids derive from the caller chain (the W4b collision study), so each factory gets a
     // fresh decorator and the assertion reads the live map immediately after the call.
-    fun fresh(): SecurityDecorator = SecurityDecorator(SecurityConfigBuilder().apply { behaviorScanResponseBody = true }.build())
+    fun fresh(): SecurityDecorator =
+        SecurityDecorator(SecurityConfigBuilder().apply { behaviorScanResponseBody = true }.build())
 
     var d = fresh()
     d.blockCountries("w9c", listOf("gb"))
@@ -127,7 +123,10 @@ class SecurityDecoratorW9cTest {
     assertTrue(d.getRouteConfigs().values.isNotEmpty())
 
     d = fresh()
-    d.behaviorAnalysis("w9c", listOf(com.guardcore.handlers.BehaviorRule(ruleType = "usage", threshold = 3)))
+    d.behaviorAnalysis(
+        "w9c",
+        listOf(com.guardcore.handlers.BehaviorRule(ruleType = "usage", threshold = 3)),
+    )
     assertTrue(d.getRouteConfigs().values.isNotEmpty())
 
     d = fresh()

@@ -1,10 +1,9 @@
 package com.guardcore.config
 
-import com.guardcore.config.ConfigSeams
 import com.guardcore.errors.ConfigValidationError
+import com.guardcore.protocols.AgentHandlerProtocol
 import com.guardcore.protocols.GeoIPHandler
 import com.guardcore.protocols.RedisHandlerProtocol
-import com.guardcore.protocols.AgentHandlerProtocol
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -18,11 +17,17 @@ import kotlin.test.assertTrue
  */
 private class FakeGeo : GeoIPHandler {
   override val isInitialized: Boolean = false
+
   override suspend fun initialize() {}
+
   override suspend fun initializeRedis(redisHandler: RedisHandlerProtocol) {}
+
   override suspend fun initializeAgent(agentHandler: AgentHandlerProtocol) {}
+
   override fun getCountry(ip: String): String? = "US"
+
   override suspend fun refresh() {}
+
   override fun close() {}
 }
 
@@ -192,7 +197,10 @@ class CopyWithRevalidateTest {
     ConfigSeams.geoIpHandlerFactory = { _, _, _ -> FakeGeo() }
     try {
       val copied =
-          config().copyWith(mapOf("whitelist_countries" to setOf("US"), "blocked_countries" to setOf("GB")))
+          config()
+              .copyWith(
+                  mapOf("whitelist_countries" to setOf("US"), "blocked_countries" to setOf("GB")),
+              )
       assertEquals(setOf("US"), copied.whitelistCountries)
       assertEquals(setOf("GB"), copied.blockedCountries)
     } finally {
@@ -229,8 +237,7 @@ class CopyWithRevalidateTest {
   @Test
   fun testValueByNameReadsFields() {
     val c = config()
-    val method =
-        SecurityConfig::class.java.declaredMethods.firstOrNull { it.name == "valueByName" }
+    val method = SecurityConfig::class.java.declaredMethods.firstOrNull { it.name == "valueByName" }
     if (method != null) {
       method.isAccessible = true
       val args = arrayOfNulls<Any?>(method.parameterCount)
@@ -243,7 +250,10 @@ class CopyWithRevalidateTest {
 
 /** Reflection-free access to the internal assign/value-by-name surfaces via a subclass shim. */
 private fun SecurityConfig.callAssignByName(name: String, value: Any?) {
-  val method = SecurityConfig::class.java.getDeclaredMethod("assignByName", String::class.java, Any::class.java)
+  val method =
+      SecurityConfig::class
+          .java
+          .getDeclaredMethod("assignByName", String::class.java, Any::class.java)
   method.isAccessible = true
   try {
     method.invoke(this, name, value)
@@ -251,8 +261,6 @@ private fun SecurityConfig.callAssignByName(name: String, value: Any?) {
     throw e.cause!!
   }
 }
-
-
 
 class RuleConfigsW9cTest {
   @Test

@@ -2,8 +2,8 @@ package com.guardcore.engine.suspatterns
 
 import com.guardcore.engine.detection.PatternValidationCache
 import com.guardcore.engine.py.PyRe
-import com.guardcore.engine.py.PyRePattern
 import com.guardcore.engine.py.PyReFlags
+import com.guardcore.engine.py.PyRePattern
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -76,7 +76,12 @@ class XmlXxeW9cTest {
     val bounds12 = listOf(0, good.length - 1)
     assertNull(
         SusPatternsXmlXxe.candidateSpan(
-            listOf(good.length), pre.quotePositions, pre.quoteToFinalGt, bounds12, 5, good.length,
+            listOf(good.length),
+            pre.quotePositions,
+            pre.quoteToFinalGt,
+            bounds12,
+            5,
+            good.length,
         ),
     )
     // publicRunBounds: boundaries around the public keyword.
@@ -225,7 +230,8 @@ class FileUploadW9cTest {
     val jinja = "{{ eval}}"
     val keywordCompiled = PyRe.compile(TEMPLATE_CURLY_KEYWORD_RE, PyReFlags.IGNORECASE)
     val keyword = SusPatternsTemplates.templateKeywordMatches(jinja, keywordCompiled, "{{", "}}")
-    val expr = SusPatternsTemplates.templateExpressionMatches("{{ eval()}}", compiledCall(), "curly")
+    val expr =
+        SusPatternsTemplates.templateExpressionMatches("{{ eval()}}", compiledCall(), "curly")
     assertTrue(keyword.isNotEmpty() || expr.isNotEmpty(), "curly template shapes must match")
     // The other template kinds flow through the same region walker.
     val asp = "<% eval(x) %>"
@@ -239,8 +245,7 @@ class FileUploadW9cTest {
   private fun compiledJinja(): PyRePattern =
       PyRe.compile("(?:eval|exec|system|config)\\s*\\(", PyReFlags.IGNORECASE)
 
-  private fun compiledCall(): PyRePattern =
-      PyRe.compile("[^}]*\\([^)]*\\)", PyReFlags.IGNORECASE)
+  private fun compiledCall(): PyRePattern = PyRe.compile("[^}]*\\([^)]*\\)", PyReFlags.IGNORECASE)
 }
 
 class MatchersW9cTest {
@@ -251,9 +256,19 @@ class MatchersW9cTest {
         ldapNullByteAttrFinditer(text, LDAP_NULL_BYTE_ATTR_COMPILED_RE, LDAP_NULL_BYTE_TAIL_RE)
     assertEquals(1, matches.size)
     // No star/paren: empty.
-    assertEquals(emptyList<com.guardcore.engine.py.PyReMatch>(), ldapNullByteAttrFinditer("plain", LDAP_NULL_BYTE_ATTR_COMPILED_RE, LDAP_NULL_BYTE_TAIL_RE))
+    assertEquals(
+        emptyList<com.guardcore.engine.py.PyReMatch>(),
+        ldapNullByteAttrFinditer("plain", LDAP_NULL_BYTE_ATTR_COMPILED_RE, LDAP_NULL_BYTE_TAIL_RE),
+    )
     // Missing '=' before the null byte tail: skipped.
-    assertEquals(emptyList<com.guardcore.engine.py.PyReMatch>(), ldapNullByteAttrFinditer("admin*)(%00", LDAP_NULL_BYTE_ATTR_COMPILED_RE, LDAP_NULL_BYTE_TAIL_RE))
+    assertEquals(
+        emptyList<com.guardcore.engine.py.PyReMatch>(),
+        ldapNullByteAttrFinditer(
+            "admin*)(%00",
+            LDAP_NULL_BYTE_ATTR_COMPILED_RE,
+            LDAP_NULL_BYTE_TAIL_RE,
+        ),
+    )
   }
 
   @Test

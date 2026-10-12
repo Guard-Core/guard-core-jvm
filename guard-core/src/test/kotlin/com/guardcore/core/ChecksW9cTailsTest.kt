@@ -1,6 +1,5 @@
 package com.guardcore.core
 
-import com.guardcore.config.SecurityConfig
 import com.guardcore.config.SecurityConfigBuilder
 import com.guardcore.core.checks.implementations.EmergencyModeCheck
 import com.guardcore.core.checks.implementations.HttpsEnforcementCheck
@@ -54,10 +53,9 @@ class ChecksW9cTailsTest {
     assertNotNull(blocked)
     assertEquals(413, blocked.statusCode)
     // Garbage content length propagates as the python ValueError -> block surface.
-    val garbage =
-        runCatching {
-          check.check(requestWithRoute(bigRoute, headers = mapOf("Content-Length" to "abc")))
-        }
+    val garbage = runCatching {
+      check.check(requestWithRoute(bigRoute, headers = mapOf("Content-Length" to "abc")))
+    }
     assertTrue(garbage.isFailure || garbage.getOrNull() != null || true)
     // Content-type allowlist mismatch.
     val typeRoute = RouteConfig().apply { allowedContentTypes = listOf("application/json") }
@@ -67,7 +65,10 @@ class ChecksW9cTailsTest {
     // Matching type passes.
     val rightType =
         check.check(
-            requestWithRoute(typeRoute, headers = mapOf("Content-Type" to "application/json; charset=utf-8")),
+            requestWithRoute(
+                typeRoute,
+                headers = mapOf("Content-Type" to "application/json; charset=utf-8"),
+            ),
         )
     assertNull(rightType)
   }
@@ -76,11 +77,10 @@ class ChecksW9cTailsTest {
   fun testEmergencyModeArms() = runBlocking {
     val off = middleware()
     assertNull(EmergencyModeCheck(off).check(TestRequest()))
-    val on =
-        middleware {
-          emergencyMode = true
-          emergencyWhitelist = listOf("192.0.2.10")
-        }
+    val on = middleware {
+      emergencyMode = true
+      emergencyWhitelist = listOf("192.0.2.10")
+    }
     // Whitelisted IP passes through with the info log.
     val whitelisted = TestRequest(clientHost = "192.0.2.10")
     whitelisted.state.setAttr("client_ip", "192.0.2.10")
@@ -92,12 +92,11 @@ class ChecksW9cTailsTest {
     assertNotNull(blocked)
     assertEquals(503, blocked.statusCode)
     // Passive mode logs only.
-    val passive =
-        middleware {
-          emergencyMode = true
-          emergencyWhitelist = listOf("192.0.2.10")
-          passiveMode = true
-        }
+    val passive = middleware {
+      emergencyMode = true
+      emergencyWhitelist = listOf("192.0.2.10")
+      passiveMode = true
+    }
     val logged = EmergencyModeCheck(passive).check(stranger)
     assertNull(logged)
   }
@@ -114,28 +113,29 @@ class ChecksW9cTailsTest {
     // Already https -> null.
     assertNull(check.check(TestRequest(urlScheme = "https")))
     // Forwarded proto honored from a trusted proxy.
-    val trusting =
-        middleware {
-          enforceHttps = true
-          trustXForwardedProto = true
-          trustedProxies = listOf("192.0.2.0/24")
-        }
+    val trusting = middleware {
+      enforceHttps = true
+      trustXForwardedProto = true
+      trustedProxies = listOf("192.0.2.0/24")
+    }
     val forwarded =
-        HttpsEnforcementCheck(trusting).check(
-            TestRequest(
-                clientHost = "192.0.2.9",
-                headers = mapOf("X-Forwarded-Proto" to "https"),
-            ),
-        )
+        HttpsEnforcementCheck(trusting)
+            .check(
+                TestRequest(
+                    clientHost = "192.0.2.9",
+                    headers = mapOf("X-Forwarded-Proto" to "https"),
+                ),
+            )
     assertNull(forwarded)
     // Untrusted proxy: still redirected.
     val untrusted =
-        HttpsEnforcementCheck(trusting).check(
-            TestRequest(
-                clientHost = "203.0.113.9",
-                headers = mapOf("X-Forwarded-Proto" to "https"),
-            ),
-        )
+        HttpsEnforcementCheck(trusting)
+            .check(
+                TestRequest(
+                    clientHost = "203.0.113.9",
+                    headers = mapOf("X-Forwarded-Proto" to "https"),
+                ),
+            )
     assertNotNull(untrusted)
   }
 

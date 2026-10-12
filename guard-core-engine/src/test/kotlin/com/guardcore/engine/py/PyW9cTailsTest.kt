@@ -288,7 +288,8 @@ class PyReW9cTailsTest {
 }
 
 class PyReParserW9cTailsTest {
-  private fun parse(pattern: String, flags: Int = 0): ParsedPattern = PyReParser.parse(pattern, flags)
+  private fun parse(pattern: String, flags: Int = 0): ParsedPattern =
+      PyReParser.parse(pattern, flags)
 
   private fun classItems(parsed: ParsedPattern): List<ReNode> = parsed.data[0].av as List<ReNode>
 

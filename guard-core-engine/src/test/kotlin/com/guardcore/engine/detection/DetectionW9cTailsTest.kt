@@ -2,7 +2,6 @@ package com.guardcore.engine.detection
 
 import com.guardcore.engine.py.PyRe
 import com.guardcore.engine.py.PyReFlags
-import com.guardcore.engine.py.PyReParser
 import com.guardcore.engine.py.PyUnicode
 import com.guardcore.engine.py.ReCategory
 import com.guardcore.engine.py.ReNode
@@ -37,7 +36,15 @@ class ParseSlotsW9cTest {
     val copy = atom.copy()
     assertEquals(atom, copy)
     assertEquals(atom.hashCode(), copy.hashCode())
-    val overridden = atom.copy(intervals = IntervalSet.single('x'.code), allowsZero = true, unbounded = false, maxRepeat = null, variableBounded = false, predicate = null)
+    val overridden =
+        atom.copy(
+            intervals = IntervalSet.single('x'.code),
+            allowsZero = true,
+            unbounded = false,
+            maxRepeat = null,
+            variableBounded = false,
+            predicate = null,
+        )
     assertTrue(atom != overridden)
     val set = HashSet<PairingAtom>()
     set.add(atom)
@@ -216,7 +223,10 @@ class ClassIntersectionW9cTest {
     classIntersectionProbeUnits("[ab]+(?:x[ab]y)[ab]*", 0)
     classIntersectionProbeUnits("[ab]+(?:(?:[ab]))[ab]+", 0)
     // The pinned finite-repeat shape.
-    assertEquals(listOf(Pair('a', '\u0000')), classIntersectionProbeUnits("a{2}a+", 0, includeBounded = true))
+    assertEquals(
+        listOf(Pair('a', '\u0000')),
+        classIntersectionProbeUnits("a{2}a+", 0, includeBounded = true),
+    )
   }
 
   @Test
@@ -257,7 +267,10 @@ class CostArbiterW9cTest {
   @Test
   fun testScaledDeadlineSecondsClamps() {
     assertTrue(scaledProbeDeadlineSeconds(1.0) > 0.0)
-    assertTrue(scaledProbeDeadlineSeconds(LOAD_FACTOR_CEILING) <= REACH_PROBE_DEADLINE_SCALE_CEILING_SECONDS)
+    assertTrue(
+        scaledProbeDeadlineSeconds(LOAD_FACTOR_CEILING) <=
+            REACH_PROBE_DEADLINE_SCALE_CEILING_SECONDS,
+    )
   }
 
   @Test
@@ -271,7 +284,10 @@ class CostArbiterW9cTest {
             null,
             System.nanoTime() + 1_000_000_000L,
         )
-    assertTrue(reason1!!.contains("timeout") || reason1.contains("timeout while measuring"), reason1)
+    assertTrue(
+        reason1!!.contains("timeout") || reason1.contains("timeout while measuring"),
+        reason1,
+    )
     // Expired deadline: builders list is sampled but the first timing row is invalid.
     val reason2 =
         firstOverBudgetReason(
@@ -300,7 +316,9 @@ class CostArbiterW9cTest {
     val samples = listOf(listOf(0.001, 0.002), listOf(0.002, 0.004, 0.003))
     val q = reachProbeVerdictFromSamples(samples, PATTERN_SAFETY_DEFAULT_CAP, 1.0)
     assertTrue(q.second > 0.0)
-    assertTrue(reachProbeCostReason(null, 1.0, 2.0, 1000, 0.1, 0.2, 1.0).contains("extrapolated CPU cost"))
+    assertTrue(
+        reachProbeCostReason(null, 1.0, 2.0, 1000, 0.1, 0.2, 1.0).contains("extrapolated CPU cost"),
+    )
     assertEquals("structural", reachProbeCostReason("structural", 1.0, 2.0, 1000, 0.1, 0.2))
     assertEquals("structural", reachProbeUnreachableReason("structural"))
     assertTrue(reachProbeUnreachableReason(null).contains("could not construct"))
@@ -362,7 +380,8 @@ class Base64DecodeW9cTailsTest {
     val decoded = Base64Decode.decodeBase64Candidates("prefix $encoded suffix", intArrayOf(1))
     assertTrue(decoded.contains("SELECT"))
     // Widened separators (urlsafe) decode through the fallback threshold.
-    val urlsafe = java.util.Base64.getUrlEncoder().withoutPadding().encodeToString("payload!!".toByteArray())
+    val urlsafe =
+        java.util.Base64.getUrlEncoder().withoutPadding().encodeToString("payload!!".toByteArray())
     Base64Decode.decodeBase64Candidates(urlsafe, intArrayOf(1))
     // Junk stays as-is.
     assertEquals("!!!", Base64Decode.decodeBase64Candidates("!!!", null))
@@ -548,7 +567,8 @@ class SmallScannerW9cTest {
     assertTrue(EncodingDecoders.decodeHexEscapes("\\x41").contains("A"))
     assertTrue(EncodingDecoders.decodeUnicodeEscapes("\\u0041").contains("A"))
     assertTrue(EncodingDecoders.decodePercentUEscapes("%u0041").contains("A"))
-    val overlong = EncodingDecoders.lenientOverlongUtf8Decode(byteArrayOf(0xC0.toByte(), 0xAF.toByte()))
+    val overlong =
+        EncodingDecoders.lenientOverlongUtf8Decode(byteArrayOf(0xC0.toByte(), 0xAF.toByte()))
     assertTrue(overlong.isNotEmpty())
     assertTrue(EncodingDecoders.decodeOverlongUtf8PercentRuns("%C0%AF").isNotEmpty())
   }

@@ -8,44 +8,48 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * W9c arm closure for the conformance runners: the case-failure arms (verdict mismatch fields,
- * the thrown-case root-cause walk) driven over a scratch corpus deliberately seeded with wrong
+ * W9c arm closure for the conformance runners: the case-failure arms (verdict mismatch fields, the
+ * thrown-case root-cause walk) driven over a scratch corpus deliberately seeded with wrong
  * expectations. The pinned corpus under conformance/guard-core-spec-4.1.0/ is never touched.
  */
 class RunnerErrorArmsW9cTest {
   private fun writeCorpus(root: Path, cases: String, suiteName: String = "w9c_seeded") {
-    root.resolve("index.json").writeText(
-        """{"suites": {"$suiteName": {"kind": "detect", "description": "seeded"}},
+    root
+        .resolve("index.json")
+        .writeText(
+            """{"suites": {"$suiteName": {"kind": "detect", "description": "seeded"}},
            "config_knobs": {},
            "fixed_ip": "203.0.113.1"}""",
-    )
+        )
     root.resolve("$suiteName.json").writeText("""{"cases": $cases}""")
   }
 
   @Test
   fun `seeded wrong expectations populate every mismatch arm`() {
     val root = Files.createTempDirectory("w9c-corpus")
-    val cases = """
-      [
-        {"id": "flag-mismatch",
-         "input": {"content": "<script>alert(1)</script>", "context": "body"},
-         "expected": {"is_threat": false, "threat_score": 0.0, "threats": []}},
-        {"id": "score-mismatch",
-         "input": {"content": "<script>alert(1)</script>", "context": "body"},
-         "expected": {"is_threat": true, "threat_score": 0.123456, "threats": []}},
-        {"id": "count-mismatch",
-         "input": {"content": "<script>alert(1)</script>", "context": "body"},
-         "expected": {"is_threat": true, "threat_score": 1.0, "threats": [{}, {}, {}]}},
-        {"id": "field-mismatch",
-         "input": {"content": "<script>alert(1)</script>", "context": "body"},
-         "expected": {"is_threat": true, "threat_score": 1.0,
-                      "threats": [{"type": "regex", "pattern": "definitely-not-a-pattern", "match": "x", "position": 0, "category": "cat", "weight": 9.9}]}},
-        {"id": "throws",
-         "input": {"content": "<script>alert(1)</script>", "context": "body"},
-         "expected": {"is_threat": true, "threat_score": 1.0,
-                      "threats": [{"no_pattern_key": 1}]}}
-      ]
-    """.trimIndent()
+    val cases =
+        """
+        [
+          {"id": "flag-mismatch",
+           "input": {"content": "<script>alert(1)</script>", "context": "body"},
+           "expected": {"is_threat": false, "threat_score": 0.0, "threats": []}},
+          {"id": "score-mismatch",
+           "input": {"content": "<script>alert(1)</script>", "context": "body"},
+           "expected": {"is_threat": true, "threat_score": 0.123456, "threats": []}},
+          {"id": "count-mismatch",
+           "input": {"content": "<script>alert(1)</script>", "context": "body"},
+           "expected": {"is_threat": true, "threat_score": 1.0, "threats": [{}, {}, {}]}},
+          {"id": "field-mismatch",
+           "input": {"content": "<script>alert(1)</script>", "context": "body"},
+           "expected": {"is_threat": true, "threat_score": 1.0,
+                        "threats": [{"type": "regex", "pattern": "definitely-not-a-pattern", "match": "x", "position": 0, "category": "cat", "weight": 9.9}]}},
+          {"id": "throws",
+           "input": {"content": "<script>alert(1)</script>", "context": "body"},
+           "expected": {"is_threat": true, "threat_score": 1.0,
+                        "threats": [{"no_pattern_key": 1}]}}
+        ]
+        """
+            .trimIndent()
     writeCorpus(root, cases)
     assertEquals(listOf("w9c_seeded"), DetectRunner.detectSuites(root))
     val failures =
@@ -66,7 +70,10 @@ class RunnerErrorArmsW9cTest {
     val score = failures.first { it.caseId == "score-mismatch" }
     assertTrue(score.reason.startsWith("threat_score"), score.reason)
     val count = failures.first { it.caseId == "count-mismatch" }
-    assertTrue(count.reason.startsWith("threat count") || count.reason.startsWith("threw "), count.reason)
+    assertTrue(
+        count.reason.startsWith("threat count") || count.reason.startsWith("threw "),
+        count.reason,
+    )
     val field = failures.first { it.caseId == "field-mismatch" }
     assertTrue(field.reason.startsWith("threat") || field.reason.contains("pattern"), field.reason)
     val thrown = failures.first { it.caseId == "throws" }

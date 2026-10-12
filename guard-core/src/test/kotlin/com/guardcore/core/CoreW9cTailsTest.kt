@@ -5,24 +5,21 @@ import com.guardcore.config.SecurityConfigBuilder
 import com.guardcore.core.behavioral.BehavioralProcessor
 import com.guardcore.core.checks.SecurityCheck
 import com.guardcore.core.checks.SecurityCheckPipeline
-import com.guardcore.core.events.CompositeAgentHandler
-import com.guardcore.core.events.EventEnricher
-import com.guardcore.core.events.EventFilter
-import com.guardcore.core.events.EventTypes
-import com.guardcore.core.events.EnrichmentContext
-import com.guardcore.core.events.SinkTelemetryMember
 import com.guardcore.core.events.AgentTelemetryMember
+import com.guardcore.core.events.CompositeAgentHandler
+import com.guardcore.core.events.EnrichmentContext
+import com.guardcore.core.events.EventEnricher
+import com.guardcore.core.events.EventTypes
 import com.guardcore.core.events.LogfireHandler
-import com.guardcore.handlers.HandlerAgentSink
 import com.guardcore.core.events.MetricsCollector
 import com.guardcore.core.events.OtelHandler
 import com.guardcore.core.events.SecurityEventBus
+import com.guardcore.core.events.SinkTelemetryMember
 import com.guardcore.core.responses.ErrorResponseFactory
 import com.guardcore.core.validation.RequestValidator
 import com.guardcore.core.validation.ValidationContext
 import com.guardcore.handlers.RecordingAgent
 import com.guardcore.java.JavaBridges
-import com.guardcore.protocols.AgentHandlerProtocol
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -41,11 +38,14 @@ class CheckBaseW9cTest {
     var failApply: Boolean = false
     var response: com.guardcore.protocols.GuardResponse? = null
 
-    override fun appliesTo(config: SecurityConfig, routeConfigs: Collection<com.guardcore.decorators.RouteConfig>?): Boolean =
-        !failApply
+    override fun appliesTo(
+        config: SecurityConfig,
+        routeConfigs: Collection<com.guardcore.decorators.RouteConfig>?,
+    ): Boolean = !failApply
 
-    override suspend fun check(request: com.guardcore.protocols.GuardRequest): com.guardcore.protocols.GuardResponse? =
-        response
+    override suspend fun check(
+        request: com.guardcore.protocols.GuardRequest,
+    ): com.guardcore.protocols.GuardResponse? = response
   }
 
   private fun middleware(): TestMiddleware =
@@ -71,7 +71,13 @@ class CheckBaseW9cTest {
     assertFalse(check.appliesTo(mw.config, emptyList()))
     check.failApply = false
     // sendEvent goes through the bus; metadata and action surface on the recording bus.
-    check.sendEvent(EventTypes.EVENT_RATE_LIMITED, request, "logged_only", "because", mapOf("k" to "v"))
+    check.sendEvent(
+        EventTypes.EVENT_RATE_LIMITED,
+        request,
+        "logged_only",
+        "because",
+        mapOf("k" to "v"),
+    )
     // create_error_response delegates to the middleware factory.
     val response = check.createErrorResponse(429, "slow down")
     assertEquals(429, response.statusCode)
@@ -107,9 +113,11 @@ class PipelineW9cTest {
             watchedContainerFields =
                 listOf("whitelist", "blacklist", "blocked_user_agents", "endpoint_rate_limits"),
         )
-    val isStale = SecurityCheckPipeline::class.java.getDeclaredMethod("isStale", SecurityConfig::class.java)
+    val isStale =
+        SecurityCheckPipeline::class.java.getDeclaredMethod("isStale", SecurityConfig::class.java)
     isStale.isAccessible = true
-    val containerSize = SecurityCheckPipeline::class.java.getDeclaredMethod("containerSize", Any::class.java)
+    val containerSize =
+        SecurityCheckPipeline::class.java.getDeclaredMethod("containerSize", Any::class.java)
     containerSize.isAccessible = true
     // Same container sizes: not stale.
     assertEquals(false, isStale.invoke(pipeline, c1))
@@ -129,7 +137,10 @@ class PipelineW9cTest {
     assertEquals(1, containerSize.invoke(pipeline, mapOf("k" to "v")))
     assertEquals(0, containerSize.invoke(pipeline, 42))
     // The watched-field signature covers the map-shaped endpoint limits.
-    val signature = SecurityCheckPipeline::class.java.getDeclaredMethod("containerSignature", SecurityConfig::class.java)
+    val signature =
+        SecurityCheckPipeline::class
+            .java
+            .getDeclaredMethod("containerSignature", SecurityConfig::class.java)
     signature.isAccessible = true
     assertTrue((signature.invoke(pipeline, c1) as List<*>).isNotEmpty())
   }
@@ -154,8 +165,14 @@ class RequestValidatorW9cTest {
     assertTrue(validator.isTrustedProxy("10.0.0.1"))
     assertFalse(validator.isTrustedProxy("192.0.2.99"))
     // A different proxy list still matches by network.
-    assertTrue(RequestValidator(context(trustedProxies = listOf("192.0.2.0/24"))).isTrustedProxy("192.0.2.44"))
-    assertFalse(RequestValidator(context(trustedProxies = listOf("192.0.2.0/24"))).isTrustedProxy("10.0.0.1"))
+    assertTrue(
+        RequestValidator(context(trustedProxies = listOf("192.0.2.0/24")))
+            .isTrustedProxy("192.0.2.44"),
+    )
+    assertFalse(
+        RequestValidator(context(trustedProxies = listOf("192.0.2.0/24")))
+            .isTrustedProxy("10.0.0.1"),
+    )
   }
 
   @Test
@@ -244,10 +261,17 @@ class EventsW9cTest {
     val bus = SecurityEventBus(RecordingAgent(), mw.config, null)
     val request = TestRequest(headers = mapOf("User-Agent" to "ua", "Connection" to "close"))
     // The full middleware event path: enrichment, filtering, dispatch.
-    bus.sendMiddlewareEvent(EventTypes.EVENT_RATE_LIMITED, request, "logged_only", "because", mapOf("k" to "v"))
+    bus.sendMiddlewareEvent(
+        EventTypes.EVENT_RATE_LIMITED,
+        request,
+        "logged_only",
+        "because",
+        mapOf("k" to "v"),
+    )
     bus.sendHttpsViolationEvent(request, null)
     // The sink adapter wraps a raw sink as a full telemetry member.
-    val adapter = com.guardcore.core.events.SecurityEventBus.Companion.sinkAsAgentProtocol(RecordingAgent())
+    val adapter =
+        com.guardcore.core.events.SecurityEventBus.Companion.sinkAsAgentProtocol(RecordingAgent())
     adapter.sendEvent(mapOf("event_type" to "t"))
   }
 
@@ -346,7 +370,7 @@ class JavaBridgesW9cTest {
             TestRequest(urlPath = "/w9c"),
             "203.0.113.77",
             createErrorResponse = { code: Int, msg: String ->
-                com.guardcore.core.TestResponse(code, msg.encodeToByteArray())
+              com.guardcore.core.TestResponse(code, msg.encodeToByteArray())
             },
         )
     assertNotNull(future.get(30, java.util.concurrent.TimeUnit.SECONDS))
@@ -399,7 +423,8 @@ class ErrorResponseW9cTest {
             com.guardcore.core.TestResponse(200, ByteArray(0)),
             0.01,
             null,
-        ) { _, _, _, _ -> }
+        ) { _, _, _, _ ->
+        }
     assertEquals(200, processed.statusCode)
   }
 }

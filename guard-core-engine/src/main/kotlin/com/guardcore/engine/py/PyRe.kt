@@ -327,8 +327,8 @@ public object PyRe {
 
   /**
    * Non-locked segments inside a flag-restructured pattern need their flags re-applied. Only
-   * literal-touching atoms observe case sensitivity, and only those atom ops the parser emits
-   * reach this check (the parse tree has no NOT_LITERAL and repeats are unwrapped by the caller).
+   * literal-touching atoms observe case sensitivity, and only those atom ops the parser emits reach
+   * this check (the parse tree has no NOT_LITERAL and repeats are unwrapped by the caller).
    */
   private fun needsCiWrapper(node: ReNode, flags: Int): Boolean =
       flags and PyReFlags.IGNORECASE != 0 && nodeTouchesLiteralText(node)
