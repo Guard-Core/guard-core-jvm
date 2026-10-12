@@ -4,6 +4,19 @@ The gap ledger tracks in-flight work to closure, not permanent documentation.
 An entry is open only while its wave is in flight. Parity bar: zero PARTIAL
 and zero MISSING rows at release (specs/impl/jvm.md, "Parity bar").
 
+## W9b (100 percent line-coverage ruling) - IN FLIGHT
+
+Operator ruling 14.2 (option A): push the family to the 100 percent line
+gate. W9b landed the engine coverage push and productized the gate.
+
+| id | state | remainder |
+|---|---|---|
+| G-C1 | DONE (W9b): the fail-closed 100 percent line gate productized - `scripts/enforce_line_coverage.sh` + `scripts/enforce_line_coverage.py` (jacococli 0.8.15 nodeps, sha256-pinned d2b74b20b415163c1f53261e7c5ef4445b788327094208ff821e0c2baf9bc8f1; merges ALL exec files against ALL kotlin classes; exits 1 unless workspace total AND every module hold 100.0 percent lines; prints uncovered-line ranges per class on failure). Seeded-regression proof in docs/w9b-coverage.md: dropping ValidationCacheTest keeps the test task green but the gate fails and pins the uncovered lines; restoring recovers. | The ci.yml coverage job (byte-for-byte block in docs/w9b-coverage.md) lands ONLY when the numbers hold: at 90.76 percent a red gate on master is worse than a missing gate. |
+| G-C2 | IN FLIGHT: engine module at 91.68 percent (616 missed of 7,407; was 1,593 at W9a). Per-class remainder enumerated in docs/w9b-coverage.md. | ~616 lines: detection 258, py 153, suspatterns 202. |
+| G-C3 | IN FLIGHT: facade module at 90.54 percent (1,391 missed - untouched in W9b; the engine was the priority). The per-line worklist stands in docs/w9a-coverage.md + issue #26. | ~1,391 lines: config 283, handlers 401, util 219, checks 145, decorators 120, events 81, the rest small tails. |
+| G-C4 | IN FLIGHT: conformance runners at 87.82 percent (153 missed: PipelineHarness 49, DetectRunner 48, EventsHarness 29, CostBudgetRunner 12, PatternSafetyRunner 8, EventsComparison 7). | Runner error/edge arms need direct unit tests per runner. |
+| G-C5 | DONE (W9b): six byte-exact bugs fixed with regression tests (Monitor anomaly cooldown ns-vs-seconds, positiveAssertion negative-slice crash, unterminated-char-class slice crashes x5 sites, JsonMini null-coercion, 3-digit octal escapes as group refs, overflowed brace bounds as {0,0}). Anchors in docs/w9b-coverage.md. | - |
+
 ## W4b/W5/W8a (events, W5 tranches, G-13 remainder) - closed
 
 | id | gap | closed in |
