@@ -88,14 +88,6 @@ public class SecurityCheckPipeline(
     }
   }
 
-  /** Python `_log_extra` (pipeline.py:83): the structured log fields. */
-  private fun logExtra(check: SecurityCheck, request: GuardRequest): Map<String, Any?> =
-      linkedMapOf(
-          "check" to check.checkName,
-          "path" to request.urlPath,
-          "method" to request.method,
-      )
-
   /** Python async `_handle_check_error` (pipeline.py:90). */
   private suspend fun handleCheckError(
       check: SecurityCheck,

@@ -15,7 +15,7 @@ private fun isLargeBoundedRepeat(slot: Slot): Boolean {
 
 private fun collectAlphabetAtoms(
     slots: List<Slot>,
-    repeated: Boolean = false,
+    repeated: Boolean,
 ): List<Pair<IntervalSet, Boolean>> {
   val atoms = ArrayList<Pair<IntervalSet, Boolean>>()
   for (slot in slots) {

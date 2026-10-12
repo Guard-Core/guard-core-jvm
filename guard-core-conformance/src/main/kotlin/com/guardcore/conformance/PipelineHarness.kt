@@ -7,6 +7,7 @@ import com.guardcore.config.RuleType
 import com.guardcore.config.SecurityConfig
 import com.guardcore.config.SecurityConfigBuilder
 import com.guardcore.core.behavioral.BehavioralContext
+import com.guardcore.handlers.BehaviorRule
 import com.guardcore.core.behavioral.BehavioralProcessor
 import com.guardcore.core.checks.ChecksFactory
 import com.guardcore.core.checks.SecurityCheckPipeline
@@ -91,6 +92,7 @@ public object PipelineHarness {
           "excluded_detection_params",
           "excluded_detection_body_fields",
           "geo_rate_limits",
+          "behavior_rules",
       )
 
   /** Read access for the events harness (events_harness.py:120 composes over it). */
@@ -326,6 +328,18 @@ public object PipelineHarness {
         "excluded_detection_body_fields" ->
             routeConfig.excludedDetectionBodyFields =
                 (value as List<*>).map { it.toString() }.toSet()
+        "behavior_rules" -> {
+          @Suppress("UNCHECKED_CAST") val rules = value as List<Map<String, Any?>>
+          for (rule in rules) {
+            routeConfig.behaviorRules.add(
+                BehaviorRule(
+                    ruleType = rule["rule_type"]?.toString() ?: "return_pattern",
+                    threshold = (rule["threshold"] as Number?)?.toInt() ?: 1,
+                    pattern = rule["pattern"]?.toString(),
+                ),
+            )
+          }
+        }
         "geo_rate_limits" -> {
           @Suppress("UNCHECKED_CAST") val map = value as Map<String, List<Number>>
           routeConfig.geoRateLimits = map.mapValues { (_, lw) -> lw[0].toInt() to lw[1].toInt() }

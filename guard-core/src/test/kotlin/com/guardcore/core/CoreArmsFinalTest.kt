@@ -266,7 +266,7 @@ class HandlerInitializerArmsTest {
     }
   }
 
-  /** The AgentHandlerProtocol adapter over the composite (compositeSinkAgentProtocol). */
+  /** The composite surface answers over the composed members. */
   @Test
   fun testCompositeSinkAgentProtocolForwards() {
     coreRunTest {
