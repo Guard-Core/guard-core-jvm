@@ -23,7 +23,7 @@
     
     
       
-        <title>W9e coverage report (the 100 percent push, batch 3 - IN FLIGHT) - guard-core-jvm</title>
+        <title>W9e coverage report (the 100 percent push, batches 3+4 - IN FLIGHT) - guard-core-jvm</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#w9e-coverage-report-the-100-percent-push-batch-3-in-flight" class="md-skip">
+        <a href="#w9e-coverage-report-the-100-percent-push-batches-34-in-flight" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              W9e coverage report (the 100 percent push, batch 3 - IN FLIGHT)
+              W9e coverage report (the 100 percent push, batches 3+4 - IN FLIGHT)
             
           </span>
         </div>
@@ -568,7 +568,7 @@
   
 
 
-<h1 id="w9e-coverage-report-the-100-percent-push-batch-3-in-flight">W9e coverage report (the 100 percent push, batch 3 - IN FLIGHT)</h1>
+<h1 id="w9e-coverage-report-the-100-percent-push-batches-34-in-flight">W9e coverage report (the 100 percent push, batches 3+4 - IN FLIGHT)</h1>
 <p>Measured 2026-10-13 with the W8d/W9a merged method: ALL module exec files
 counted against ALL kotlin classes (per-module reports UNDERCOUNT because the
 conformance module exercises facade/engine code from another JVM). Reproduce:</p>
@@ -581,7 +581,8 @@ MERGE_ONLY=1 scripts/enforce_line_coverage.sh /tmp/w9e
 <tr>
 <th>module</th>
 <th>W9d baseline (master 7ae562c)</th>
-<th>after W9e (this batch)</th>
+<th>after batch 3 (fc48355)</th>
+<th>after batch 4 (this branch)</th>
 <th>missed</th>
 </tr>
 </thead>
@@ -590,25 +591,29 @@ MERGE_ONLY=1 scripts/enforce_line_coverage.sh /tmp/w9e
 <td>guard-core-engine</td>
 <td>97.02% (220 missed)</td>
 <td>98.47%</td>
-<td>113</td>
+<td>99.15% (62 reasoned excludes)</td>
+<td>62</td>
 </tr>
 <tr>
 <td>guard-core (facade)</td>
 <td>94.67% (784 missed)</td>
 <td>95.93%</td>
-<td>599</td>
+<td>96.84%</td>
+<td>465</td>
 </tr>
 <tr>
 <td>guard-core-conformance (runners)</td>
 <td>90.76% (116 missed)</td>
 <td>99.76%</td>
+<td>99.76%</td>
 <td>3</td>
 </tr>
 <tr>
 <td>workspace total</td>
-<td>95.20% (22,219/23,339)</td>
-<td>96.94% (22,633/23,348)</td>
-<td>715</td>
+<td>95.20% (1,120 missed)</td>
+<td>96.94%</td>
+<td>97.73% (22,767/23,297)</td>
+<td>530</td>
 </tr>
 </tbody>
 </table>
