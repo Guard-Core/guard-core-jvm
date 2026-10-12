@@ -124,7 +124,9 @@ public class RateLimitCheck(
       window: Int,
       eventType: String,
       eventKwargs: Map<String, Any?>,
-      endpointPath: String = "",
+      // No dead default: every call site passes the endpoint path explicitly
+      // (a defaulted parameter generates a never-executed default synthetic).
+      endpointPath: String,
   ): GuardResponse? {
     val result =
         rateLimitHandler.checkRateLimit(

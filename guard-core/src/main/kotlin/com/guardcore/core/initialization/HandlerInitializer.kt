@@ -414,26 +414,30 @@ public class HandlerInitializer(
       dynamicRuleManager.initializeDynamicRuleRedis(redisHandler as? RedisManager)
     }
 
+    // One adapter over whichever telemetry surface is wired. The previous
+    // sink-only adapter hardwired getDynamicRules() to null, so no rule flow
+    // could ever dispatch sendEvent on it and its body was unreachable; the
+    // merged source keeps both surfaces' behavior identical (rules flow only
+    // through the composite, events forward to whichever is present).
+    val sink = telemetry as? HandlerAgentSink
+    val composite = telemetry as? CompositeAgentHandler
     dynamicRuleManager.initializeAgent(
-        when (telemetry) {
-          is HandlerAgentSink ->
-              object : DynamicRuleManager.AgentDynamicRulesSource {
-                override suspend fun getDynamicRules(): com.guardcore.handlers.DynamicRules? = null
+        if (sink != null || composite != null) {
+          object : DynamicRuleManager.AgentDynamicRulesSource {
+            override suspend fun getDynamicRules(): com.guardcore.handlers.DynamicRules? =
+                composite?.getDynamicRules() as? com.guardcore.handlers.DynamicRules
 
-                override suspend fun sendEvent(event: Map<String, Any?>) {
-                  telemetry.sendEvent(event)
-                }
+            override suspend fun sendEvent(event: Map<String, Any?>) {
+              val sinkNow = sink
+              if (sinkNow != null) {
+                sinkNow.sendEvent(event)
+              } else {
+                composite?.sendEvent(event)
               }
-          is CompositeAgentHandler ->
-              object : DynamicRuleManager.AgentDynamicRulesSource {
-                override suspend fun getDynamicRules(): com.guardcore.handlers.DynamicRules? =
-                    telemetry.getDynamicRules() as? com.guardcore.handlers.DynamicRules
-
-                override suspend fun sendEvent(event: Map<String, Any?>) {
-                  telemetry.sendEvent(event)
-                }
-              }
-          else -> null
+            }
+          }
+        } else {
+          null
         },
     )
   }

@@ -10,6 +10,7 @@ on:
       - "gradlew"
       - "gradle.properties"
       - "conformance/**"
+      - "scripts/**"
       - "**/gradle.lockfile"
       - "osv-scanner.toml"
       - ".github/workflows/ci.yml"
@@ -22,6 +23,7 @@ on:
       - "gradlew"
       - "gradle.properties"
       - "conformance/**"
+      - "scripts/**"
       - "**/gradle.lockfile"
       - "osv-scanner.toml"
       - ".github/workflows/ci.yml"
@@ -70,6 +72,43 @@ jobs:
 
       - name: Full corpus certification gate (21 suites + cost budgets, one gate)
         run: ./gradlew :guard-core-conformance:fullCorpusGate --no-daemon
+
+      - name: Stop Redis
+        if: always()
+        run: docker rm -f guard-redis || true
+
+  coverage:
+    name: coverage (100 percent line gate)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        # pin: unverified (no in-org setup-java usage found; resolved from actions/setup-java v6.0.1)
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Start Redis
+        run: |
+          docker run -d --name guard-redis -p 6379:6379 redis:8
+          for i in $(seq 1 30); do
+            if docker exec guard-redis redis-cli ping | grep -q PONG; then break; fi
+            sleep 1
+          done
+
+      # The fail-closed 100 percent line gate (spec 14.2, the family standard):
+      # runs every module's tests, merges ALL exec files against ALL kotlin
+      # classes, and fails below 100.0 percent on the workspace total AND each
+      # module. Exclusions carry a written proof in enforce_line_coverage.py.
+      - name: Fail-closed 100 percent line-coverage gate
+        run: scripts/enforce_line_coverage.sh
 
       - name: Stop Redis
         if: always()

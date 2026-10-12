@@ -218,6 +218,121 @@ EXCLUDES = {
         ((377, 377), "floatRepr finite-double fallback: the digit-loop always terminates for "
                       "finite doubles (comment on 376); NaN/Infinity never reach the redis-score "
                       "float path"),
+        ((46, 46), "Parser.pos synthetic accessors: kotlinc emits getPos()/setPos() for the "
+                    "'var pos: Int = 0' property and maps their bytecode to line 46, but Parser "
+                    "is private and every in-class access reads the backing field directly, so "
+                    "the accessors have zero call sites (same compiler-artifact family as the "
+                    "excluded SecurityConfigBuilder.kt 318 field-init probe)"),
+    ],
+    "PyDiffLib.kt": [
+        ((134, 136), "junk-extension backward pass: SequenceMatcher is the isjunk=None port - "
+                      "bJunk is a hard-wired emptySet with no setter, so bJunk.contains(...) is "
+                      "always false and the loop body cannot run (the loop is kept for "
+                      "structural parity with CPython Lib/difflib.py find_longest_match)"),
+        ((142, 144), "junk-extension forward pass: same permanently-empty bJunk as 134-136 - the "
+                      "third conjunct short-circuits before the line-142 comparison evaluates"),
+    ],
+    "IpInfoManager.kt": [
+        ((97, 102), "getInstance synchronized again-branch: the double-checked lock re-reads "
+                     "instance inside synchronized(this) after the outer fast path already saw "
+                     "null; between the two reads a second creator thread would have to win the "
+                     "race - a benign-race arm no deterministic single-threaded test can reach"),
+        ((302, 302), "the no-seam HttpClient.send arm requires outbound network to the pinned "
+                      "ipinfo.io URL; the test surface drives the downloadOverride/"
+                      "httpSendOverride seams (ipinfo_handler.py:194 keeps the retry loop)"),
+        ((423, 425), "reader.close() rethrow: com.maxmind.db.Reader is final and its close() is "
+                      "an idempotent channel teardown; no test surface can force the underlying "
+                      "close to raise (the arm preserves the python OSError propagation)"),
+    ],
+    "RedisManager.kt": [
+        ((171, 172), "transaction exec CompletionException unwrap: EXEC fails exceptionally only "
+                      "when the connection dies between MULTI and EXEC (a mid-flight connection "
+                      "loss); over a healthy live redis the queued commands either succeed or "
+                      "raise through the per-future unwrap at 179-181"),
+        ((179, 180), "queued-future CompletionException unwrap: java.util.concurrent.Future.get() "
+                      "documentedly wraps completion failures in ExecutionException (handled at "
+                      "181-182) or throws InterruptedException/CancellationException - "
+                      "CompletionException is a join() outcome, not a get() outcome, so the arm "
+                      "is a defensive wrap that no driver future can take"),
+        ((247, 247), "LettuceQueuedOperations.close: interface-required no-op; transaction() "
+                      "never closes the queued view (RedisManager.kt:165-185)"),
+        ((260, 260), "await CompletionException unwrap: reached only when a driver future "
+                      "completes with a CompletionException (mid-flight connection loss); plain "
+                      "driver failures raise through the ExecutionException unwrap at 255-258"),
+        ((339, 341), "getInstance synchronized again-branch: the same double-checked-locking "
+                      "benign-race family as the excluded IpInfoManager 97-102 - a second "
+                      "creator thread must win the race between the outer read and the "
+                      "synchronized re-read"),
+    ],
+    "SecurityHeadersManager.kt": [
+        ((36, 36), "getInstance synchronized again-branch: the double-checked-locking "
+                    "benign-race family (see the excluded IpInfoManager 97-102)"),
+    ],
+    "RateLimitManager.kt": [
+        ((347, 348), "getInstance synchronized again-branch: the double-checked-locking "
+                      "benign-race family (see the excluded IpInfoManager 97-102)"),
+    ],
+    "HandlerSeams.kt": [
+        ((24, 24), "register synchronized double-check return: @Volatile registered is read "
+                    "outside the block and re-read inside; the inner return needs a second "
+                    "registration thread to win the race between the reads - a benign-race arm"),
+    ],
+    "DynamicRuleManager.kt": [
+        ((134, 136), "update-loop generic catch: updateRules() swallows every exception "
+                      "internally (its own catch at DynamicRuleManager.kt:268 logs and returns), "
+                      "and interruptibleSleep handles its withTimeout internally, so nothing in "
+                      "the loop body can raise except CancellationException (handled above) - "
+                      "the arm is provably dead defensive code"),
+        ((647, 649), "persistLastKnownRules dump catch: dumpLastKnownRulesSnapshot is total over "
+                      "the typed DynamicRules domain (every field renders through JsonPrimitive/"
+                      "stringListJson and PyJsonDumps of a JsonObject cannot throw), so the "
+                      "wrapper only guards failure classes python's json.dumps could raise "
+                      "(the arm preserves the reference's structural wrapper)"),
+        ((687, 687), "writeLastKnownRulesFile cleanup-ignored arm: deleteIfExists runs on a temp "
+                      "file this function just created in a freshly-writable parent, which on "
+                      "POSIX always deletes; the arm exists for Windows file-lock semantics "
+                      "(the same family as the excluded IpInfoManager close rethrow)"),
+    ],
+    "CloudAzureFetch.kt": [
+        ((75, 75), "the no-seam httpGet arm requires outbound network to microsoft.com; the "
+                    "test surface drives the httpGetOverride seam (the same family as the "
+                    "excluded IpInfoManager 302)"),
+        ((298, 298), "fetchAzureIpRanges page-timeout arm: pageTimeout <= 0 requires a full "
+                      "AZURE_DOWNLOAD_MAX_ELAPSED_SECONDS host stall between the two adjacent "
+                      "monotonic() reads - a host-scheduling race"),
+        ((88, 101), "FakeHttpResponse interface stubs: the private fake only escapes into the "
+                      "azure fetch flow, which consumes statusCode() and body() only; uri(), "
+                      "headers(), previousResponse(), request(), sslSession() and version() have "
+                      "zero call sites on HttpResponse anywhere in the repo"),
+    ],
+    "AuthenticationCheck.kt": [
+        ((132, 132), "unsupported-verifier else arm: verifier is the elvis of exactly "
+                      "routeConfig.authVerifier (RouteAuthVerifier?) and config.authVerifier "
+                      "(AuthVerifier?), and the null case returns earlier - no third runtime "
+                      "type can reach the when; Kotlin's Any? static type merely forces the "
+                      "exhaustive else"),
+    ],
+    "ChecksFactory.kt": [
+        ((32, 32), "SecurityCheckFactory.containerFields interface default: every implementer "
+                    "shadows it - all 13 check companions go through CheckCompanion (which "
+                    "overrides the property with a backing field) and the four checks with real "
+                    "container fields override it again on their companions, so the interface "
+                    "default getter has no dispatch site"),
+    ],
+    "HandlerInitializer.kt": [
+        ((197, 198), "lazy cloud-IP initialization catch: initializeCloudRedis guards every "
+                      "failure inside its own per-provider try bodies (refreshAsync's loop catch "
+                      "and refreshProvidersViaRedisHandler's loop catch), the pre-loop returns "
+                      "are clean, and bareProviderNames/parseCloudSelectors are total string "
+                      "ops - no exception can escape initializeCloudRedis to reach the lazy-init "
+                      "catch (the geo arm at 206-207 is covered by a throwing handler test)"),
+    ],
+    "SusPatternsRegistry.kt": [
+        ((305, 305), "patternInfo unknown arm: sendThreatEvent only runs when result.isThreat, "
+                      "and isThreat = regexAnomaly(regexThreats) >= threshold OR "
+                      "semanticThreats.isNotEmpty() (SusPatternsManager.kt:1028-1030) - either "
+                      "way at least one of the two complementary filtered lists is non-empty, "
+                      "so the else arm cannot fire"),
     ],
 }
 

@@ -21,15 +21,18 @@ public object PyJsonDumps {
   private fun render(element: JsonElement, compact: Boolean): String {
     val itemSep = if (compact) "," else ", "
     val keySep = if (compact) ":" else ": "
+    // ensure_ascii is the json.dumps default (True) while pydantic model_dump_json
+    // keeps non-ASCII as UTF-8: the flag is the INVERSE of the compact selector.
+    val ensureAscii = !compact
     return when (element) {
       is JsonObject ->
           element.entries.joinToString(itemSep, "{", "}") { (k, v) ->
-            renderString(k, compact) + keySep + render(v, compact)
+            renderString(k, ensureAscii) + keySep + render(v, compact)
           }
       is JsonArray -> element.joinToString(itemSep, "[", "]") { render(it, compact) }
       is JsonNull -> "null"
       is JsonPrimitive ->
-          if (element.isString) renderString(element.content, compact) else element.content
+          if (element.isString) renderString(element.content, ensureAscii) else element.content
     }
   }
 

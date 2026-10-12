@@ -1375,8 +1375,13 @@ class HandlersW9hTailsTest {
   /** PyJsonDumps: the control-char and ensureAscii escape arms (51). */
   @Test
   fun `py json dumps escapes control and high chars`() {
+    // json.dumps defaults (ensure_ascii=True): control chars AND non-ASCII escape.
     val payload = PyJsonDumps.dumps(kotlinx.serialization.json.JsonPrimitive("\u0001\u00e9"))
     assertTrue(payload.contains("\\u0001"))
-    assertTrue(payload.contains("é"))
+    assertTrue(payload.contains("\\u00e9"))
+    // pydantic model_dump_json keeps non-ASCII as UTF-8 (W9i: the ensure-ascii
+    // flag was inverted; the escape path is the dumps default).
+    val compact = PyJsonDumps.dumpsCompact(kotlinx.serialization.json.JsonPrimitive("\u00e9"))
+    assertTrue(compact.contains("é"))
   }
 }

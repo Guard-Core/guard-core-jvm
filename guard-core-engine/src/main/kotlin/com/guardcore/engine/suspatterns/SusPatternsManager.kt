@@ -347,12 +347,11 @@ public class SusPatternsManager private constructor() {
           val index = patterns.indexOf(pattern)
           if (index == -1) return false
           patterns.removeAt(index)
-          if (index < compiledPatterns.size) {
-            compiledPatterns.removeAt(index)
-            true
-          } else {
-            false
-          }
+          // Python dels both lists unconditionally (remove_pattern keeps them in
+          // lockstep: both are seeded from PATTERN_DEFINITIONS and appended/removed
+          // together), so removeAt mirrors python's IndexError-on-skew exactly.
+          compiledPatterns.removeAt(index)
+          true
         }
     if (removed) {
       compiler?.clearCache()
@@ -799,22 +798,19 @@ public class SusPatternsManager private constructor() {
       context: String,
       enabledCategories: Set<String>?,
       state: DetectionState,
-      precomputedDecoded: String?,
+      precomputedDecoded: String,
       precomputedDecodeBudgetExhausted: Boolean,
   ): Quad<MutableList<Threat>, MutableList<String>, MutableList<String>, Boolean> {
     val preprocessor =
         state.preprocessor ?: return Quad(ArrayList(), ArrayList(), ArrayList(), false)
 
-    val urlDecodedViewContent: String
-    val decodeBudgetExhaustedFlag: Boolean
-    if (precomputedDecoded != null) {
-      urlDecodedViewContent = preprocessor.truncateSafely(precomputedDecoded)
-      decodeBudgetExhaustedFlag = precomputedDecodeBudgetExhausted
-    } else {
-      val budget = booleanArrayOf(false)
-      urlDecodedViewContent = preprocessor.preprocessUrlDecodedNewlinePreserving(content, budget)
-      decodeBudgetExhaustedFlag = budget[0]
-    }
+    // preprocessContent always computes the decoded view alongside the processed
+    // content (a single preprocessWithDecoded pass), so the decoded view re-derives
+    // from the precomputed value; a null precompute cannot occur (the python
+    // _check_url_decoded_view_patterns recompute branch guarded a lazily-computed
+    // value this port always has).
+    val urlDecodedViewContent = preprocessor.truncateSafely(precomputedDecoded)
+    val decodeBudgetExhaustedFlag = precomputedDecodeBudgetExhausted
 
     val (threats, matched, timeouts) =
         checkRegexPatterns(
