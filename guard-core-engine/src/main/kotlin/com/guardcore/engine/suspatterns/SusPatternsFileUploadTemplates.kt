@@ -327,7 +327,10 @@ public object SusPatternsTemplates {
     val indicator = templateRegex(KEYWORD_INDICATOR, compiled.flags)
     val matches = ArrayList<PyReMatch>()
     for ((start, barrier, end) in templateRegions(content, opening, closing)) {
-      if (indicator.search(content, start + opening.length + 1, barrier, Long.MAX_VALUE) != null) {
+      // python's endpos TRUNCATES the subject for matching, so the indicator's \Z anchors at
+      // the barrier; a java region never moves \Z (absolute end), so the truncation must be
+      // applied to the subject itself.
+      if (indicator.search(content.substring(0, barrier), start + opening.length + 1, Long.MAX_VALUE) != null) {
         matches.add(templateFrame(content, opening, closing, start, end, compiled.flags))
       }
     }
@@ -379,7 +382,12 @@ public object SusPatternsTemplates {
       }
       if (
           start != -1 &&
-              indicator.search(content, start + opening.length, barrier, Long.MAX_VALUE) != null
+              indicator.search(
+                  // python endpos truncation: \Z-style indicators anchor at the barrier.
+                  content.substring(0, barrier),
+                  start + opening.length,
+                  Long.MAX_VALUE,
+              ) != null
       ) {
         matches.add(templateFrame(content, opening, closing, start, end, compiled.flags))
         lastEnd = end

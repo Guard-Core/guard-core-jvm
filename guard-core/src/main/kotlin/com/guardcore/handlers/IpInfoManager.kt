@@ -295,11 +295,12 @@ private constructor(
     for (attempt in 0 until retries) {
       try {
         val response =
-            withContext(Dispatchers.IO) {
-              val builder = HttpRequest.newBuilder().uri(URI.create(baseUrl)).GET()
-              headers.forEach { (k, v) -> builder.header(k, v) }
-              client.send(builder.build(), HttpResponse.BodyHandlers.ofByteArray())
-            }
+            httpSendOverride?.let { it(baseUrl, headers) }
+                ?: withContext(Dispatchers.IO) {
+                  val builder = HttpRequest.newBuilder().uri(URI.create(baseUrl)).GET()
+                  headers.forEach { (k, v) -> builder.header(k, v) }
+                  client.send(builder.build(), HttpResponse.BodyHandlers.ofByteArray())
+                }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
           throw HttpStatusException(
               response.statusCode(),
@@ -473,4 +474,13 @@ private constructor(
 
   /** Test seam mirroring the python tests' aiohttp download mocks. */
   @Volatile public var downloadOverride: (suspend () -> Unit)? = null
+
+  /**
+   * Test seam mirroring the python tests' `patch` of the aiohttp session get inside
+   * `_download_database`: when set, the retry loop resolves through it instead of the real HTTP
+   * client (production code never sets it).
+   */
+  @Volatile
+  internal var httpSendOverride: ((url: String, headers: Map<String, String>) -> HttpResponse<ByteArray>)? =
+      null
 }

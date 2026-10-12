@@ -72,8 +72,8 @@ public object PenetrationDetection {
       logLevel: String?,
       sensitiveHeaders: Set<String>,
       sensitiveParams: Set<String>,
-      sensitiveBodyFields: Set<String> = emptySet(),
-      excludedBodyFields: Set<String> = emptySet(),
+      sensitiveBodyFields: Set<String>,
+      excludedBodyFields: Set<String>,
   ): DetectionResult? {
     val (paramsDetected, paramsTrigger, paramsThreats) =
         BodyContentScan.scanQueryParams(
@@ -148,7 +148,7 @@ public object PenetrationDetection {
       correlationId: String,
       logLevel: String?,
       sensitiveBodyFields: Set<String>,
-      sensitiveParams: Set<String> = emptySet(),
+      sensitiveParams: Set<String>,
   ): DetectionResult {
     if (!DetectionConfig.resolveScanBody(config, routeConfig)) {
       return DetectionResultBuilders.buildDetectionMiss()
@@ -208,7 +208,16 @@ public object PenetrationDetection {
               isValid =
                   !(b == 0xE0 && bytes[i + 1].toInt() and 0xFF < 0xA0) &&
                       !(b == 0xED && bytes[i + 1].toInt() and 0xFF > 0x9F)
-          4 -> isValid = b and 0x07 != 0 && b < 0xF5
+          // CPython utf-8.c: F0 must not introduce an overlong encoding (second byte
+          // >= 0x90) and F4 must stay <= 0x8F (code point <= U+10FFFF); F0-led
+          // sequences are valid exactly when those hold. The previous `b and 0x07
+          // != 0` test rejected every F0-led sequence, i.e. all of U+10000..U+3FFFF
+          // (every emoji), which python decodes as the code point.
+          4 ->
+              isValid =
+                  b >= 0xF0 && b <= 0xF4 &&
+                      !(b == 0xF0 && bytes[i + 1].toInt() and 0xFF < 0x90) &&
+                      !(b == 0xF4 && bytes[i + 1].toInt() and 0xFF > 0x8F)
         }
         if (isValid) {
           for (j in 1 until length) {
@@ -221,6 +230,10 @@ public object PenetrationDetection {
       }
       if (isValid) {
         when (length) {
+          // A bare continuation byte (0x80..0xBF) is its own one-byte decode error;
+          // python's surrogateescape keeps it as U+DC00+b (0x80 -> U+DC80, PEP 383)
+          // instead of dropping it.
+          1 -> sb.append((0xDC00 + b).toChar())
           2 -> sb.append((((b and 0x1F) shl 6) or (bytes[i + 1].toInt() and 0x3F)).toChar())
           3 -> {
             val cp =
@@ -242,7 +255,9 @@ public object PenetrationDetection {
         }
         i += length
       } else {
-        sb.append((0xDC00 + b - 0x80).toChar())
+        // PEP 383 surrogateescape: every error byte b (0x80..0xFF) is U+DC00+b
+        // (0x80 -> U+DC80); the previous `b - 0x80` offset shifted the whole range.
+        sb.append((0xDC00 + b).toChar())
         i += 1
       }
     }

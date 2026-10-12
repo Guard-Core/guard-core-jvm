@@ -12,6 +12,22 @@ import com.guardcore.handlers.DetectionScanRedaction
  * (G-10, unions registered live by [PenetrationDetection]).
  */
 public object DetectionScan {
+  /**
+   * Test seam mirroring the python tests' `patch.object` of the shared SusPatternsManager detect:
+   * when set, `checkValueEnhanced` resolves through it instead of the engine singleton
+   * (production code never sets it).
+   */
+  @Volatile
+  internal var enhancedDetectOverride:
+      (
+          content: String,
+          ipAddress: String,
+          context: String,
+          correlationId: String,
+          enabledCategories: Set<String>?,
+      ) -> com.guardcore.engine.suspatterns.DetectResult? =
+      { _, _, _, _, _ -> null }
+
   /** Python `_MAX_USER_AGENT_MATCH_LENGTH` (detection_scan.py:194). */
   public const val MAX_USER_AGENT_MATCH_LENGTH: Int = 512
 
@@ -166,14 +182,15 @@ public object DetectionScan {
 
     val result =
         try {
-          com.guardcore.engine.suspatterns.SusPatternsManager.shared()
-              .detect(
-                  content = value,
-                  ipAddress = clientIp,
-                  context = context,
-                  correlationId = correlationId,
-                  enabledCategories = enabledCategories,
-              )
+          enhancedDetectOverride?.invoke(value, clientIp, context, correlationId, enabledCategories)
+              ?: com.guardcore.engine.suspatterns.SusPatternsManager.shared()
+                  .detect(
+                      content = value,
+                      ipAddress = clientIp,
+                      context = context,
+                      correlationId = correlationId,
+                      enabledCategories = enabledCategories,
+                  )
         } catch (e: java.util.concurrent.ExecutionException) {
           // Python re-raises RecursionError ahead of the generic handler (detection_scan.py:
           // 337-339): the recursion class escapes `_check_value_enhanced` untouched and every
