@@ -193,7 +193,8 @@ public fun iterQuantifiedGroupBodiesAt(
       i++
       continue
     }
-    val rawInner = pattern.substring(i + 1, j - 1)
+    // python pattern[i + 1 : j - 1] is "" when the slice is reversed.
+    val rawInner = if (j >= i + 2) pattern.substring(i + 1, j - 1) else ""
     out.addAll(iterQuantifiedGroupBodiesAt(rawInner, base + i + 1, depth + 1))
     var inner = normalizeGroupInner(rawInner)
     if (inner != null) {

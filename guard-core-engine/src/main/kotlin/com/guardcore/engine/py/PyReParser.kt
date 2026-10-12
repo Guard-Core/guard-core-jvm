@@ -249,9 +249,10 @@ public class PyReParser(private val src: String, initialFlags: Int) {
         if (lowStr.isEmpty() && highStr.isEmpty()) return null
         val low = parseDecimal(lowStr)
         val high = parseDecimal(highStr)
-        if (low == null || high == null) {
+        if (low == null || high == null || !low.parsed || !high.parsed) {
           // An all-digit run that overflowed the sentinel is the reference's "repetition
-          // number too large"; junk is a literal.
+          // number too large"; junk is a literal. The parsed flag matters: without it an
+          // overflowed bound silently degraded to a {0,0} quantifier.
           if (low != null && !low.parsed && isAllDigits(lowStr)) overflow = true
           if (high != null && !high.parsed && isAllDigits(highStr)) overflow = true
           return null
@@ -375,12 +376,10 @@ public class PyReParser(private val src: String, initialFlags: Int) {
           if (nextChar() != null && nextChar()!! in '0'..'9') {
             escape += src[pos]
             pos++
-            if (
-                escape[1] in '0'..'7' &&
-                    escape[2] in '0'..'7' &&
-                    nextChar() != null &&
-                    nextChar()!! in '0'..'7'
-            ) {
+            // python's source.next is the UNCONSUMED char at pos, not the one
+            // after it: without this peek the third octal digit is missed and
+            // \\101 parses as group reference 10 instead of octal 65.
+            if (escape[1] in '0'..'7' && escape[2] in '0'..'7' && !atEnd() && peek() in '0'..'7') {
               // Got three octal digits: this is an octal escape.
               escape += src[pos]
               pos++
