@@ -11,7 +11,7 @@
 
 ## Coordinates
 
-Maven Central (published at release; pre-release builds come from source):
+Maven Central:
 
 ```kotlin
 dependencies {

@@ -30,12 +30,7 @@ ___
 
 ## Status
 
-**Certified, pre-release.** Full parity is certified against the guard-core
-spec 4.1.0 corpus and the every-feature matrix (see
-[Conformance](#conformance)); the artifacts ship to Maven Central with the
-first synchronized release, on explicit operator go
-([docs/release.md](docs/release.md)). Until then nothing is published: build
-from source or consume the composite as described below.
+**Certified and released.** Full parity is certified against the guard-core spec 4.1.0 corpus and the every-feature matrix (see [Conformance](#conformance)). 4.3.3 is on Maven Central as `com.guard-core:guard-core` (the facade) and `com.guard-core:guard-core-engine`; [docs/release.md](docs/release.md) covers the release choreography.
 
 **Mirror statement:** guard-core-jvm 4.3.3 mirrors the
 [guard-core 4.3.3](https://github.com/Guard-Core/guard-core) release. Versions
