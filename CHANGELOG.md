@@ -6,6 +6,7 @@
 
 - guard-core-jvm 4.3.3 mirrors the guard-core 4.3.3 parity release (lockstep version, no functional change); the corpus remains the 4.3.2-generation vendored set (behavior identical). The corpus index's `engine_version` pin stays 4.3.2: it tracks the corpus revision (the generating engine), not the release.
 - The SusPatterns detection-state builder now keys the pattern validation cache on `GuardCoreEngine.VERSION` instead of a hardcoded literal (the facade's dynamic-rule manager already wired the constant; the cache version follows the release, matching the reference's engine-versioned cache key). No behavior change on any single version.
+- Dependencies: lettuce-core 6.7.1.RELEASE -> 6.8.2.RELEASE (netty 4.1.118 -> 4.1.125) and slf4j-api 2.0.17 -> 2.0.20, with the lockfiles regenerated. The osv-scanner suppression GHSA-3p8m-j85q-pgmj is removed (fixed in netty 4.1.125); the other twelve netty suppressions still apply at 4.1.125 and stay.
 
 ## [4.3.2] - 2026-10-10
 
