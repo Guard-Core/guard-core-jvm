@@ -225,7 +225,7 @@ jobs:
               -H "Authorization: Bearer ${token}" \
               -F "bundle=@central-bundle.zip;type=application/octet-stream" \
               "https://central.sonatype.com/api/v1/publisher/upload?name=guard-core-engine-${version}&publishingType=USER_MANAGED") \
-              && deployment=$(echo "$response" | jq -r '.deploymentId') && break
+              && deployment=$(printf '%s' "$response" | tr -d '[:space:]') && break
             echo "upload attempt $attempt failed; retrying in 30s"
             sleep 30
           done
@@ -237,7 +237,7 @@ jobs:
           for _ in $(seq 1 30); do
             state=$(curl -sS -X POST \
               -H "Authorization: Bearer ${token}" \
-              "https://central.sonatype.com/api/v1/publisher/status?id=${deployment}" | jq -r '.deploymentState')
+              "https://central.sonatype.com/api/v1/publisher/status?id=${deployment}" | jq -r '.deploymentState' || true)
             echo "validation state: ${state}"
             case "$state" in
               VALIDATED)
@@ -291,7 +291,7 @@ jobs:
               -H "Authorization: Bearer ${token}" \
               -F "bundle=@central-bundle.zip;type=application/octet-stream" \
               "https://central.sonatype.com/api/v1/publisher/upload?name=guard-core-${version}&publishingType=USER_MANAGED") \
-              && deployment=$(echo "$response" | jq -r '.deploymentId') && break
+              && deployment=$(printf '%s' "$response" | tr -d '[:space:]') && break
             echo "upload attempt $attempt failed; retrying in 30s"
             sleep 30
           done
@@ -303,7 +303,7 @@ jobs:
           for _ in $(seq 1 30); do
             state=$(curl -sS -X POST \
               -H "Authorization: Bearer ${token}" \
-              "https://central.sonatype.com/api/v1/publisher/status?id=${deployment}" | jq -r '.deploymentState')
+              "https://central.sonatype.com/api/v1/publisher/status?id=${deployment}" | jq -r '.deploymentState' || true)
             echo "validation state: ${state}"
             case "$state" in
               VALIDATED)
