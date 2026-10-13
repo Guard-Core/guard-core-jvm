@@ -18,9 +18,15 @@ conformance module exercises facade/engine code from another JVM). Reproduce:
 
 RULING COMPLETE: the spec 14.2 push-to-100-percent ruling closes with this
 batch. The gate holds 100.0 percent across TWO consecutive
-`cleanTest test` + `enforce_line_coverage.sh` cycles (the numbers above and
-the second cycle in the PR description), and the coverage job is wired into
-ci.yml so every future PR and master push re-proves it.
+`cleanTest test` + `enforce_line_coverage.sh` cycles (23,157 covered,
+0 missed, byte-identical between the cycles), and the coverage job is wired
+into ci.yml so every future PR and master push re-proves it. The gate script
+now measures ONLY the test task's exec files, so the number is environment
+independent (a local corpus run's fullCorpusGate exec no longer leaks
+pipeline arms into the measurement - caught by the first CI run of the job,
+whose CI-side timezone and redis-scan environment differences surfaced five
+test-task lines the corpus exec had been masking; those lines are now closed
+by the explicit timezone and scan tests).
 
 ## Tests added this batch
 
