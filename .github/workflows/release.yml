@@ -181,20 +181,22 @@ jobs:
           code_facade=$(curl -sS -o /dev/null -w '%{http_code}' \
             "https://repo1.maven.org/maven2/com/guard-core/guard-core/${version}/guard-core-${version}.pom" \
             || echo 000)
-          for pair in "engine:${code_engine}" "facade:${code_facade}"; do
-            name="${pair%%:*}"
-            code="${pair##*:}"
+          for triple in "engine:guard-core-engine:${code_engine}" "facade:guard-core:${code_facade}"; do
+            name="${triple%%:*}"
+            rest="${triple#*:}"
+            artifact="${rest%%:*}"
+            code="${rest##*:}"
             case "$code" in
               200)
-                echo "com.guard-core:guard-core-${name} ${version} is already live on Maven Central; it will be skipped"
+                echo "com.guard-core:${artifact} ${version} is already live on Maven Central; it will be skipped"
                 echo "${name}=skip" >> "$GITHUB_OUTPUT"
                 ;;
               404)
-                echo "com.guard-core:guard-core-${name} ${version} is not on Maven Central; queued to publish"
+                echo "com.guard-core:${artifact} ${version} is not on Maven Central; queued to publish"
                 echo "${name}=publish" >> "$GITHUB_OUTPUT"
                 ;;
               *)
-                echo "repo1.maven.org returned HTTP ${code} for guard-core-${name}:${version}; refusing to publish against unknown registry state"
+                echo "repo1.maven.org returned HTTP ${code} for ${artifact}:${version}; refusing to publish against unknown registry state"
                 exit 1
                 ;;
             esac

@@ -9,6 +9,7 @@ detekt = "1.23.8"
 spotless = "8.10.4"
 jmh = "0.7.3"
 lettuce = "6.8.2.RELEASE"
+netty = "4.1.139.Final"
 maxmindDb = "4.2.0"
 slf4j = "2.0.20"
 dokka = "2.2.0"
@@ -19,6 +20,7 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serializationJson" }
 lettuce-core = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
+netty-bom = { module = "io.netty:netty-bom", version.ref = "netty" }
 maxmind-db = { module = "com.maxmind.db:maxmind-db", version.ref = "maxmindDb" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
