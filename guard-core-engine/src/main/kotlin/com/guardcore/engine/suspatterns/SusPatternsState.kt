@@ -1,5 +1,6 @@
 package com.guardcore.engine.suspatterns
 
+import com.guardcore.engine.GuardCoreEngine
 import com.guardcore.engine.detection.ContentPreprocessor
 import com.guardcore.engine.detection.PatternCompiler
 import com.guardcore.engine.detection.PatternValidationCache
@@ -57,7 +58,7 @@ public fun buildEnhancedDetectionState(config: DetectionConfigView): DetectionSt
   val cachePath = config.detectionPatternValidationCachePath
   val validationCache =
       if (cachePath != null) {
-        PatternValidationCache(Paths.get(cachePath), "4.3.2")
+        PatternValidationCache(Paths.get(cachePath), GuardCoreEngine.VERSION)
       } else {
         null
       }

@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.3] - 2026-10-13
+
+### Changed
+
+- guard-core-jvm 4.3.3 mirrors the guard-core 4.3.3 parity release (lockstep version, no functional change); the corpus remains the 4.3.2-generation vendored set (behavior identical). The corpus index's `engine_version` pin stays 4.3.2: it tracks the corpus revision (the generating engine), not the release.
+- The SusPatterns detection-state builder now keys the pattern validation cache on `GuardCoreEngine.VERSION` instead of a hardcoded literal (the facade's dynamic-rule manager already wired the constant; the cache version follows the release, matching the reference's engine-versioned cache key). No behavior change on any single version.
+
 ## [4.3.2] - 2026-10-10
 
 ### Added
