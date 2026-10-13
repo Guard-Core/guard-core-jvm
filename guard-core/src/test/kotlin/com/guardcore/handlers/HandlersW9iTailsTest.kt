@@ -392,9 +392,31 @@ class HandlersW9iTailsTest {
         )
     val dumpedShifted = dumpLastKnownRulesSnapshot(shifted)
     assertTrue(dumpedShifted.contains("2026-10-12T08:30:00+05:30"), dumpedShifted)
+    // A microsecond-precision timestamp drives the fraction trim loop (73).
+    val micros =
+        DynamicRules(
+            ruleId = "w9i-micros",
+            version = 1,
+            timestamp =
+                java.time.OffsetDateTime.of(
+                    2026,
+                    10,
+                    12,
+                    8,
+                    30,
+                    5,
+                    500000000,
+                    java.time.ZoneOffset.UTC,
+                ),
+        )
+    val dumpedMicros = dumpLastKnownRulesSnapshot(micros)
+    assertTrue(dumpedMicros.contains("08:30:05.500Z"), dumpedMicros)
   }
 
-  /** The multi-cursor SCAN surface over live redis (RedisManager 197). */
+  /**
+   * The multi-cursor SCAN surface over live redis (197): enough keys that the SCAN COUNT 1000 hint
+   * cannot cover the keyspace in one page, so the loop always takes the second-cursor assignment.
+   */
   @Test
   fun `scan walks the redis keyspace`(): Unit = runBlocking {
     val client = io.lettuce.core.RedisClient.create("redis://localhost:6379")
@@ -404,9 +426,14 @@ class HandlersW9iTailsTest {
       for (i in 0 until 25) {
         operations.set("w9i:scan:Key:$i", "v")
       }
+      for (i in 0 until 1200) {
+        operations.set("w9i:scan:Filler:$i", "v")
+      }
       val found = operations.scan("w9i:scan:Key:*")
       assertEquals(25, found.size)
       operations.del(*found.toTypedArray())
+      val fillers = operations.scan("w9i:scan:Filler:*")
+      operations.del(*fillers.toTypedArray())
     } finally {
       connection.close()
     }
