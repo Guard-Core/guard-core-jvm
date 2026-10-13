@@ -4,8 +4,11 @@
 
 ### Changed
 
+- Agent wiring: `HandlerInitializer.buildCompositeHandler()` now adds any injected agent handler to the composite, as `handler_initializer.py:87-105` does. An `AgentTelemetryMember` (the `GuardAgentTelemetry` bridge) is used directly, a `HandlerAgentSink` goes through `SinkTelemetryMember`, and a plain `AgentHandlerProtocol` goes through the new `ProtocolTelemetryMember`. Before, only a `HandlerAgentSink` was composed, so the protocol-typed agent the adapters inject was never started and received no events.
+- Metrics: `MetricsCollector` now calls `sendMetric` (`metrics.py:45`) instead of `sendEvent`. `HandlerAgentSink` gains `sendMetric` (default: `sendEvent`, so existing sinks keep their behavior), `SinkTelemetryMember.sendMetric` and the initializer's composite sink forward to it, and `CompositeAgentHandler.sendMetric` is now `open`. Before, metrics reached agents as blank security events.
 - Dependencies: the facade pins netty to 4.1.139.Final through `api(platform(io.netty:netty-bom))`. lettuce-core 6.8.2 declares netty 4.1.125, which carries twelve advisories (GHSA-3qp7-7mw8-wx86, GHSA-558v-64gr-wgg4, GHSA-5pvg-856g-cp85, GHSA-676x-f7gg-47vc, GHSA-c4c3-7fpv-j4q5, GHSA-c653-97m9-rcg9, GHSA-cm33-6792-r9fm, GHSA-fccg-mwvh-qqg4, GHSA-mfg7-5gfp-c4w3, GHSA-mj4r-2hfc-f8p6, GHSA-x4gw-5cx5-pgmh, GHSA-xmv7-r254-6q78), all fixed by 4.1.137 at the latest. Their osv-scanner suppressions are removed. Gradle consumers get the pin from the module metadata; Maven consumers import the same BOM (docs/installation.md).
 - The release workflow's registry check now names the facade artifact correctly in its log (`com.guard-core:guard-core`, not `guard-core-facade`). The URLs it checks were already right.
+- The geo-IP agent adapter built in `initializeAgentForHandlers` now routes metrics to `sendMetric` (its composite sink forwards `sendMetric` too), and an injected agent that implements none of AgentTelemetryMember, HandlerAgentSink or AgentHandlerProtocol is logged as a warning instead of being dropped silently.
 
 ## [4.3.3] - 2026-10-13
 

@@ -24,7 +24,7 @@ public class EventsGatingTest {
       events.add(event)
     }
 
-    fun sendMetric(metric: Map<String, Any?>) {
+    override suspend fun sendMetric(metric: Map<String, Any?>) {
       failWith?.let { throw it }
       metrics.add(metric)
     }
@@ -53,12 +53,13 @@ public class EventsGatingTest {
   fun metricsCollectorSendsMetric() = runBlocking {
     val agent = RecordingAgent()
     val collector = MetricsCollector(agent, config { agentEnableMetrics = true })
-    // MetricsCollector.send_metric dispatches through HandlerAgentSink.sendEvent (the agent
-    // model factory is the W7 seam); the sink records the SecurityMetric envelope map.
+    // MetricsCollector.send_metric dispatches through HandlerAgentSink.sendMetric (metrics.py:45);
+    // the sink records the SecurityMetric envelope map.
     collector.sendMetric("response_time", 0.5, mapOf("endpoint" to "/api"))
-    assertEquals(1, agent.events.size)
-    assertEquals("response_time", agent.events[0]["metric_type"])
-    assertEquals(0.5, agent.events[0]["value"])
+    assertEquals(0, agent.events.size)
+    assertEquals(1, agent.metrics.size)
+    assertEquals("response_time", agent.metrics[0]["metric_type"])
+    assertEquals(0.5, agent.metrics[0]["value"])
   }
 
   @Test
@@ -81,7 +82,7 @@ public class EventsGatingTest {
     val agent = RecordingAgent()
     val collector = MetricsCollector(agent, config { agentEnableMetrics = true })
     collector.collectRequestMetrics(TestRequest(), 0.1, 200)
-    assertEquals(2, agent.events.size)
+    assertEquals(2, agent.metrics.size)
   }
 
   @Test
@@ -89,7 +90,7 @@ public class EventsGatingTest {
     val agent = RecordingAgent()
     val collector = MetricsCollector(agent, config { agentEnableMetrics = true })
     collector.collectRequestMetrics(TestRequest(), 0.1, 500)
-    assertEquals(3, agent.events.size)
+    assertEquals(3, agent.metrics.size)
   }
 
   // middleware_events.py halves

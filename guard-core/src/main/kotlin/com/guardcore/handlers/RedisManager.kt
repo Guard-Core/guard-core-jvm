@@ -271,12 +271,24 @@ internal constructor(
 public interface HandlerAgentSink {
   public suspend fun sendEvent(event: Map<String, Any?>)
 
+  /**
+   * Port of `send_metric` (agent_protocol.py:24). Defaults to [sendEvent] so sinks that predate the
+   * metric path keep their behavior; sinks that distinguish metrics override it.
+   */
+  public suspend fun sendMetric(metric: Map<String, Any?>) {
+    sendEvent(metric)
+  }
+
   public companion object {
     /** Wrap the production protocol sink. */
     public fun of(handler: AgentHandlerProtocol): HandlerAgentSink =
         object : HandlerAgentSink {
           override suspend fun sendEvent(event: Map<String, Any?>) {
             handler.sendEvent(event)
+          }
+
+          override suspend fun sendMetric(metric: Map<String, Any?>) {
+            handler.sendMetric(metric)
           }
         }
   }
