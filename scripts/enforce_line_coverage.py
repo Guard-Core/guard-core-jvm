@@ -373,13 +373,13 @@ EXCLUDES = {
                    "dispatch site"),
     ],
     "HandlerInitializer.kt": [
-        ((207, 208), "lazy cloud-IP initialization catch: initializeCloudRedis guards "
+        ((214, 215), "lazy cloud-IP initialization catch: initializeCloudRedis guards "
                      "every failure inside its own per-provider try bodies "
                      "(refreshAsync's loop catch and refreshProvidersViaRedisHandler's "
                      "loop catch), the pre-loop returns are clean, and "
                      "bareProviderNames/parseCloudSelectors are total string ops - no "
                      "exception can escape initializeCloudRedis to reach the lazy-init "
-                     "catch (the geo arm at 216-217 is covered by a throwing handler "
+                     "catch (the geo arm at 223-224 is covered by a throwing handler "
                      "test)"),
     ],
     "IpExtraction.kt": [

@@ -125,6 +125,13 @@ public class HandlerInitializer(
       is AgentTelemetryMember -> members.add(agent)
       is HandlerAgentSink -> members.add(SinkTelemetryMember(agent))
       is AgentHandlerProtocol -> members.add(ProtocolTelemetryMember(agent))
+      null -> Unit
+      else ->
+          logger.warning(
+              "Agent handler ${agent::class.java.name} implements none of " +
+                  "AgentTelemetryMember, HandlerAgentSink or AgentHandlerProtocol; " +
+                  "it receives no telemetry",
+          )
     }
     if (config.enableOtel || config.enableLogfire) {
       // The python factory appends OtelHandler/LogfireHandler (handler_initializer.py:93-100);
@@ -361,6 +368,10 @@ public class HandlerInitializer(
                 override suspend fun sendEvent(event: Map<String, Any?>) {
                   telemetry.sendEvent(event)
                 }
+
+                override suspend fun sendMetric(metric: Map<String, Any?>) {
+                  telemetry.sendMetric(metric)
+                }
               }
           else -> return
         }
@@ -388,7 +399,7 @@ public class HandlerInitializer(
 
           override suspend fun sendMetric(metric: Any?) {
             @Suppress("UNCHECKED_CAST")
-            sink.sendEvent((metric as? Map<String, Any?>) ?: mapOf<String, Any?>())
+            sink.sendMetric((metric as? Map<String, Any?>) ?: mapOf<String, Any?>())
           }
 
           override suspend fun start() {}

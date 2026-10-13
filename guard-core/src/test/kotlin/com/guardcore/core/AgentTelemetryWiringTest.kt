@@ -5,6 +5,7 @@ import com.guardcore.core.initialization.HandlerInitializer
 import com.guardcore.handlers.HandlerAgentSink
 import com.guardcore.handlers.resetIpBanGlobalState
 import com.guardcore.protocols.AgentHandlerProtocol
+import com.guardcore.protocols.GeoIPHandler
 import com.guardcore.protocols.RedisHandlerProtocol
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -198,6 +199,71 @@ public class AgentTelemetryWiringTest {
 
       assertEquals(listOf<Any?>(event), agent.events)
       assertEquals(1, agent.metrics.size)
+    }
+  }
+
+  private class CapturingGeo : GeoIPHandler {
+    var agentProtocol: AgentHandlerProtocol? = null
+
+    override val isInitialized: Boolean = false
+
+    override suspend fun initialize() {}
+
+    override suspend fun initializeRedis(redisHandler: RedisHandlerProtocol) {}
+
+    override suspend fun initializeAgent(agentHandler: AgentHandlerProtocol) {
+      agentProtocol = agentHandler
+    }
+
+    override fun getCountry(ip: String): String? = null
+
+    override suspend fun refresh() {}
+
+    override fun close() {}
+  }
+
+  @Test
+  fun geoAdapterRoutesMetricsToSendMetric() {
+    coreRunTest {
+      resetIpBanGlobalState()
+      val agent = BridgeAgent()
+      val geo = CapturingGeo()
+      val initializer =
+          HandlerInitializer(config = metricsConfig(), agentHandler = agent, geoIpHandler = geo)
+      initializer.initializeAgentIntegrations()
+
+      geo.agentProtocol!!.sendMetric(mapOf("metric_type" to "request_count"))
+
+      assertTrue(agent.events.isEmpty(), "metric leaked into sendEvent: ${agent.events}")
+      assertEquals(1, agent.metrics.size)
+    }
+  }
+
+  @Test
+  fun unrecognizedAgentTypeIsSkippedWithAWarning() {
+    coreRunTest {
+      resetIpBanGlobalState()
+      val initializer = HandlerInitializer(config = metricsConfig(), agentHandler = Any())
+      val warnings = mutableListOf<String>()
+      val capture =
+          object : java.util.logging.Handler() {
+            override fun publish(record: java.util.logging.LogRecord) {
+              warnings.add(record.message)
+            }
+
+            override fun flush() {}
+
+            override fun close() {}
+          }
+      initializer.logger.addHandler(capture)
+      try {
+        initializer.initializeAgentIntegrations()
+      } finally {
+        initializer.logger.removeHandler(capture)
+      }
+
+      assertTrue(initializer.compositeHandler!!.handlers.isEmpty())
+      assertTrue(warnings.any { it.contains("receives no telemetry") }, "warnings: $warnings")
     }
   }
 }
