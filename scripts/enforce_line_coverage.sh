@@ -45,8 +45,11 @@ fi
 
 mkdir -p "$OUT"
 
+# Only the test task's exec files: the gate measures the unit-test surface and
+# must not drift with whatever else left an exec behind (e.g. a local corpus
+# run's fullCorpusGate.exec covering pipeline arms the tests do not).
 EXEC_FILES=()
-for f in */build/jacoco/*.exec; do
+for f in */build/jacoco/test.exec; do
   [ -e "$f" ] && EXEC_FILES+=("$f")
 done
 CLASS_DIRS=()

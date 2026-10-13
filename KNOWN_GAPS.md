@@ -4,17 +4,21 @@ The gap ledger tracks in-flight work to closure, not permanent documentation.
 An entry is open only while its wave is in flight. Parity bar: zero PARTIAL
 and zero MISSING rows at release (specs/impl/jvm.md, "Parity bar").
 
-## W9b (100 percent line-coverage ruling) - IN FLIGHT
+## W9b (100 percent line-coverage ruling) - CLOSED (W9i, 2026-10-14)
 
 Operator ruling 14.2 (option A): push the family to the 100 percent line
-gate. W9b landed the engine coverage push and productized the gate.
+gate. W9b landed the engine coverage push and productized the gate; W9i
+closed the final lines and wired the gate into ci.yml (the `coverage` job,
+every PR + master push). Final state: workspace 100.00 percent lines
+(23,158 covered, 0 missed), every module 100.00 percent, proven across two
+consecutive cleanTest test + gate cycles on the branch (docs/w9i-coverage.md).
 
 | id | state | remainder |
 |---|---|---|
 | G-C1 | DONE (W9b): the fail-closed 100 percent line gate productized - `scripts/enforce_line_coverage.sh` + `scripts/enforce_line_coverage.py` (jacococli 0.8.15 nodeps, sha256-pinned d2b74b20b415163c1f53261e7c5ef4445b788327094208ff821e0c2baf9bc8f1; merges ALL exec files against ALL kotlin classes; exits 1 unless workspace total AND every module hold 100.0 percent lines; prints uncovered-line ranges per class on failure). Seeded-regression proof in docs/w9b-coverage.md. | The ci.yml coverage job (byte-for-byte block in docs/w9b-coverage.md) lands ONLY when the numbers hold: after W9c batch 1 the workspace holds at 1,574 missed (was 2,160), so the gate stays unwired. |
-| G-C2 | IN FLIGHT (W9e batch 4 landed: the negated-shorthand render arms closed by tests; the remaining 62 engine lines carry reasoned EXCLUDES in scripts/enforce_line_coverage.py - every entry verified against the parser/normalization code (bare CATEGORY/NOT_LITERAL/ATOMIC_GROUP/multi-atom-repeat shapes the sre port never emits, the scoped-emitter fail-closed arm, the thread-CPU fallback and the timing-race arms)). | residual: 62 excluded lines, each with a written proof in the gate. |
-| G-C3 | IN FLIGHT: facade module at 97.15 percent (413 missed; was 784 after W9d). W9e batches 3-5 landed the harness-surface, agent-wired manager tails, decorator factory, per-check, initializer-composite, full builder/validator sweeps and the IpInfoManager reader lifecycle over the vendored MaxMind test fixture (docs/w9e-coverage.md). | ~413 lines: the remaining manager persistence/fetch internals and the per-file singles printed by the gate. |
-| G-C4 | IN FLIGHT: conformance at 99.76 percent (3 missed; was 116). W9e batch 3 closed the PipelineHarness/EventsHarness seeded arms (HarnessArmsW9eTest) and the DetectRunner/PatternSafety/CostBudget/EventsComparison failure tables. | residual: 3 lines printed by the gate. |
+| G-C2 | CLOSED (W9i): engine at 100.00 percent lines - the last counted arms closed by tests (the batch-compile ReCompileError skip over a non-Latin group name, the truncation attack-budget concatenation, the terminator class tokens, the class-intersection crossing, the legacy candidate-rejection detect path, the base64 fragment reassembly through the pipeline) and every provably-unreachable arm carries a written proof in scripts/enforce_line_coverage.py. | - |
+| G-C3 | CLOSED (W9i): facade at 100.00 percent lines - the always-scan header shapes, the behavioral threshold-crossing return, the ipinfo download/refresh lifecycle, the cloud via-redis refresh arms, the azure extraction arms, the dynamic-rule whitelist failure, the merged dynamic-rule telemetry adapter, the registry anomaly handoff + semantic pattern info, and the per-file singles all closed by tests (docs/w9i-coverage.md). | - |
+| G-C4 | CLOSED (W9i): conformance at 100.00 percent lines - the per-workload cost-budget drift guard (HarnessArmsW9iTest). | - |
 | G-C5 | DONE (W9b): six byte-exact bugs fixed with regression tests (Monitor anomaly cooldown ns-vs-seconds, positiveAssertion negative-slice crash, unterminated-char-class slice crashes x5 sites, JsonMini null-coercion, 3-digit octal escapes as group refs, overflowed brace bounds as {0,0}). Anchors in docs/w9b-coverage.md. | - |
 | G-C6 | DONE (W9c batch 1): six more byte-exact bugs fixed with regression tests - the PyAst aug-assignment infinite loop (`**=` pinned the tokenizer CPU-side, no deadline escape), the (?-i:...) scoped-emitter case-sensitivity inversion outside the scope, the call-arg walrus value never parsed, the `*args/**kwargs` + interleaved-comprehension rejections against python-valid input, and the `\g<num>/\g<name>` parse rejection; plus the behavior-preserving dead-defensive-code removals (AmbiguousTail shape-only parser, PyReParser unreachable arms, RegexWorkers catch, PyRe NOT_LITERAL/CATEGORY emitter arms). Anchors in docs/w9c-coverage.md. | - |
 

@@ -32,7 +32,8 @@ public fun handleBehaviorArrayMatch(current: Any?, part: String, expected: Strin
 
   val list = map[key] as? List<*> ?: return false
 
-  return list.any { item -> item.toString().lowercase() == expected.lowercase() }
+  // python str() over each item: None renders as "none" (str(None)).
+  return list.any { item -> (item?.toString() ?: "none").lowercase() == expected.lowercase() }
 }
 
 /** Port of `_traverse_json_path` (_behavior_json_pattern.py:26). */
@@ -67,7 +68,10 @@ public fun matchBehaviorJsonPattern(data: Any?, pattern: String): Boolean {
       current = map[part]
     }
 
-    current.toString().lowercase() == expected.lowercase()
+    // python str() over the leaf: None renders as "none" (str(None)), so a null
+    // leaf compares against the expected text instead of raising.
+    val rendered = current?.toString() ?: "none"
+    rendered.lowercase() == expected.lowercase()
   } catch (e: Exception) {
     false
   }
@@ -169,6 +173,10 @@ internal object PyJsonLike {
 
   private fun parseValue(element: kotlinx.serialization.json.JsonElement): Any? =
       when (element) {
+        // JsonNull IS a JsonPrimitive, so the is-check below would shadow the
+        // null branch and render python's None as the string "null"; check the
+        // null object first.
+        is kotlinx.serialization.json.JsonNull -> null
         is kotlinx.serialization.json.JsonObject ->
             element.entries.associate { (k, v) -> k to parseValue(v) }
         is kotlinx.serialization.json.JsonArray -> element.map { parseValue(it) }
@@ -178,7 +186,6 @@ internal object PyJsonLike {
               element.booleanOrNull != null -> element.booleanOrNull
               else -> element.longOrNull ?: element.doubleOrNull ?: element.content
             }
-        kotlinx.serialization.json.JsonNull -> null
       }
 
   private val kotlinx.serialization.json.JsonPrimitive.longOrNull: Long?
