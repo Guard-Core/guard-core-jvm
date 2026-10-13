@@ -349,19 +349,28 @@ class HandlersW9iTailsTest {
     assertEquals("\"caf\u00e9\"", compact)
   }
 
-  /** pydanticDatetimeJson's offset arms over explicit zones: a UTC timestamp renders
-   * the trailing Z and a non-UTC offset renders the +HH:MM form (73, 83-85) - both
-   * driven deterministically regardless of the host zone. */
+  /**
+   * pydanticDatetimeJson's offset arms over explicit zones: a UTC timestamp renders the trailing Z
+   * and a non-UTC offset renders the +HH:MM form (73, 83-85) - both driven deterministically
+   * regardless of the host zone.
+   */
   @Test
   fun `snapshot dump renders both timestamp offset forms`() {
     val utc =
         DynamicRules(
             ruleId = "w9i-utc",
             version = 1,
-            timestamp = java.time.OffsetDateTime.of(
-                2026, 10, 12, 8, 30, 0, 0,
-                java.time.ZoneOffset.UTC,
-            ),
+            timestamp =
+                java.time.OffsetDateTime.of(
+                    2026,
+                    10,
+                    12,
+                    8,
+                    30,
+                    0,
+                    0,
+                    java.time.ZoneOffset.UTC,
+                ),
         )
     val dumpedUtc = dumpLastKnownRulesSnapshot(utc)
     assertTrue(dumpedUtc.contains("2026-10-12T08:30:00Z"), dumpedUtc)
@@ -369,10 +378,17 @@ class HandlersW9iTailsTest {
         DynamicRules(
             ruleId = "w9i-shifted",
             version = 1,
-            timestamp = java.time.OffsetDateTime.of(
-                2026, 10, 12, 8, 30, 0, 0,
-                java.time.ZoneOffset.ofHoursMinutes(5, 30),
-            ),
+            timestamp =
+                java.time.OffsetDateTime.of(
+                    2026,
+                    10,
+                    12,
+                    8,
+                    30,
+                    0,
+                    0,
+                    java.time.ZoneOffset.ofHoursMinutes(5, 30),
+                ),
         )
     val dumpedShifted = dumpLastKnownRulesSnapshot(shifted)
     assertTrue(dumpedShifted.contains("2026-10-12T08:30:00+05:30"), dumpedShifted)
