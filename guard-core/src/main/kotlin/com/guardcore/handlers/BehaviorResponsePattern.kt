@@ -172,21 +172,20 @@ internal object PyJsonLike {
   fun parse(text: String): Any? = parseValue(json.parseToJsonElement(text))
 
   private fun parseValue(element: kotlinx.serialization.json.JsonElement): Any? =
-      when {
+      when (element) {
         // JsonNull IS a JsonPrimitive, so the is-check below would shadow the
         // null branch and render python's None as the string "null"; check the
         // null object first.
-        element is kotlinx.serialization.json.JsonNull -> null
-        element is kotlinx.serialization.json.JsonObject ->
+        is kotlinx.serialization.json.JsonNull -> null
+        is kotlinx.serialization.json.JsonObject ->
             element.entries.associate { (k, v) -> k to parseValue(v) }
-        element is kotlinx.serialization.json.JsonArray -> element.map { parseValue(it) }
-        element is kotlinx.serialization.json.JsonPrimitive ->
+        is kotlinx.serialization.json.JsonArray -> element.map { parseValue(it) }
+        is kotlinx.serialization.json.JsonPrimitive ->
             when {
               element.isString -> element.content
               element.booleanOrNull != null -> element.booleanOrNull
               else -> element.longOrNull ?: element.doubleOrNull ?: element.content
             }
-        else -> null
       }
 
   private val kotlinx.serialization.json.JsonPrimitive.longOrNull: Long?

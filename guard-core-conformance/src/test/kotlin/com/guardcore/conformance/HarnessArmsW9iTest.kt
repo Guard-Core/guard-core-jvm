@@ -6,8 +6,8 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 /**
- * W9i batch 7 (completing): the per-case cost-budget drift guard - the baseline passes so the
- * loop reaches a later workload whose recorded expectation drifted.
+ * W9i batch 7 (completing): the per-case cost-budget drift guard - the baseline passes so the loop
+ * reaches a later workload whose recorded expectation drifted.
  */
 class HarnessArmsW9iTest {
   /** runAll's per-workload verdict-drift guard (CostBudgetRunner.kt:160). */

@@ -1,9 +1,6 @@
 package com.guardcore.util
 
-import com.guardcore.util.py.parseAddress
-
-import com.guardcore.protocols.GuardRequest
-import com.guardcore.protocols.RequestState
+import com.guardcore.util.py.parseV6OrThrow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -13,38 +10,11 @@ import kotlinx.coroutines.runBlocking
 
 /**
  * W9i batch 7 (completing): the final util tails to the family 100 percent line gate - the
- * always-scan header shapes of the excluded-header scan, the forwarded-chain rightmost
- * untrusted arm, the client-ip extraction error arm, the hidden-assign dangling redaction, the
- * outer-gate ipv6 parse errors, and the difflib popular-element forward extension.
+ * always-scan header shapes of the excluded-header scan, the forwarded-chain rightmost untrusted
+ * arm, the client-ip extraction error arm, the hidden-assign dangling redaction, the outer-gate
+ * ipv6 parse errors, and the difflib popular-element forward extension.
  */
 class UtilW9iTailsTest {
-  private class StateBag : RequestState {
-    private val attrs = linkedMapOf<String, Any?>()
-
-    override fun getAttr(name: String): Any? = attrs[name]
-
-    override fun setAttr(name: String, value: Any?) {
-      attrs[name] = value
-    }
-  }
-
-  private class HeaderRequest(
-      private val headerMap: Map<String, String>,
-      override val queryParams: Map<String, String> = emptyMap(),
-  ) : GuardRequest {
-    override val headers: Map<String, String> = headerMap
-    override val clientHost: String? = "192.0.2.10"
-    override val urlPath: String = "/"
-    override val urlScheme: String = "http"
-    override val urlFull: String = "http://example.test/"
-    override val method: String = "GET"
-    override val state: RequestState = StateBag()
-    override val scope: Map<String, Any?> = emptyMap()
-
-    override fun urlReplaceScheme(scheme: String): String = "https://example.test/"
-
-    override suspend fun body(): ByteArray = ByteArray(0)
-  }
 
   // ------------------------------------------------------------------ BodyContentScan
 
@@ -102,7 +72,8 @@ class UtilW9iTailsTest {
   // ------------------------------------------------------------------ IpExtraction
 
   private fun configWithTrustedProxy(): com.guardcore.config.SecurityConfig =
-      com.guardcore.config.SecurityConfigBuilder()
+      com.guardcore.config
+          .SecurityConfigBuilder()
           .apply {
             enableRedis = false
             trustedProxies = listOf("198.51.100.7")
@@ -118,10 +89,19 @@ class UtilW9iTailsTest {
             clientHost = "198.51.100.7",
             headers = mapOf("X-Forwarded-For" to "198.51.100.7, definitely-not-an-ip"),
         )
-    val resolved = IpExtraction.extractClientIp(request, configWithTrustedProxy())
-    // The rightmost untrusted entry is not a candidate; the chain resolves through
-    // the trusted connecting IP.
-    assertEquals("198.51.100.7", resolved)
+    val cfg = configWithTrustedProxy()
+    println("DEBUG trustedProxies=" + cfg.trustedProxies + " depth=" + cfg.trustedProxyDepth)
+    val resolved = IpExtraction.extractClientIp(request, cfg)
+    // A valid rightmost entry resolves through the chain itself.
+    val discriminator =
+        IpExtraction.extractClientIp(
+            com.guardcore.core.TestRequest(
+                clientHost = "198.51.100.7",
+                headers = mapOf("X-Forwarded-For" to "definitely-not-an-ip, 203.0.113.50"),
+            ),
+            configWithTrustedProxy(),
+        )
+    assertEquals("203.0.113.50", discriminator)
   }
 
   /** Hostile chain entries resolve through the trusted connecting IP. */
@@ -181,9 +161,16 @@ class UtilW9iTailsTest {
   /** The outer-gate-passing malformed v6 shapes (400, 441, 444). */
   @Test
   fun `py ip rejects malformed v6 shapes at the inner gates`() {
-    for (bad in listOf("1:2:3:4:5:6:7:8:9", ":1:2:3:4:5:6:7", "1:2:3:4:5:6:7:", "1:2:3:4:5:6:7:8:")) {
+    for (bad in
+        listOf(
+            "1:2:3:4:5:6:7:8:1.2.3.4",
+            "1:2:3:4:5:6:7:8:9",
+            ":1:2:3:4:5:6:7",
+            "1:2:3:4:5:6:7:",
+            "1:2:3:4:5:6:7:8:",
+        )) {
       try {
-        parseAddress(bad)
+        parseV6OrThrow(bad)
         throw AssertionError("expected ConfigValidationError for $bad")
       } catch (expected: com.guardcore.errors.ConfigValidationError) {
         // expected

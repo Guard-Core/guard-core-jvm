@@ -40,7 +40,7 @@ public class SinkTelemetryMember(
   }
 }
 
-public class CompositeAgentHandler(
+public open class CompositeAgentHandler(
     public val handlers: List<AgentTelemetryMember>,
     public val eventFilter: EventFilter = EventFilter(),
     /** Port of the python `enricher` parameter (composite_handler.py:16). */
@@ -62,7 +62,7 @@ public class CompositeAgentHandler(
     get() = failedHandlers.toList()
 
   /** Port of `send_event` (composite_handler.py:36). */
-  public suspend fun sendEvent(event: Map<String, Any?>) {
+  public open suspend fun sendEvent(event: Map<String, Any?>) {
     val eventType = event["event_type"] as? String
     if (!eventType.isNullOrEmpty() && !eventFilter.isEventAllowed(eventType)) {
       return

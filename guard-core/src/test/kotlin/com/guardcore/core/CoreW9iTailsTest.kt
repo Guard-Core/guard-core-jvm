@@ -14,10 +14,9 @@ import com.guardcore.handlers.BehaviorRule
 import com.guardcore.handlers.BehaviorTracker
 import com.guardcore.handlers.DynamicRules
 import com.guardcore.handlers.HandlerAgentSink
-import com.guardcore.protocols.GuardRequest
 import com.guardcore.protocols.GuardRedisConnection
+import com.guardcore.protocols.GuardRequest
 import com.guardcore.protocols.RedisHandlerProtocol
-import com.guardcore.protocols.RequestState
 import java.util.logging.Logger
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -33,8 +32,8 @@ import kotlinx.coroutines.runBlocking
  * behavioral return-pattern violation through the decorator and the middleware counts arm, the
  * lazy-init geo failure arm and the merged dynamic-rule telemetry adapter, the event-bus send
  * failure and the sink protocol adapter, the otel span-attrs table and the throwing extraction
- * surface, the composite dynamic-rules short circuit, the referrer parse catch, and the small
- * check singles.
+ * surface, the composite dynamic-rules short circuit, the referrer parse catch, and the small check
+ * singles.
  */
 class CoreW9iTailsTest {
   private fun config(apply: SecurityConfigBuilder.() -> Unit = {}): SecurityConfig =
@@ -77,7 +76,9 @@ class CoreW9iTailsTest {
       throw IllegalStateException("w9i geo redis down")
     }
 
-    override suspend fun initializeAgent(agentHandler: com.guardcore.protocols.AgentHandlerProtocol) {}
+    override suspend fun initializeAgent(
+        agentHandler: com.guardcore.protocols.AgentHandlerProtocol,
+    ) {}
 
     override fun getCountry(ip: String): String? = null
 
@@ -89,9 +90,9 @@ class CoreW9iTailsTest {
   // ------------------------------------------------------------------ BehavioralProcessor
 
   /**
-   * processReturnRules' threshold-crossing decorator arm (130-139): two matching responses push
-   * the tracked timestamps past the threshold. The correlated-categories middleware arm (207)
-   * runs processGlobalReturnRules with a middleware that is not the GuardMiddlewareProtocol.
+   * processReturnRules' threshold-crossing decorator arm (130-139): two matching responses push the
+   * tracked timestamps past the threshold. The correlated-categories middleware arm (207) runs
+   * processGlobalReturnRules with a middleware that is not the GuardMiddlewareProtocol.
    */
   @Test
   fun `behavioral return rules cross the threshold through the decorator`(): Unit = runBlocking {
@@ -143,10 +144,14 @@ class CoreW9iTailsTest {
 
   // ------------------------------------------------------------------ HandlerInitializer
 
-  /** runLazyInit's geo failure arm (206-207): a handler whose initializeRedis throws. */
+  /**
+   * runLazyInit's geo failure arm (206-207): a handler whose initializeRedis throws. The redis
+   * handler must be a RedisHandlerProtocol so the lazy call is reached at all.
+   */
   @Test
   fun `lazy init logs and swallows a failing geo handler`(): Unit = runBlocking {
-    val initializer = HandlerInitializer(config(), geoIpHandler = ThrowingGeo())
+    val initializer =
+        HandlerInitializer(config(), redisHandler = NullRedis(), geoIpHandler = ThrowingGeo())
     initializer.runLazyInit()
   }
 
@@ -196,16 +201,46 @@ class CoreW9iTailsTest {
     // The update loop's first pass fires the rule-received event through the adapter.
     delay(1500)
     assertTrue(events >= 1, "expected the adapter to forward the rule event")
+
+    // A telemetry surface that is BOTH a composite and a sink takes the adapter's
+    // sink-forwarding branch (433).
+    var sinkEvents = 0
+    val hybrid =
+        object : CompositeAgentHandler(listOf(rulesMember)), HandlerAgentSink {
+          override suspend fun sendEvent(event: Map<String, Any?>) {
+            sinkEvents += 1
+          }
+        }
+    val hybridInitializer =
+        HandlerInitializer(
+            builder.build(),
+            agentHandler =
+                object : HandlerAgentSink {
+                  override suspend fun sendEvent(event: Map<String, Any?>) {}
+                },
+        )
+    hybridInitializer.compositeHandler = hybrid
+    hybridInitializer.initializeDynamicRuleManager()
+    delay(1500)
+    assertTrue(sinkEvents >= 1, "expected the hybrid sink branch to forward the rule event")
   }
 
   // ------------------------------------------------------------------ SecurityEventBus
 
-  /** The send-failure catch (132-133) over a throwing agent sink and the sink protocol
-   * adapter's initializeRedis body (224). */
+  /**
+   * The send-failure catch (132-133) over a throwing agent sink and the sink protocol adapter's
+   * initializeRedis body (224).
+   */
   @Test
   fun `event bus survives a failing agent and adapts the sink`(): Unit = runBlocking {
     val mw =
-        middleware(apply = { agentEnableEvents = true; enableAgent = true; agentApiKey = "w9i" })
+        middleware(
+            apply = {
+              agentEnableEvents = true
+              enableAgent = true
+              agentApiKey = "w9i"
+            },
+        )
     val bus =
         SecurityEventBus(
             agentHandler =
@@ -237,40 +272,56 @@ class CoreW9iTailsTest {
 
   // ------------------------------------------------------------------ OtelHandler
 
-  /** The span-attrs table (55) and the extraction-surface failure arm (145). */
+  /**
+   * The span-attrs table (55) and the extraction-surface failure arm (145): the started OtelHandler
+   * member receives an event whose traceparent drives a throwing surface.
+   */
   @Test
   fun `otel handler span attrs and a throwing surface`(): Unit = runBlocking {
     assertTrue(OtelHandler.EVENT_SPAN_ATTRS.isNotEmpty())
-    val mw =
-        middleware(apply = { agentEnableEvents = true; enableAgent = true; agentApiKey = "w9i" })
+    val providerConfig =
+        object : OtelHandler.ProviderConfig {
+          override val otelServiceName: String = "w9i"
+          override val otelResourceAttributes: Map<String, String> = emptyMap()
+          override val otelExporterEndpoint: String? = null
+        }
     val previousSurface = OtelHandler.surface
     OtelHandler.surface =
         object : OtelHandler.OtelSurface {
-          override fun startSpan(name: String, attributes: Map<String, Any?>, parentContext: Any?) {}
+          override fun startSpan(
+              name: String,
+              attributes: Map<String, Any?>,
+              parentContext: Any?,
+          ) {}
 
-          override fun recordHistogram(name: String, value: Double, attributes: Map<String, Any?>) {}
+          override fun recordHistogram(
+              name: String,
+              value: Double,
+              attributes: Map<String, Any?>,
+          ) {}
 
-          override fun recordCounterAdd(name: String, value: Double, attributes: Map<String, Any?>) {}
+          override fun recordCounterAdd(
+              name: String,
+              value: Double,
+              attributes: Map<String, Any?>,
+          ) {}
 
           override fun extractTraceContext(carrier: Map<String, String>): Any? {
             throw IllegalStateException("w9i otel surface down")
           }
         }
     try {
-      val bus =
-          SecurityEventBus(
-              agentHandler =
-                  object : HandlerAgentSink {
-                    override suspend fun sendEvent(event: Map<String, Any?>) {}
-                  },
-              config = mw.config,
-          )
-      bus.sendMiddlewareEvent(
-          EventTypes.EVENT_PENETRATION_ATTEMPT,
-          TestRequest(urlPath = "/api"),
-          "request_blocked",
-          "because",
-          linkedMapOf("traceparent" to "00-abc-def-01"),
+      val handler = OtelHandler(providerConfig)
+      handler.start()
+      handler.sendEvent(
+          linkedMapOf(
+              "event_type" to EventTypes.EVENT_PENETRATION_ATTEMPT,
+              "ip_address" to "192.0.2.10",
+              "action_taken" to "request_blocked",
+              "reason" to "because",
+              "endpoint" to "/api",
+              "metadata" to linkedMapOf("traceparent" to "00-abc-def-01"),
+          ),
       )
     } finally {
       OtelHandler.surface = previousSurface
@@ -300,8 +351,10 @@ class CoreW9iTailsTest {
 
   // ------------------------------------------------------------------ Checks helpers
 
-  /** isReferrerDomainAllowed's urlsplit catch (347) and resolveAndApplyThresholdBan's
-   * not-applied arm (479). */
+  /**
+   * isReferrerDomainAllowed's urlsplit catch (347) and resolveAndApplyThresholdBan's not-applied
+   * arm (479).
+   */
   @Test
   fun `referrer parse catch and threshold ban not applied`(): Unit = runBlocking {
     assertFalse(
@@ -340,8 +393,7 @@ class CoreW9iTailsTest {
   @Test
   fun `required headers classifies an advanced header violation`(): Unit = runBlocking {
     val mw = middleware()
-    val route =
-        RouteConfig().apply { requiredHeaders.put("x-tenant-id", "tenant-1") }
+    val route = RouteConfig().apply { requiredHeaders.put("x-tenant-id", "tenant-1") }
     val check = com.guardcore.core.checks.implementations.RequiredHeadersCheck(mw)
     val blocked = check.check(requestWithRoute(route))
     assertNotNull(blocked)
@@ -371,17 +423,39 @@ class CoreW9iTailsTest {
               rateLimitWindow = 60
             },
         )
-    val route = RouteConfig().apply { rateLimit = 1; rateLimitWindow = 60 }
+    val route =
+        RouteConfig().apply {
+          rateLimit = 1
+          rateLimitWindow = 60
+        }
     val check = com.guardcore.core.checks.implementations.RateLimitCheck(mw)
-    assertNull(check.check(requestWithRoute(route)))
-    // The second request exceeds the limit; passive mode logs it and yields (145).
-    assertNull(check.check(requestWithRoute(route)))
+    val firstRequest = requestWithRoute(route)
+    firstRequest.state.setAttr("client_ip", "192.0.2.10")
+    assertNull(check.check(firstRequest))
+    // The second request exceeds the limit; passive mode logs it and yields (147).
+    val secondRequest = requestWithRoute(route)
+    secondRequest.state.setAttr("client_ip", "192.0.2.10")
+    assertNull(check.check(secondRequest))
+  }
+
+  // ------------------------------------------------------------------ Config
+
+  /**
+   * valueByName's exclude_paths read (SecurityConfig 2556, the copy-revalidation field read): a
+   * pure field projection, asserted against the property.
+   */
+  @Test
+  fun `value by name reads the exclude paths field`() {
+    val base = config()
+    assertEquals(base.excludePaths, base.valueByName("exclude_paths"))
   }
 
   // ------------------------------------------------------------------ Protocols
 
-  /** The interface default-arg synthetics: CloudIpStore.set without ttl (12) and
-   * sendMiddlewareEvent without metadata (22), invoked through the protocol types. */
+  /**
+   * The interface default-arg synthetics: CloudIpStore.set without ttl (12) and sendMiddlewareEvent
+   * without metadata (22), invoked through the protocol types.
+   */
   @Test
   fun `protocol default arguments invoke the interface synthetics`(): Unit = runBlocking {
     var stored: Pair<String, Set<String>>? = null

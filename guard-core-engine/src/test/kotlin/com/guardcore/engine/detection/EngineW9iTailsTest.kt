@@ -1,5 +1,6 @@
 package com.guardcore.engine.detection
 
+import com.guardcore.engine.py.PyAst
 import com.guardcore.engine.py.PyRe
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -11,8 +12,8 @@ import kotlin.test.assertTrue
 /**
  * W9i batch 7 (completing): the final engine tails to the family 100 percent line gate - the
  * batch-compile ReCompileError skip arm (a legal python pattern whose java translation fails to
- * compile), the truncation attack-budget concatenation, the class/escape terminator tokens, and
- * the class-intersection crossing arms where a non-pairing group slot follows a pairing class.
+ * compile), the truncation attack-budget concatenation, the class/escape terminator tokens, and the
+ * class-intersection crossing arms where a non-pairing group slot follows a pairing class.
  */
 class EngineW9iTailsTest {
   /** batchCompile's ReCompileError skip arm (172-173): parses as python, fails as java. */
@@ -58,12 +59,15 @@ class EngineW9iTailsTest {
   fun `class intersection crosses groups fed by a diverged exact state`() {
     val patterns =
         listOf(
-            // exactFill pairing arm (141-142) + the empty-overlap state handoff (144-148).
+            // The pairing chain over a disjoint pairing slot (the empty-overlap verdict).
             "[ab]+(?:[aq])+[zq]+",
             // A boundary group (min 1) disjoint from shared with a non-null exact fill (72).
             "[ab]+(?:[aq])+(?:[b])+",
             // An allows-zero group whose inner chain fails the crossing (74).
             "[ab]+(?:[aq])+(?:[ab][z])*",
+            // A bounded multi-atom group (non-boundary, inner atoms min 1) whose crossing
+            // fails at the first inner atom (74).
+            "[ab]+(?:z[b]){0,3}",
         )
     for (pattern in patterns) {
       val builders = reachProbeCandidateBuilders(pattern, 0, null)
@@ -71,5 +75,30 @@ class EngineW9iTailsTest {
       assertTrue(builders.isNotEmpty(), pattern)
     }
     assertNotNull(classIntersectionProbeUnits("[ab]+(?:[aq])+(?:[b])+", 0))
+  }
+
+  /** Base64Decode: the fragment reassembly appended beside the base decode (219). */
+  @Test
+  fun `base64 decode appends the fragment reassembly`() {
+    // The wrapped-attack pipeline shape: over the iterated decode passes the
+    // fragment pass reassembles the wrapped payload and appends it beside the
+    // base with the python separator (219).
+    val out =
+        ContentPreprocessor()
+            .decodeCommonEncodings(
+                "eval(base64_decode('YWxlcnQoMSk='))",
+                null,
+            )
+    assertTrue(out.contains("alert(1)"), out)
+    assertTrue(out.contains(" "), "expected the reassembly appended beside the base: " + out)
+  }
+
+  /** PyAst: the lambda parameter list's bare-star continuation (249). */
+  @Test
+  fun `py ast walks a bare star lambda parameter`() {
+    // "lambda a*: 1" walks the name parameter, takes the bare-star continuation,
+    // then fails on the dangling colon - the arm is the parse walk itself.
+    kotlin.test.assertFalse(PyAst.parsesAsExpression("lambda a*: 1"))
+    assertTrue(PyAst.parsesAsExpression("lambda *a: 1"))
   }
 }

@@ -12,8 +12,8 @@ import kotlin.test.assertTrue
 class SusPatternsW9iTailsTest {
   /**
    * detect() over the LEGACY detection state: with no compiler the manager takes
-   * checkRegexPatternWithRetry, and a benign legacy-IPv4-host match exercises
-   * buildRegexThreat's candidate rejection plus the retry loop's advance.
+   * checkRegexPatternWithRetry, and a benign legacy-IPv4-host match exercises buildRegexThreat's
+   * candidate rejection plus the retry loop's advance.
    */
   @Test
   fun `legacy detect rejects a benign legacy ipv4 host candidate`() {
@@ -27,6 +27,23 @@ class SusPatternsW9iTailsTest {
       val threats = result.threats.filter { it.category == "ssrf" && it.pattern.contains("://") }
       assertTrue(threats.isEmpty(), "benign legacy ipv4 host must not be reported")
       assertNotNull(result)
+    } finally {
+      manager.detectionState = original
+    }
+  }
+
+  /**
+   * detect() over a path-probe token under a query-param context: the recon pattern matches but the
+   * matched text is not a probe in that context, so buildRegexThreat rejects it.
+   */
+  @Test
+  fun `legacy detect rejects a non-probe recon match under query params`() {
+    val manager = SusPatternsManager.shared()
+    val original = manager.detectionState
+    try {
+      manager.detectionState = LEGACY_DETECTION_STATE
+      val result = manager.detect("actuator", "203.0.113.7", context = "query_param")
+      assertTrue(result.threats.isEmpty(), "the recon match is not a probe under query params")
     } finally {
       manager.detectionState = original
     }

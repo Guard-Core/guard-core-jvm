@@ -21,3 +21,4 @@ local.properties
 # Release rehearsal / publish staging leftovers
 central-bundle.zip
 .kotlin/
+__pycache__/
