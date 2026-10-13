@@ -1005,7 +1005,7 @@ test surface. None of these rows is a parity gap.
 | decorator callables + `*Mixin` composition | `SecurityDecorator` factory methods (25/25); adapter annotations (Boot) / plugin (ktor); `HandlerRouteKey` method identity | 24 | SecurityDecoratorTest 1:1; both adapters' decorator suites |
 | pydantic `BaseModel`/`Field` + validators | `SecurityConfig` properties + `ConfigFieldRegistry` `FieldMeta` + builder, byte-matched rejection messages | 129 | W1 field-for-field gate (docs/w1-config-parity.md) |
 | `typing.Protocol` (runtime_checkable) | Kotlin interfaces | 61 | adapters implement them over native types (W6) |
-| redis-py | Lettuce 6.7.1 | handlers | redis_interop 14/14, section 08 schema byte-exact |
+| redis-py | Lettuce 6.8.2 | handlers | redis_interop 14/14, section 08 schema byte-exact |
 | `re` module | PyRe translation layer (python-grammar fail-closed parser) | detection | pattern ledger 158 as_is / 0 translated; detect 193/193 |
 | `logging` | slf4j-style console handlers + ported formatters | utils | logging display tests (W3+) |
 | contextvars scan budget | `DetectionScanBudget` over the `DetectionScanContext` seam | utils | cost budgets 9/9 |
