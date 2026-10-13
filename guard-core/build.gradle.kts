@@ -17,6 +17,7 @@ dependencies {
   implementation(libs.kotlinx.coroutines.core)
   implementation(libs.kotlinx.serialization.json)
   api(libs.lettuce.core)
+  api(platform(libs.netty.bom))
   api(libs.maxmind.db)
   api(libs.slf4j.api)
 

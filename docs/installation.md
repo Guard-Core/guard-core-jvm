@@ -27,6 +27,8 @@ to guard-core.com). Kotlin packages stay `com.guardcore.*` (hyphens are
 illegal in package names; the groupId/package mismatch is standard for
 hyphenated domains).
 
+The facade pins netty through `io.netty:netty-bom` (4.1.139.Final, above the version lettuce-core 6.8.2 declares). Gradle builds apply that pin automatically from the published module metadata. Maven does not inherit a dependency's `dependencyManagement`, so in a Maven build, import the same BOM in your own `dependencyManagement` to get the patched netty.
+
 Adapters normally consume the adapter artifact, not the facade directly:
 
 ```kotlin
