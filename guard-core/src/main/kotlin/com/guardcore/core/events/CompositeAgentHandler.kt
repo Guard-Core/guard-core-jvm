@@ -1,5 +1,7 @@
 package com.guardcore.core.events
 
+import com.guardcore.protocols.AgentHandlerProtocol
+import com.guardcore.protocols.RedisHandlerProtocol
 import java.util.logging.Logger
 
 /**
@@ -36,8 +38,47 @@ public class SinkTelemetryMember(
   }
 
   override suspend fun sendMetric(metric: Map<String, Any?>) {
-    sink.sendEvent(metric)
+    sink.sendMetric(metric)
   }
+}
+
+/**
+ * Adapter: an injected [AgentHandlerProtocol] (the shape the adapters pass,
+ * handler_initializer.py:87 appends any agent handler) as a composite member. Redis is forwarded
+ * only when it is a [RedisHandlerProtocol].
+ */
+public class ProtocolTelemetryMember(
+    private val agent: AgentHandlerProtocol,
+) : AgentTelemetryMember {
+  override suspend fun sendEvent(event: Map<String, Any?>) {
+    agent.sendEvent(event)
+  }
+
+  override suspend fun sendMetric(metric: Map<String, Any?>) {
+    agent.sendMetric(metric)
+  }
+
+  override suspend fun initializeRedis(redisHandler: Any?) {
+    if (redisHandler is RedisHandlerProtocol) {
+      agent.initializeRedis(redisHandler)
+    }
+  }
+
+  override suspend fun start() {
+    agent.start()
+  }
+
+  override suspend fun stop() {
+    agent.stop()
+  }
+
+  override suspend fun flushBuffer() {
+    agent.flushBuffer()
+  }
+
+  override suspend fun getDynamicRules(): Any? = agent.getDynamicRules()
+
+  override suspend fun healthCheck(): Boolean = agent.healthCheck()
 }
 
 public open class CompositeAgentHandler(
@@ -78,7 +119,7 @@ public open class CompositeAgentHandler(
   }
 
   /** Port of `send_metric` (composite_handler.py:48). */
-  public suspend fun sendMetric(metric: Map<String, Any?>) {
+  public open suspend fun sendMetric(metric: Map<String, Any?>) {
     val metricType = metric["metric_type"] as? String
     if (!metricType.isNullOrEmpty() && !eventFilter.isMetricAllowed(metricType)) {
       return

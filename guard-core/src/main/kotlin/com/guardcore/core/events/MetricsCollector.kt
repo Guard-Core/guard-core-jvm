@@ -46,7 +46,7 @@ public class MetricsCollector(
               value = value,
               tags = tags ?: emptyMap(),
           )
-      agentHandler.sendEvent(
+      agentHandler.sendMetric(
           linkedMapOf(
               "timestamp" to metric.timestamp,
               "metric_type" to metric.metricType,

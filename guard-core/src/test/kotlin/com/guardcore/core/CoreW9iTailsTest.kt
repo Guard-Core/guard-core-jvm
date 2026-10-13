@@ -210,6 +210,9 @@ class CoreW9iTailsTest {
           override suspend fun sendEvent(event: Map<String, Any?>) {
             sinkEvents += 1
           }
+
+          override suspend fun sendMetric(metric: Map<String, Any?>) =
+              super<CompositeAgentHandler>.sendMetric(metric)
         }
     val hybridInitializer =
         HandlerInitializer(

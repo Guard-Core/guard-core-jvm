@@ -228,18 +228,18 @@ EXCLUDES = {
                      "future completes with a CompletionException (mid-flight connection "
                      "loss); plain driver failures raise through the ExecutionException "
                      "unwrap at 255-258"),
-        ((339, 341), "getInstance synchronized again-branch: the same double-checked- "
+        ((351, 353), "getInstance synchronized again-branch: the same double-checked- "
                      "locking benign-race family as the excluded IpInfoManager 97-102 - "
                      "a second creator thread must win the race between the outer read "
                      "and the synchronized re-read"),
-        ((724, 724), "unparseableRedisUrl default-arg synthetic: the only default- "
-                     "omitting call site is the urlsplit catch at 738-739 (the covered "
-                     "752 call passes the scheme explicitly), and 738-739 is dead below "
+        ((736, 736), "unparseableRedisUrl default-arg synthetic: the only default- "
+                     "omitting call site is the urlsplit catch at 750-751 (the covered "
+                     "764 call passes the scheme explicitly), and 750-751 is dead below "
                      "- the synthetic has no live caller"),
-        ((738, 739), "redactRedisUrl urlsplit catch: the ported PyUrllib.urlsplit is "
+        ((750, 751), "redactRedisUrl urlsplit catch: the ported PyUrllib.urlsplit is "
                      "total over every string input (zero throw sites in PyUrllib.kt; "
                      "the python Invalid-IPv6-URL checks live in splitHostPort, whose "
-                     "catch at 751-753 is covered), so the catch cannot fire"),
+                     "catch at 763-765 is covered), so the catch cannot fire"),
     ],
     "PairRedaction.kt": [
         ((136, 136), "percent-escape conjunct of resolvePairResult: decodedName resolves "
@@ -373,13 +373,13 @@ EXCLUDES = {
                    "dispatch site"),
     ],
     "HandlerInitializer.kt": [
-        ((197, 198), "lazy cloud-IP initialization catch: initializeCloudRedis guards "
+        ((207, 208), "lazy cloud-IP initialization catch: initializeCloudRedis guards "
                      "every failure inside its own per-provider try bodies "
                      "(refreshAsync's loop catch and refreshProvidersViaRedisHandler's "
                      "loop catch), the pre-loop returns are clean, and "
                      "bareProviderNames/parseCloudSelectors are total string ops - no "
                      "exception can escape initializeCloudRedis to reach the lazy-init "
-                     "catch (the geo arm at 206-207 is covered by a throwing handler "
+                     "catch (the geo arm at 216-217 is covered by a throwing handler "
                      "test)"),
     ],
     "IpExtraction.kt": [

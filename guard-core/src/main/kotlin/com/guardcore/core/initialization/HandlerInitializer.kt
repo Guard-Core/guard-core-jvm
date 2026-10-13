@@ -7,6 +7,7 @@ import com.guardcore.core.events.EnrichmentContext
 import com.guardcore.core.events.EventEnricher
 import com.guardcore.core.events.EventFilter
 import com.guardcore.core.events.MetricsCollector
+import com.guardcore.core.events.ProtocolTelemetryMember
 import com.guardcore.core.events.SecurityEventBus
 import com.guardcore.core.events.SinkTelemetryMember
 import com.guardcore.errors.GuardRedisError
@@ -22,6 +23,7 @@ import com.guardcore.handlers.SecurityHeadersManager
 import com.guardcore.handlers.SusPatternsRegistry
 import com.guardcore.handlers.initializeBanAgent
 import com.guardcore.handlers.initializeBanRedis
+import com.guardcore.protocols.AgentHandlerProtocol
 import com.guardcore.protocols.GeoIPHandler
 import java.util.logging.Logger
 
@@ -119,7 +121,11 @@ public class HandlerInitializer(
   /** Python `build_composite_handler` (handler_initializer.py:87). */
   public fun buildCompositeHandler(): CompositeAgentHandler {
     val members = mutableListOf<AgentTelemetryMember>()
-    (agentHandler as? HandlerAgentSink)?.let { members.add(SinkTelemetryMember(it)) }
+    when (val agent = agentHandler) {
+      is AgentTelemetryMember -> members.add(agent)
+      is HandlerAgentSink -> members.add(SinkTelemetryMember(agent))
+      is AgentHandlerProtocol -> members.add(ProtocolTelemetryMember(agent))
+    }
     if (config.enableOtel || config.enableLogfire) {
       // The python factory appends OtelHandler/LogfireHandler (handler_initializer.py:93-100);
       // the JVM mirrors the construction through the factory seam. The default raises explicitly
@@ -178,6 +184,10 @@ public class HandlerInitializer(
     return object : HandlerAgentSink {
       override suspend fun sendEvent(event: Map<String, Any?>) {
         composite.sendEvent(event)
+      }
+
+      override suspend fun sendMetric(metric: Map<String, Any?>) {
+        composite.sendMetric(metric)
       }
     }
   }
