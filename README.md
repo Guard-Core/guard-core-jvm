@@ -23,7 +23,7 @@ ___
     <a href="https://github.com/Guard-Core/guard-core-jvm/blob/master/LICENSE-APACHE">
         <img src="https://img.shields.io/badge/License-Apache_2.0%20%2B%20MIT-blue.svg" alt="License Apache-2.0 + MIT">
     </a>
-    <img src="https://img.shields.io/badge/version-4.3.2-0080ff.svg" alt="Version 4.3.2">
+    <img src="https://img.shields.io/badge/version-4.3.3-0080ff.svg" alt="Version 4.3.3">
 </p>
 
 ___
@@ -37,8 +37,8 @@ first synchronized release, on explicit operator go
 ([docs/release.md](docs/release.md)). Until then nothing is published: build
 from source or consume the composite as described below.
 
-**Mirror statement:** guard-core-jvm 4.3.2 mirrors the
-[guard-core 4.3.2](https://github.com/Guard-Core/guard-core) release. Versions
+**Mirror statement:** guard-core-jvm 4.3.3 mirrors the
+[guard-core 4.3.3](https://github.com/Guard-Core/guard-core) release. Versions
 move in lockstep, and the conformance corpus records the exact engine commit
 it was regenerated at (see
 [conformance/README.md](conformance/README.md) for provenance). The Maven
@@ -51,8 +51,8 @@ hyphenated domains).
 
 | Module | Path | Artifact | Contents |
 |---|---|---|---|
-| Engine | `guard-core-engine/` | `com.guard-core:guard-core-engine:4.3.2` | Framework-free detection core, `kotlin-stdlib` only (no coroutines, no redis, no frameworks): the PyRe layer (python-grammar fail-closed regex parser, translation + flag mapping + match semantics over `java.util.regex`), the full 25-module ReDoS static-safety chain (IntervalSet through CostArbiter) with hard match deadlines via `DeadlineCharSequence`, the semantic analyzer and monitor, and SusPatterns (157-row pattern table, matchers, file-upload/template/shell/ldap/xml-xxe/pickle sources) |
-| Facade | `guard-core/` | `com.guard-core:guard-core:4.3.2` | The single integration artifact: `SecurityConfig` (129 fields, field-for-field with the reference, byte-matched rejection messages), the 17-check pipeline in the reference's fixed order, the handler set (Redis/Lettuce rate limiting + bans, IP bans, cloud providers, GeoIP, security headers, CORS, behavioral tracking, dynamic rules), the event bus with the guard-agent envelope, 25 decorator factories, and the Java bridges (suspend primary, `xBlocking` and `xFuture` variants for Java-only consumers) |
+| Engine | `guard-core-engine/` | `com.guard-core:guard-core-engine:4.3.3` | Framework-free detection core, `kotlin-stdlib` only (no coroutines, no redis, no frameworks): the PyRe layer (python-grammar fail-closed regex parser, translation + flag mapping + match semantics over `java.util.regex`), the full 25-module ReDoS static-safety chain (IntervalSet through CostArbiter) with hard match deadlines via `DeadlineCharSequence`, the semantic analyzer and monitor, and SusPatterns (157-row pattern table, matchers, file-upload/template/shell/ldap/xml-xxe/pickle sources) |
+| Facade | `guard-core/` | `com.guard-core:guard-core:4.3.3` | The single integration artifact: `SecurityConfig` (129 fields, field-for-field with the reference, byte-matched rejection messages), the 17-check pipeline in the reference's fixed order, the handler set (Redis/Lettuce rate limiting + bans, IP bans, cloud providers, GeoIP, security headers, CORS, behavioral tracking, dynamic rules), the event bus with the guard-agent envelope, 25 decorator factories, and the Java bridges (suspend primary, `xBlocking` and `xFuture` variants for Java-only consumers) |
 | Conformance | `guard-core-conformance/` | unpublished | The spec 4.1.0 corpus runner: the full-corpus gate runs all 21 vendored suites (375 cases) plus 9 self-relative cost budgets in one command, fail-closed on totals |
 | Benchmark | `guard-core-benchmark/` | unpublished | JMH cost-ceiling benchmarks backing the corpus budgets (all workloads run 5.7-16x under ceiling at certification) |
 
@@ -70,7 +70,7 @@ Once the first release is on Maven Central, the coordinates are:
 dependencies {
     implementation("com.guard-core:spring-boot-guard:1.0.0") // adapter of your choice
     // or the facade directly:
-    implementation("com.guard-core:guard-core:4.3.2")
+    implementation("com.guard-core:guard-core:4.3.3")
 }
 ```
 
