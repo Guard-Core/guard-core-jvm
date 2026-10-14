@@ -1,4 +1,5 @@
 site_name: guard-core-jvm
+site_url: https://guard-core.github.io/guard-core-jvm/
 site_description: Kotlin/JVM port of the guard-core engine - detection, rate limiting, IP banning, and cloud provider blocking for the JVM
 site_author: Renn F
 repo_url: https://github.com/Guard-Core/guard-core-jvm
