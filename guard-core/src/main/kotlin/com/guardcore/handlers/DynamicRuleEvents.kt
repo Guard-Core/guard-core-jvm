@@ -108,6 +108,15 @@ public val DYNAMIC_RULE_SNAPSHOT_FIELDS: List<String> =
 public val VALID_CLOUD_PROVIDERS: Set<String> =
     setOf("AWS", "GCP", "Azure", "DigitalOcean", "Linode", "Vultr")
 
+/** Python `deepcopy` of a snapshot value: collections are copied, scalars are immutable. */
+private fun deepCopy(value: Any?): Any? =
+    when (value) {
+      is Set<*> -> value.mapTo(LinkedHashSet()) { deepCopy(it) }
+      is List<*> -> value.map { deepCopy(it) }
+      is Map<*, *> -> value.entries.associateTo(LinkedHashMap()) { it.key to deepCopy(it.value) }
+      else -> value
+    }
+
 /** Port of `_snapshot_config` (dynamic_rule_handler.py:219): deepcopy per snapshot field. */
 public fun snapshotConfig(config: SecurityConfig): Map<String, Any?> {
   val live: Map<String, Any?> =
@@ -131,7 +140,7 @@ public fun snapshotConfig(config: SecurityConfig): Map<String, Any?> {
   val snapshot = linkedMapOf<String, Any?>()
   for (field in DYNAMIC_RULE_SNAPSHOT_FIELDS) {
     if (live.containsKey(field)) {
-      snapshot[field] = live[field]
+      snapshot[field] = deepCopy(live[field])
     }
   }
   return snapshot
@@ -140,7 +149,7 @@ public fun snapshotConfig(config: SecurityConfig): Map<String, Any?> {
 /** Port of `_restore_config` (dynamic_rule_handler.py:226). */
 public fun restoreConfig(config: SecurityConfig, snapshot: Map<String, Any?>) {
   for ((field, value) in snapshot) {
-    config.setPrevalidated(field, value)
+    config.setPrevalidated(field, deepCopy(value))
   }
 }
 

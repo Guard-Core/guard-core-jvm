@@ -269,9 +269,16 @@ internal constructor(
     }
   }
 
-  /** Port of `_apply_rules` (dynamic_rule_handler.py:234). */
+  /**
+   * Port of `_apply_rules` (dynamic_rule_handler.py:234): each version overlays the true base. The
+   * active base snapshot is restored first, so the emergency halving and the replaced collections
+   * never compound across versions, and a failed apply restores the config as it was before the
+   * call (the active version), not the base.
+   */
   public suspend fun applyRules(rules: DynamicRules) {
     lock.withLock {
+      val previous = snapshotConfig(config)
+      activeBaseSnapshot?.let { restoreConfig(config, it) }
       val snapshot = snapshotConfig(config)
       try {
         applyIpRules(rules)
@@ -284,7 +291,7 @@ internal constructor(
           activateEmergencyMode(rules.emergencyWhitelist)
         }
       } catch (e: Exception) {
-        restoreConfig(config, snapshot)
+        restoreConfig(config, previous)
         logger.severe("Failed to apply dynamic rules: $e")
         throw e
       }
@@ -492,6 +499,8 @@ internal constructor(
 
   /** Port of `_apply_pattern_rules` (_dynamic_rule_application.py:159). */
   public open suspend fun applyPatternRules(patterns: List<String>) {
+    val known = SusPatternsRegistry.getAllPatterns().toSet()
+    @Suppress("NAME_SHADOWING") val patterns = patterns.filter { it !in known }
     val added = patterns.filter { SusPatternsRegistry.addPattern(it) }
     if (added.isNotEmpty()) {
       logger.info("Dynamic rule: Added suspicious patterns ${redactPatternList(added)}")

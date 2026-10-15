@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Dynamic rules: each rule version now applies over the base config instead of over the previous version's result (`DynamicRuleManager.applyRules`, `_apply_rules` in guard-core #169). The active base snapshot is restored first, so the emergency auto-ban halving no longer compounds (16 went 8, 4, 2 across versions 1 to 3, and now stays 8), a change from an earlier version no longer lingers when a later version omits it, and expiry restores the true base. A failed apply restores the config as it was before the call, so the previously active version keeps running. Snapshot and restore copy collection values (`deepcopy` in the reference). `suspiciousPatterns` the registry already holds are skipped instead of re-added on every version.
+
 ### Changed
 
 - Agent wiring: `HandlerInitializer.buildCompositeHandler()` now adds any injected agent handler to the composite, as `handler_initializer.py:87-105` does. An `AgentTelemetryMember` (the `GuardAgentTelemetry` bridge) is used directly, a `HandlerAgentSink` goes through `SinkTelemetryMember`, and a plain `AgentHandlerProtocol` goes through the new `ProtocolTelemetryMember`. Before, only a `HandlerAgentSink` was composed, so the protocol-typed agent the adapters inject was never started and received no events.

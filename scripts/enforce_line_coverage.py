@@ -345,13 +345,13 @@ EXCLUDES = {
                      "internally, so nothing in the loop body can raise except "
                      "CancellationException (handled above) - the arm is provably dead "
                      "defensive code"),
-        ((647, 649), "persistLastKnownRules dump catch: dumpLastKnownRulesSnapshot is "
+        ((656, 658), "persistLastKnownRules dump catch: dumpLastKnownRulesSnapshot is "
                      "total over the typed DynamicRules domain (every field renders "
                      "through JsonPrimitive/stringListJson and PyJsonDumps of a "
                      "JsonObject cannot throw), so the wrapper only guards failure "
                      "classes python's json.dumps could raise (the arm preserves the "
                      "reference's structural wrapper)"),
-        ((687, 687), "writeLastKnownRulesFile cleanup-ignored arm: deleteIfExists runs "
+        ((696, 696), "writeLastKnownRulesFile cleanup-ignored arm: deleteIfExists runs "
                      "on a temp file this function just created in a freshly-writable "
                      "parent, which on POSIX always deletes; the arm exists for Windows "
                      "file-lock semantics (the same family as the excluded IpInfoManager "
