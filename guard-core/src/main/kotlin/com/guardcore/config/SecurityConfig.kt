@@ -1100,7 +1100,17 @@ internal constructor(
 
   private var _enableDynamicRules: Boolean = false
 
-  /** python_name: enable_dynamic_rules (models.py:703). */
+  /**
+   * python_name: enable_dynamic_rules (models.py:703).
+   *
+   * Lets the SaaS dashboard change protection at runtime without a code change: a rule bans the IPs
+   * in its ip_blacklist (for ip_ban_duration seconds), unbans the IPs in its ip_whitelist, adds its
+   * suspicious_patterns to detection, and replaces blocked_countries, whitelist_countries,
+   * rate_limit, rate_limit_window, endpoint_rate_limits, block_cloud_providers,
+   * blocked_user_agents, enable_penetration_detection, enable_ip_banning, enable_rate_limiting,
+   * enable_rate_limit_auto_ban, auto_ban_threshold, auto_ban_duration, emergency_mode and
+   * emergency_whitelist. Requires enable_agent. A rule cannot change any other setting.
+   */
   public var enableDynamicRules: Boolean
     get() = _enableDynamicRules
     set(value) {
