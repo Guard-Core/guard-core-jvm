@@ -14,6 +14,7 @@ import java.util.logging.Logger
 public object DetectionScanContext {
   public const val DEFAULT_MAX_SCAN_VALUES: Int = 512
   public const val DEFAULT_MAX_SCAN_CHARS: Int = 65536
+  public const val DEFAULT_MAX_SCAN_SECONDS: Double = 10.0
   public const val DEFAULT_MAX_JSON_DEPTH: Int = 32
   public const val DEFAULT_BINARY_MIN_RUN_LENGTH: Int = 16
 

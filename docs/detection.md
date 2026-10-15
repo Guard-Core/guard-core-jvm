@@ -69,6 +69,15 @@ they are the honest operating envelope of every guard family port:
   is not scanned (fail-open with a one-time warning naming the client IP).
   `detection_max_json_depth` bounds structural JSON walking; at the cap the
   value is serialized and scanned as one value.
+- **Scan time budget.** `detection_max_scan_seconds` (default 10.0, range 0.1
+  to 60) caps the CPU time spent regex scanning one request, summed across
+  every field and pattern. It is measured as the CPU time of the scan worker
+  thread, not wall time, so a loaded server that makes a benign request wait
+  does not flag it. Unlike the caps above it fails closed: once spent, the
+  remaining patterns and values are not scanned and the request records a
+  weighted `pattern_timeout` threat named `scan_time_budget_exhausted`, which
+  counts toward the anomaly score and is named in the trigger text when it
+  tips the request.
 
 Every limit is enforced with the same posture: the engine prefers
 under-scanning with a warning over unbounded reads, and the corpus

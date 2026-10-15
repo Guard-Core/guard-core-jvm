@@ -340,6 +340,7 @@ public class SecurityConfigBuilder {
   public var detectionMaxBodyInspectBytes: Int? = null
   public var detectionMaxScanValues: Int? = null
   public var detectionMaxScanChars: Int? = null
+  public var detectionMaxScanSeconds: Double? = null
   public var detectionMaxJsonDepth: Int? = null
   public var detectionBinaryMinRunLength: Int? = null
   public var detectionPreserveAttackPatterns: Boolean? = null
@@ -827,6 +828,13 @@ public class SecurityConfigBuilder {
     }
     config.setRawDetectionMaxScanChars(maxScanChars)
 
+    val maxScanSeconds = detectionMaxScanSeconds ?: 10.0
+    if (v) {
+      ConfigValidators.checkGe(maxScanSeconds, 0.1, "detection_max_scan_seconds")
+      ConfigValidators.checkLe(maxScanSeconds, 60.0, "detection_max_scan_seconds")
+    }
+    config.setRawDetectionMaxScanSeconds(maxScanSeconds)
+
     val maxJsonDepth = detectionMaxJsonDepth ?: 32
     if (v) {
       ConfigValidators.checkGe(maxJsonDepth, 1, "detection_max_json_depth")
@@ -1156,6 +1164,7 @@ public class SecurityConfigBuilder {
       b.detectionMaxBodyInspectBytes = config.detectionMaxBodyInspectBytes
       b.detectionMaxScanValues = config.detectionMaxScanValues
       b.detectionMaxScanChars = config.detectionMaxScanChars
+      b.detectionMaxScanSeconds = config.detectionMaxScanSeconds
       b.detectionMaxJsonDepth = config.detectionMaxJsonDepth
       b.detectionBinaryMinRunLength = config.detectionBinaryMinRunLength
       b.detectionPreserveAttackPatterns = config.detectionPreserveAttackPatterns
@@ -1416,6 +1425,7 @@ private object MapApplier {
       "detection_max_body_inspect_bytes" -> b.detectionMaxBodyInspectBytes = intValue(value, name)
       "detection_max_scan_values" -> b.detectionMaxScanValues = intValue(value, name)
       "detection_max_scan_chars" -> b.detectionMaxScanChars = intValue(value, name)
+      "detection_max_scan_seconds" -> b.detectionMaxScanSeconds = floatValue(value, name)
       "detection_max_json_depth" -> b.detectionMaxJsonDepth = intValue(value, name)
       "detection_binary_min_run_length" -> b.detectionBinaryMinRunLength = intValue(value, name)
       "detection_preserve_attack_patterns" ->

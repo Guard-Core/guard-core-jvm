@@ -501,6 +501,14 @@ public object ConfigFieldRegistry {
               le = 262144,
           ),
           FieldMeta(
+              "detection_max_scan_seconds",
+              "detectionMaxScanSeconds",
+              Kind.FLOAT,
+              "10.0",
+              geFloat = 0.1,
+              leFloat = 60.0,
+          ),
+          FieldMeta(
               "detection_max_json_depth",
               "detectionMaxJsonDepth",
               Kind.INT,

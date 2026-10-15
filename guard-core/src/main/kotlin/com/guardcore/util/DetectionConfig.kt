@@ -215,6 +215,10 @@ public object DetectionConfig {
   public fun resolveMaxScanChars(config: SecurityConfig?): Int =
       config?.detectionMaxScanChars ?: DetectionScanContext.DEFAULT_MAX_SCAN_CHARS
 
+  /** Python `_resolve_max_scan_seconds`. */
+  public fun resolveMaxScanSeconds(config: SecurityConfig?): Double =
+      config?.detectionMaxScanSeconds ?: DetectionScanContext.DEFAULT_MAX_SCAN_SECONDS
+
   /** Python `_resolve_max_json_depth` (detection_config.py:218). */
   public fun resolveMaxJsonDepth(config: SecurityConfig?): Int =
       config?.detectionMaxJsonDepth ?: DetectionScanContext.DEFAULT_MAX_JSON_DEPTH

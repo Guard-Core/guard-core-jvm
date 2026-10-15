@@ -47,6 +47,19 @@ public object DetectionScan {
     return "Threat detected"
   }
 
+  /**
+   * Python `_build_threats_message`: when a per-pattern timeout or the spent scan budget tips the
+   * request, the trigger names it behind a non-timeout first threat.
+   */
+  public fun buildThreatsMessage(threats: List<com.guardcore.engine.suspatterns.Threat>): String {
+    val message = buildThreatMessage(threats.first())
+    if (threats.first().type == "pattern_timeout") {
+      return message
+    }
+    val timeout = threats.drop(1).firstOrNull { it.type == "pattern_timeout" } ?: return message
+    return "$message; ${buildThreatMessage(timeout)}"
+  }
+
   /** Python `_fallback_pattern_check` (detection_scan.py:211): the engine-exception fallback. */
   public suspend fun fallbackPatternCheck(
       value: String,
@@ -57,8 +70,13 @@ public object DetectionScan {
     val normalizedContext = normalizeContext(context)
     val allCompiled = manager.getAllCompiledPatterns()
     val binaryPrefix = BinaryPrefix.buildBinaryPrefix(value)
+    val scanBudget = DetectionScanBudget.scanTimeBudget()
     for (row in allCompiled) {
+      if (scanBudget != null && scanBudget.exhausted()) {
+        return true to "Scan time budget exhausted (fallback)"
+      }
       val patternStart = System.nanoTime()
+      val cpuStart = scanBudget?.currentCpuNanos() ?: 0L
       val threat =
           try {
             val matches = row.compiled.finditer(value, deadlineNanos = Long.MAX_VALUE)
@@ -83,6 +101,7 @@ public object DetectionScan {
             )
             null
           }
+      scanBudget?.record(scanBudget.currentCpuNanos() - cpuStart)
       if (threat != null) {
         return true to "Value matched pattern (fallback)"
       }
@@ -193,6 +212,7 @@ public object DetectionScan {
                       correlationId = correlationId,
                       enabledCategories = enabledCategories,
                       skipSemantic = DetectionScanBudget.contextHeaderIsSemanticExcluded(context),
+                      scanBudget = DetectionScanBudget.scanTimeBudget(),
                   )
         } catch (e: java.util.concurrent.ExecutionException) {
           // Python re-raises RecursionError ahead of the generic handler (detection_scan.py:
@@ -223,7 +243,7 @@ public object DetectionScan {
 
     val threats = result.threats.toList()
     if (threats.isNotEmpty()) {
-      return ScanHit(true, buildThreatMessage(threats.first()), threats, null)
+      return ScanHit(true, buildThreatsMessage(threats), threats, null)
     }
 
     return ScanHit(true, "Threat detected", threats, null)

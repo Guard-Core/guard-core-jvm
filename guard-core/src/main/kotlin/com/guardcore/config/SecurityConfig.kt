@@ -1255,6 +1255,22 @@ internal constructor(
       bumpRevision()
     }
 
+  private var _detectionMaxScanSeconds: Double = 10.0
+
+  /**
+   * python_name: detection_max_scan_seconds. Cap on the CPU time (seconds) spent regex scanning one
+   * request, not wall time, summed across every field and every pattern. Once reached, remaining
+   * patterns and values are not scanned and the request receives a weighted pattern_timeout threat
+   * that counts toward the anomaly score, so padding a request cannot skip detection.
+   */
+  public var detectionMaxScanSeconds: Double
+    get() = _detectionMaxScanSeconds
+    set(value) {
+      if (geoStateHook("detection_max_scan_seconds", value)) return
+      _detectionMaxScanSeconds = value
+      bumpRevision()
+    }
+
   private var _detectionMaxJsonDepth: Int = 32
 
   /** python_name: detection_max_json_depth (models.py:853). */
@@ -2012,6 +2028,10 @@ internal constructor(
     _detectionMaxScanChars = value
   }
 
+  internal fun setRawDetectionMaxScanSeconds(value: Double) {
+    _detectionMaxScanSeconds = value
+  }
+
   internal fun setRawDetectionMaxJsonDepth(value: Int) {
     _detectionMaxJsonDepth = value
   }
@@ -2442,6 +2462,7 @@ internal constructor(
       "detection_max_body_inspect_bytes" -> detectionMaxBodyInspectBytes = value as Int
       "detection_max_scan_values" -> detectionMaxScanValues = value as Int
       "detection_max_scan_chars" -> detectionMaxScanChars = value as Int
+      "detection_max_scan_seconds" -> detectionMaxScanSeconds = value as Double
       "detection_max_json_depth" -> detectionMaxJsonDepth = value as Int
       "detection_binary_min_run_length" -> detectionBinaryMinRunLength = value as Int
       "detection_preserve_attack_patterns" -> detectionPreserveAttackPatterns = value as Boolean
