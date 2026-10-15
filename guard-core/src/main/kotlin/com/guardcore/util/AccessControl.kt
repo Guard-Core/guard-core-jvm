@@ -195,7 +195,8 @@ public object AccessControl {
       ipAddr: com.guardcore.util.py.IpAddress,
       ip: String,
       config: com.guardcore.config.SecurityConfig,
-  ): Boolean = if (config.whitelist != null) ipInList(ipAddr, ip, config.whitelist) else true
+  ): Boolean =
+      if (!config.whitelist.isNullOrEmpty()) ipInList(ipAddr, ip, config.whitelist) else true
 
   /** Port of `IpAccessResult` (access_control.py:165-170). */
   public class IpAccessResult(
@@ -258,7 +259,7 @@ public object AccessControl {
       skipCountries: Boolean,
   ): IpAccessResult? {
     if (ip != IpExtraction.UNKNOWN_CLIENT_IDENTITY) return null
-    val whitelistBlocks = !skipIpLists && config.whitelist != null
+    val whitelistBlocks = !skipIpLists && !config.whitelist.isNullOrEmpty()
     val countryWhitelistBlocks = !skipCountries && config.whitelistCountries.isNotEmpty()
     return if (whitelistBlocks || countryWhitelistBlocks) {
       IpAccessResult(false, genericListBlockReason(ip))
@@ -273,7 +274,7 @@ public object AccessControl {
       ip: String,
       config: com.guardcore.config.SecurityConfig,
   ): IpAccessResult? =
-      if (config.whitelist != null) {
+      if (!config.whitelist.isNullOrEmpty()) {
         if (!checkWhitelist(ipAddr, ip, config)) IpAccessResult(false, genericListBlockReason(ip))
         else null
       } else {
