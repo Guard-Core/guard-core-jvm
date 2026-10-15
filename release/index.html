@@ -673,14 +673,14 @@ runbooks with the same structure and a version-flip checklist.</p>
 <tr>
 <td><code>guard-core-engine</code></td>
 <td>guard-core-jvm (this repo)</td>
-<td>4.3.3</td>
-<td>lockstep with guard-core 4.3.3</td>
+<td>4.4.0</td>
+<td>lockstep with guard-core 4.4.0</td>
 </tr>
 <tr>
 <td><code>guard-core</code> (facade)</td>
 <td>guard-core-jvm (this repo)</td>
-<td>4.3.3</td>
-<td>lockstep with guard-core 4.3.3</td>
+<td>4.4.0</td>
+<td>lockstep with guard-core 4.4.0</td>
 </tr>
 <tr>
 <td><code>spring-boot-guard</code></td>
@@ -704,8 +704,8 @@ runbooks with the same structure and a version-flip checklist.</p>
 </table>
 <ul>
 <li>The engine version is set in-file (<code>build.gradle.kts</code>, <code>allprojects</code>).
-  Tags must match it exactly: the engine tags <code>v4.3.3</code>.</li>
-<li>Tags are bare <code>vX.Y.z</code> only: no suffixes (<code>v4.3.3-jvm</code> is wrong), no build
+  Tags must match it exactly: the engine tags <code>v4.4.0</code>.</li>
+<li>Tags are bare <code>vX.Y.z</code> only: no suffixes (<code>v4.4.0-jvm</code> is wrong), no build
   metadata. The <code>tag-consistency</code> job refuses anything else. This audit exists
   because of the guard-core-rs invisible-rule incident on <code>refs/tags/v4.3.2</code>.</li>
 <li>CHANGELOG entries use <code>## [SEMVER] - YYYY-MM-DD</code> and mirror the narrative
@@ -795,13 +795,13 @@ runbooks with the same structure and a version-flip checklist.</p>
 adapters and the agent.</p>
 <h3 id="1-engine-this-repo">1. Engine (this repo)</h3>
 <ol>
-<li>Confirm <code>build.gradle.kts</code> carries the release version (4.3.3 - no flip
+<li>Confirm <code>build.gradle.kts</code> carries the release version (4.4.0 - no flip
    needed while in lockstep; the version lives in the file, never on the
-   command line) and the CHANGELOG has a <code>## [4.3.3] - YYYY-MM-DD</code> section.</li>
-<li>Tag on the release commit: <code>git tag v4.3.3 &amp;&amp; git push origin v4.3.3</code>.
+   command line) and the CHANGELOG has a <code>## [4.4.0] - YYYY-MM-DD</code> section.</li>
+<li>Tag on the release commit: <code>git tag v4.4.0 &amp;&amp; git push origin v4.4.0</code>.
    The tag push runs the gate suite (build + full-corpus certification +
    tag-consistency audit). Wait for it to go green.</li>
-<li>Create the GitHub release for <code>v4.3.3</code> (Create release from the tag). The
+<li>Create the GitHub release for <code>v4.4.0</code> (Create release from the tag). The
    <code>release: created</code> event starts the publish job:</li>
 <li>secrets gate -&gt; existence check per artifact (skip if already live) -&gt;
      <code>guard-core-engine</code> staging bundle -&gt; Portal upload -&gt; VALIDATED -&gt;
@@ -813,8 +813,8 @@ adapters and the agent.</p>
    deployment first, the facade second.</li>
 <li>Wait for replication and verify liveness (this is the signal the consumer
    releases wait on):</li>
-<li><code>curl -f https://repo1.maven.org/maven2/com/guard-core/guard-core-engine/4.3.3/guard-core-engine-4.3.3.pom</code></li>
-<li><code>curl -f https://repo1.maven.org/maven2/com/guard-core/guard-core/4.3.3/guard-core-4.3.3.pom</code></li>
+<li><code>curl -f https://repo1.maven.org/maven2/com/guard-core/guard-core-engine/4.4.0/guard-core-engine-4.4.0.pom</code></li>
+<li><code>curl -f https://repo1.maven.org/maven2/com/guard-core/guard-core/4.4.0/guard-core-4.4.0.pom</code></li>
 </ol>
 <h3 id="2-adapters-and-agent-spring-boot-guard-ktor-guard-guard-agent-jvm">2. Adapters and agent (spring-boot-guard, ktor-guard, guard-agent-jvm)</h3>
 <p>Only after step 1.5 succeeds (their workflows re-check it anyway):</p>
@@ -825,7 +825,7 @@ adapters and the agent.</p>
    run: engine-artifact pre-flight, tests at tag, tag-consistency.</li>
 <li>Create the GitHub release. The publish job runs with
    <code>GUARD_CORE_USE_COMPOSITE=false</code>, so the build resolves
-   <code>com.guard-core:guard-core:4.3.3</code> from Maven Central (mavenLocal, then
+   <code>com.guard-core:guard-core:4.4.0</code> from Maven Central (mavenLocal, then
    Central) - proving the published graph, not the composite checkout.</li>
 <li>Release the VALIDATED deployment in the Portal UI.</li>
 <li>Verify liveness:</li>
@@ -838,7 +838,7 @@ adapters and the agent.</p>
 <li>[ ] <code>build.gradle.kts</code>: <code>version = "1.0.0-SNAPSHOT"</code> -&gt; <code>version = "1.0.0"</code>
       (agent: <code>3.2.3-SNAPSHOT</code> -&gt; <code>3.2.3</code>).</li>
 <li>[ ] <code>gradle/libs.versions.toml</code>: the <code>guardCore</code> version ref still reads
-      <code>4.3.3</code> (the lockstep engine pin - bump it only when the engine train
+      <code>4.4.0</code> (the lockstep engine pin - bump it only when the engine train
       moves).</li>
 <li>[ ] <code>CHANGELOG.md</code>: rename the <code>Unreleased</code> section to
       <code>## [1.0.0] - YYYY-MM-DD</code> and state the engine pin.</li>
