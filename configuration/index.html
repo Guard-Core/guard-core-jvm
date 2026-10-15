@@ -1018,6 +1018,13 @@ changes; a field that exists in code but not here is a defect.</p>
 <td>Headers exempted from the categories known to false-positive on their typical values (identity/proxy headers skip <code>ssrf</code> only); other categories still scan them. Merged with the hardcoded default exclusion set.</td>
 </tr>
 <tr>
+<td><code>excluded_semantic_detection_headers</code></td>
+<td><code>excludedSemanticDetectionHeaders</code></td>
+<td>str set</td>
+<td><code>{}</code></td>
+<td>Opt-in header names whose values skip the semantic analyzer only, matched case-insensitively. Regex category scanning of these headers is unchanged. Useful when a JWT session cookie scores near <code>detection_semantic_threshold</code> (for example <code>cookie</code>, <code>authorization</code>). Can also be set per route with <code>detectionExclusion(semanticHeaders = ...)</code>.</td>
+</tr>
+<tr>
 <td><code>excluded_detection_params</code></td>
 <td><code>excludedDetectionParams</code></td>
 <td>str set</td>
@@ -1065,6 +1072,13 @@ changes; a field that exists in code but not here is a defect.</p>
 <td>int, 1024–262144 (ge=1024, le=262144)</td>
 <td><code>65536</code></td>
 <td>Max total characters across every value handed to the pattern engine per request. Beyond the cap: same fail-open + warning as above.</td>
+</tr>
+<tr>
+<td><code>detection_max_scan_seconds</code></td>
+<td><code>detectionMaxScanSeconds</code></td>
+<td>float, 0.1–60.0 (ge=0.1, le=60.0)</td>
+<td><code>10.0</code></td>
+<td>Cap on the CPU time (seconds) spent regex scanning one request, not wall time, summed across every field and every pattern. Once reached, remaining patterns and values are not scanned and the request receives a weighted <code>pattern_timeout</code> threat that counts toward the anomaly score, so padding a request cannot skip detection.</td>
 </tr>
 <tr>
 <td><code>detection_max_json_depth</code></td>

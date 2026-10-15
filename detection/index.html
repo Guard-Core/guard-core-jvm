@@ -647,9 +647,15 @@ request_body, unknown) per the spec 06 context table: <code>cmd_injection</code>
 <code>file_upload</code>, <code>sensitive_file</code>, <code>cms_probing</code>, and <code>recon</code> skip one context
 each (<code>url_path</code> for the first two, <code>header</code> for the last three).</p>
 <p>Configuration knobs: <code>enabled_detection_categories</code>,
-<code>excluded_detection_headers</code>, <code>excluded_detection_params</code>,
+<code>excluded_detection_headers</code>, <code>excluded_semantic_detection_headers</code>,
+<code>excluded_detection_params</code>,
 <code>excluded_detection_body_fields</code>, and the threshold family - all documented
 in <a href="../configuration/">Configuration</a> under Detection / penetration.</p>
+<p>The <code>Cookie</code> header is scanned one <code>name=value</code> pair at a time (split on <code>;</code>,
+spaces trimmed, empty pairs skipped), each pair through the same header path
+and the same value budget, so a logged-in session cookie no longer scores as
+one long value. An attack in any single pair is still detected, and
+<code>excluded_semantic_detection_headers</code> applies per pair.</p>
 <h2 id="detection-limits-bounded-reads">Detection limits (bounded reads)</h2>
 <p>These limits are part of the contract (spec 01.2/01.4), not defects, and
 they are the honest operating envelope of every guard family port:</p>
@@ -676,6 +682,15 @@ they are the honest operating envelope of every guard family port:</p>
   is not scanned (fail-open with a one-time warning naming the client IP).
   <code>detection_max_json_depth</code> bounds structural JSON walking; at the cap the
   value is serialized and scanned as one value.</li>
+<li><strong>Scan time budget.</strong> <code>detection_max_scan_seconds</code> (default 10.0, range 0.1
+  to 60) caps the CPU time spent regex scanning one request, summed across
+  every field and pattern. It is measured as the CPU time of the scan worker
+  thread, not wall time, so a loaded server that makes a benign request wait
+  does not flag it. Unlike the caps above it fails closed: once spent, the
+  remaining patterns and values are not scanned and the request records a
+  weighted <code>pattern_timeout</code> threat named <code>scan_time_budget_exhausted</code>, which
+  counts toward the anomaly score and is named in the trigger text when it
+  tips the request.</li>
 </ul>
 <p>Every limit is enforced with the same posture: the engine prefers
 under-scanning with a warning over unbounded reads, and the corpus
