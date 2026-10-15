@@ -13,7 +13,7 @@ pipeline, byte-exact response factory, and per-route decorator resolution.
 
 ## Versioning
 
-The engine and facade mirror guard-core releases (4.3.3). The adapters start
+The engine and facade mirror guard-core releases (4.4.0). The adapters start
 a fresh family version at 1.0.0 and pin the engine artifact version; the
 agent mirrors guard-agent (3.2.3). In CI, the adapters run against the
 engine at a pinned ref (the `ecosystem-gate` workflow in this repo runs both

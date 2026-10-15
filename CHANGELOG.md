@@ -1,18 +1,37 @@
 # Changelog
 
-## Unreleased
+## [4.4.0] - 2026-10-15
+
+guard-core-jvm 4.4.0 mirrors the guard-core 4.4.0 scan-budget release and carries the JVM agent telemetry fixes.
+
+### Added
+
+- `detectionMaxScanSeconds` (`detection_max_scan_seconds`, default 10.0, range 0.1 to 60): a per-request cap on regex scan time (guard-core #166, #167). It is measured in thread CPU time inside the scan worker, not wall time, so a loaded host does not flag benign requests. Exhausting it records a weighted `pattern_timeout` threat named `scan_time_budget_exhausted`, fails closed, and the trigger text names it when it tips the score.
+- `excludedSemanticDetectionHeaders` (`excluded_semantic_detection_headers`, global, default empty) and `detectionExclusion(semanticHeaders = ...)` (route): header names that skip the semantic analyzer only, while regex scanning of those headers is unchanged (guard-core #166, #167).
 
 ### Fixed
 
+- Empty whitelist: an empty global `whitelist` now means no whitelist, as `if config.whitelist:` does in the reference. Before, `whitelist = emptyList()` denied every client with a 403. The fix is in `AccessControl` (`checkWhitelist`, `checkIpListsDetail`, `checkUnknownIdentityAccess`).
+- IP list precedence: a configured whitelist decides alone and the blacklist applies only without a whitelist, for the global and route checks, and a route whitelist skips the global lists. This already matched the reference and is now pinned by `IpListPrecedenceTest` with tables generated from the reference (120 rows for the global and route checks, 243 rows composing route and global lists).
+- Client IP parity: client IP resolution is guarded by `ClientIpParityTest` (104 + 78 reference rows), which passes unchanged.
+- The Cookie header is scanned one `name=value` pair at a time, each pair through the same header path and value budget, so the `;` between cookies no longer counts as a command separator in the semantic score (guard-core #161, #162).
+- A header whose threats are all category-filtered no longer ends the request scan early: an SSRF value in an address header followed by an XSS header still flags (probe test `HeaderScanContinuesTest`).
+- Passive-mode log lines keep the reason. A passive hit without trigger info now logs `[PASSIVE MODE] Suspicious activity detected from ... - Reason: ...` instead of the penetration wording with the reason dropped (guard-core #164, #165). If you match on the old passive log text, update the match.
+- Agent telemetry: an injected agent was never started and received no events, and metrics reached agents as blank security events. See the Changed entries on agent wiring and metrics below.
 - Dynamic rules: each rule version now applies over the base config instead of over the previous version's result (`DynamicRuleManager.applyRules`, `_apply_rules` in guard-core #169). The active base snapshot is restored first, so the emergency auto-ban halving no longer compounds (16 went 8, 4, 2 across versions 1 to 3, and now stays 8), a change from an earlier version no longer lingers when a later version omits it, and expiry restores the true base. A failed apply restores the config as it was before the call, so the previously active version keeps running. Snapshot and restore copy collection values (`deepcopy` in the reference). `suspiciousPatterns` the registry already holds are skipped instead of re-added on every version.
 
 ### Changed
 
+- Behavior to know before upgrading: a dynamic rule version no longer carries over the previous version's changes, so a field the new version does not set returns to the base value and rules that relied on stacking versions must set every field they want. A request that spends `detectionMaxScanSeconds` of regex CPU time is flagged with a `pattern_timeout` threat instead of being scanned to the end.
 - Agent wiring: `HandlerInitializer.buildCompositeHandler()` now adds any injected agent handler to the composite, as `handler_initializer.py:87-105` does. An `AgentTelemetryMember` (the `GuardAgentTelemetry` bridge) is used directly, a `HandlerAgentSink` goes through `SinkTelemetryMember`, and a plain `AgentHandlerProtocol` goes through the new `ProtocolTelemetryMember`. Before, only a `HandlerAgentSink` was composed, so the protocol-typed agent the adapters inject was never started and received no events.
 - Metrics: `MetricsCollector` now calls `sendMetric` (`metrics.py:45`) instead of `sendEvent`. `HandlerAgentSink` gains `sendMetric` (default: `sendEvent`, so existing sinks keep their behavior), `SinkTelemetryMember.sendMetric` and the initializer's composite sink forward to it, and `CompositeAgentHandler.sendMetric` is now `open`. Before, metrics reached agents as blank security events.
 - Dependencies: the facade pins netty to 4.1.139.Final through `api(platform(io.netty:netty-bom))`. lettuce-core 6.8.2 declares netty 4.1.125, which carries twelve advisories (GHSA-3qp7-7mw8-wx86, GHSA-558v-64gr-wgg4, GHSA-5pvg-856g-cp85, GHSA-676x-f7gg-47vc, GHSA-c4c3-7fpv-j4q5, GHSA-c653-97m9-rcg9, GHSA-cm33-6792-r9fm, GHSA-fccg-mwvh-qqg4, GHSA-mfg7-5gfp-c4w3, GHSA-mj4r-2hfc-f8p6, GHSA-x4gw-5cx5-pgmh, GHSA-xmv7-r254-6q78), all fixed by 4.1.137 at the latest. Their osv-scanner suppressions are removed. Gradle consumers get the pin from the module metadata; Maven consumers import the same BOM (docs/installation.md).
 - The release workflow's registry check now names the facade artifact correctly in its log (`com.guard-core:guard-core`, not `guard-core-facade`). The URLs it checks were already right.
 - The geo-IP agent adapter built in `initializeAgentForHandlers` now routes metrics to `sendMetric` (its composite sink forwards `sendMetric` too), and an injected agent that implements none of AgentTelemetryMember, HandlerAgentSink or AgentHandlerProtocol is logged as a warning instead of being dropped silently.
+
+### Docs
+
+- `enable_dynamic_rules` documentation lists exactly what a dynamic rule can change, the install sections point at Maven Central, and the mkdocs `site_url` is set so the sitemap and canonical links are generated.
 
 ## [4.3.3] - 2026-10-13
 
