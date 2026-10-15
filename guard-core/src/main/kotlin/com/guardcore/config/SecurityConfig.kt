@@ -1100,7 +1100,17 @@ internal constructor(
 
   private var _enableDynamicRules: Boolean = false
 
-  /** python_name: enable_dynamic_rules (models.py:703). */
+  /**
+   * python_name: enable_dynamic_rules (models.py:703).
+   *
+   * Lets the SaaS dashboard change protection at runtime without a code change: a rule bans the IPs
+   * in its ip_blacklist (for ip_ban_duration seconds), unbans the IPs in its ip_whitelist, adds its
+   * suspicious_patterns to detection, and replaces blocked_countries, whitelist_countries,
+   * rate_limit, rate_limit_window, endpoint_rate_limits, block_cloud_providers,
+   * blocked_user_agents, enable_penetration_detection, enable_ip_banning, enable_rate_limiting,
+   * enable_rate_limit_auto_ban, auto_ban_threshold, auto_ban_duration, emergency_mode and
+   * emergency_whitelist. Requires enable_agent. A rule cannot change any other setting.
+   */
   public var enableDynamicRules: Boolean
     get() = _enableDynamicRules
     set(value) {
@@ -1242,6 +1252,22 @@ internal constructor(
     set(value) {
       if (geoStateHook("detection_max_scan_chars", value)) return
       _detectionMaxScanChars = value
+      bumpRevision()
+    }
+
+  private var _detectionMaxScanSeconds: Double = 10.0
+
+  /**
+   * python_name: detection_max_scan_seconds. Cap on the CPU time (seconds) spent regex scanning one
+   * request, not wall time, summed across every field and every pattern. Once reached, remaining
+   * patterns and values are not scanned and the request receives a weighted pattern_timeout threat
+   * that counts toward the anomaly score, so padding a request cannot skip detection.
+   */
+  public var detectionMaxScanSeconds: Double
+    get() = _detectionMaxScanSeconds
+    set(value) {
+      if (geoStateHook("detection_max_scan_seconds", value)) return
+      _detectionMaxScanSeconds = value
       bumpRevision()
     }
 
@@ -1526,6 +1552,22 @@ internal constructor(
       val validated = ConfigValidators.validateStrSet(value, "excluded_detection_headers")
       if (geoStateHook("excluded_detection_headers", validated)) return
       _excludedDetectionHeaders = validated
+      bumpRevision()
+    }
+
+  private var _excludedSemanticDetectionHeaders: Set<String> = emptySet()
+
+  /**
+   * python_name: excluded_semantic_detection_headers. Opt-in header names whose values skip the
+   * semantic analyzer only, matched case-insensitively. Regex category scanning of these headers is
+   * unchanged. Default empty.
+   */
+  public var excludedSemanticDetectionHeaders: Set<String>
+    get() = _excludedSemanticDetectionHeaders
+    set(value) {
+      val validated = ConfigValidators.validateStrSet(value, "excluded_semantic_detection_headers")
+      if (geoStateHook("excluded_semantic_detection_headers", validated)) return
+      _excludedSemanticDetectionHeaders = validated
       bumpRevision()
     }
 
@@ -1986,6 +2028,10 @@ internal constructor(
     _detectionMaxScanChars = value
   }
 
+  internal fun setRawDetectionMaxScanSeconds(value: Double) {
+    _detectionMaxScanSeconds = value
+  }
+
   internal fun setRawDetectionMaxJsonDepth(value: Int) {
     _detectionMaxJsonDepth = value
   }
@@ -2084,6 +2130,10 @@ internal constructor(
 
   internal fun setRawExcludedDetectionHeaders(value: Set<String>) {
     _excludedDetectionHeaders = value
+  }
+
+  internal fun setRawExcludedSemanticDetectionHeaders(value: Set<String>) {
+    _excludedSemanticDetectionHeaders = value
   }
 
   internal fun setRawExcludedDetectionParams(value: Set<String>) {
@@ -2412,6 +2462,7 @@ internal constructor(
       "detection_max_body_inspect_bytes" -> detectionMaxBodyInspectBytes = value as Int
       "detection_max_scan_values" -> detectionMaxScanValues = value as Int
       "detection_max_scan_chars" -> detectionMaxScanChars = value as Int
+      "detection_max_scan_seconds" -> detectionMaxScanSeconds = value as Double
       "detection_max_json_depth" -> detectionMaxJsonDepth = value as Int
       "detection_binary_min_run_length" -> detectionBinaryMinRunLength = value as Int
       "detection_preserve_attack_patterns" -> detectionPreserveAttackPatterns = value as Boolean
@@ -2437,6 +2488,8 @@ internal constructor(
       "logfire_service_name" -> logfireServiceName = value as String
       "enable_enrichment" -> enableEnrichment = value as Boolean
       "excluded_detection_headers" -> excludedDetectionHeaders = value as Set<String>
+      "excluded_semantic_detection_headers" ->
+          excludedSemanticDetectionHeaders = value as Set<String>
       "excluded_detection_params" -> excludedDetectionParams = value as Set<String>
       "excluded_detection_body_fields" -> excludedDetectionBodyFields = value as Set<String>
       "detection_scan_body" -> detectionScanBody = value as Boolean
@@ -2564,6 +2617,7 @@ internal constructor(
         "agent_sensitive_headers" -> agentSensitiveHeaders
         "otel_resource_attributes" -> otelResourceAttributes
         "excluded_detection_headers" -> excludedDetectionHeaders
+        "excluded_semantic_detection_headers" -> excludedSemanticDetectionHeaders
         "excluded_detection_params" -> excludedDetectionParams
         "excluded_detection_body_fields" -> excludedDetectionBodyFields
         else -> throw ConfigValidationError("Unknown SecurityConfig field '$name'")

@@ -542,6 +542,7 @@ class CoreW9hTailsTest {
         bodyFields = setOf("b"),
         categories = setOf("xss"),
         scanBody = false,
+        semanticHeaders = setOf("x-s"),
     )
     // The honeypot validator: malformed JSON takes the catch (421); an unknown content
     // type takes the else arm (437); the simple response body getter (452).

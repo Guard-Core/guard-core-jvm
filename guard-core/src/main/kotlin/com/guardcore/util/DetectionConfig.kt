@@ -180,6 +180,15 @@ public object DetectionConfig {
     return base - skip
   }
 
+  /** Python `_resolve_semantic_excluded_headers`: global and route-level names, lowercased. */
+  public fun resolveSemanticExcludedHeaders(
+      config: SecurityConfig?,
+      routeConfig: RouteConfig?,
+  ): Set<String> = buildSet {
+    config?.excludedSemanticDetectionHeaders?.forEach { add(it.trim().lowercase()) }
+    routeConfig?.excludedSemanticDetectionHeaders?.forEach { add(it.trim().lowercase()) }
+  }
+
   /** Python `_resolve_log_level` (detection_config.py:167). */
   public fun resolveLogLevel(config: SecurityConfig?): String? =
       config?.logSuspiciousLevel?.pythonName ?: "WARNING"
@@ -205,6 +214,10 @@ public object DetectionConfig {
   /** Python `_resolve_max_scan_chars` (detection_config.py:207). */
   public fun resolveMaxScanChars(config: SecurityConfig?): Int =
       config?.detectionMaxScanChars ?: DetectionScanContext.DEFAULT_MAX_SCAN_CHARS
+
+  /** Python `_resolve_max_scan_seconds`. */
+  public fun resolveMaxScanSeconds(config: SecurityConfig?): Double =
+      config?.detectionMaxScanSeconds ?: DetectionScanContext.DEFAULT_MAX_SCAN_SECONDS
 
   /** Python `_resolve_max_json_depth` (detection_config.py:218). */
   public fun resolveMaxJsonDepth(config: SecurityConfig?): Int =

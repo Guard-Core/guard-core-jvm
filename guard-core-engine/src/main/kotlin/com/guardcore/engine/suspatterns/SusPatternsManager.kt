@@ -61,6 +61,19 @@ public fun decodeBudgetExhaustedThreat(): Threat =
         weight = SusPatternsWeights.resolvePatternWeight(DECODE_BUDGET_EXHAUSTED_PATTERN, "custom"),
     )
 
+/** `_scan_time_budget_exhausted_threat`: the weighted pattern_timeout a spent budget records. */
+public fun scanTimeBudgetExhaustedThreat(): Threat =
+    Threat(
+        type = "pattern_timeout",
+        pattern = SCAN_TIME_BUDGET_EXHAUSTED_PATTERN,
+        match = "",
+        position = 0,
+        executionTime = 0.0,
+        category = "custom",
+        weight =
+            SusPatternsWeights.resolvePatternWeight(SCAN_TIME_BUDGET_EXHAUSTED_PATTERN, "custom"),
+    )
+
 /** SEMANTIC_ATTACK_TYPE_TO_CATEGORY. */
 public val SEMANTIC_ATTACK_TYPE_TO_CATEGORY: Map<String, String> =
     mapOf(
@@ -638,7 +651,17 @@ public class SusPatternsManager private constructor() {
     val performanceMonitor = state.performanceMonitor
     val binaryPrefix = BinaryPrefix.buildBinaryPrefix(content)
 
+    val workerBudget = workerScanBudget.get()
+    val scanBudget = workerBudget?.first
     for (row in allPatterns) {
+      if (scanBudget != null && scanBudget.exhausted()) {
+        val budgetThreat = scanTimeBudgetExhaustedThreat()
+        scanBudget.warnOnce(workerBudget.second)
+        threats.add(budgetThreat)
+        matchedPatterns.add(budgetThreat.pattern)
+        timeouts.add(budgetThreat.pattern)
+        break
+      }
       if (
           patternShouldBeSkipped(
               row.compiled.source,
@@ -655,6 +678,7 @@ public class SusPatternsManager private constructor() {
       }
 
       val patternStart = System.nanoTime()
+      val cpuStart = scanBudget?.currentCpuNanos() ?: 0L
 
       var threat: Threat?
       var timeoutOccurred: Boolean
@@ -675,6 +699,7 @@ public class SusPatternsManager private constructor() {
         threat = null
         timeoutOccurred = true
       }
+      scanBudget?.record(scanBudget.currentCpuNanos() - cpuStart)
 
       if (timeoutOccurred) {
         timeouts.add(row.compiled.source)
@@ -939,19 +964,31 @@ public class SusPatternsManager private constructor() {
       context: String = "unknown",
       correlationId: String? = null,
       enabledCategories: Set<String>? = null,
+      skipSemantic: Boolean = false,
+      scanBudget: ScanTimeBudget? = null,
   ): DetectResult =
       // The whole pipeline runs on one big-stack scan-pool worker: java.util.regex recurses
       // per group-repetition iteration, so the table's long-input scans need the 512 MiB
       // worker stack (the JVM analog of the reference's shared regex executor).
       com.guardcore.engine.py.RegexWorkers.submit {
-        detectInternal(
-            content,
-            ipAddress,
-            context,
-            correlationId,
-            enabledCategories,
-        )
+        // The budget rides a worker-confined thread local (the reference's contextvar): the
+        // scan, and so the CPU time it charges, stays on this one worker.
+        workerScanBudget.set(scanBudget?.let { it to ipAddress })
+        try {
+          detectInternal(
+              content,
+              ipAddress,
+              context,
+              correlationId,
+              enabledCategories,
+              skipSemantic,
+          )
+        } finally {
+          workerScanBudget.remove()
+        }
       }
+
+  private val workerScanBudget = ThreadLocal<Pair<ScanTimeBudget, String>?>()
 
   private fun detectInternal(
       content: String,
@@ -959,6 +996,7 @@ public class SusPatternsManager private constructor() {
       context: String,
       correlationId: String?,
       enabledCategories: Set<String>?,
+      skipSemantic: Boolean,
   ): DetectResult {
     val originalContent = content
     val executionStart = System.nanoTime()
@@ -1021,7 +1059,9 @@ public class SusPatternsManager private constructor() {
     matchedPatterns.addAll(shortBase64Matched)
     timeouts.addAll(shortBase64Timeouts)
 
-    val (semanticThreats, _) = checkSemanticThreats(processedContent, state, originalContent)
+    val semanticThreats =
+        if (skipSemantic) emptyList()
+        else checkSemanticThreats(processedContent, state, originalContent).first
 
     val threats = ArrayList(regexThreats)
     threats.addAll(semanticThreats)

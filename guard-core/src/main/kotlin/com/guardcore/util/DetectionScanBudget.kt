@@ -1,5 +1,6 @@
 package com.guardcore.util
 
+import com.guardcore.engine.suspatterns.ScanTimeBudget
 import java.util.logging.Level
 
 /**
@@ -51,6 +52,15 @@ public object DetectionScanBudget {
         override fun initialValue(): Int = DetectionScanContext.DEFAULT_BINARY_MIN_RUN_LENGTH
       }
 
+  /** Python `_scan_time_cap` / `_scan_time_spent`: the request's scan time budget (null: none). */
+  private val scanTimeBudget: ThreadLocal<ScanTimeBudget?> = ThreadLocal()
+
+  /** Python `_semantic_excluded_headers` (detection_scan.py). */
+  private val semanticExcludedHeaders: ThreadLocal<Set<String>> =
+      object : ThreadLocal<Set<String>>() {
+        override fun initialValue(): Set<String> = emptySet()
+      }
+
   /**
    * Port of the `_scan_value_budget` context manager (detection_scan.py:46). Resets every budget
    * counter for the block and restores the previous values afterwards.
@@ -60,6 +70,8 @@ public object DetectionScanBudget {
       maxJsonDepth: Int = DetectionScanContext.DEFAULT_MAX_JSON_DEPTH,
       maxScanChars: Int = DetectionScanContext.DEFAULT_MAX_SCAN_CHARS,
       binaryMinRunLength: Int = DetectionScanContext.DEFAULT_BINARY_MIN_RUN_LENGTH,
+      maxScanSeconds: Double = DetectionScanContext.DEFAULT_MAX_SCAN_SECONDS,
+      semanticExcludedHeaders: Set<String> = emptySet(),
       block: suspend () -> T,
   ): T {
     val prevCount = scannedValueCount.get()
@@ -70,6 +82,8 @@ public object DetectionScanBudget {
     val prevDepthCap = DetectionScanContext.jsonDepthCapValue()
     val prevDepthWarned = jsonDepthWarned.get()
     val prevBinaryRun = binaryMinRun.get()
+    val prevTimeBudget = scanTimeBudget.get()
+    val prevSemanticExcluded = this.semanticExcludedHeaders.get()
     scannedValueCount.set(0)
     scanValueCap.set(maxValues)
     scannedCharCount.set(0)
@@ -78,6 +92,8 @@ public object DetectionScanBudget {
     DetectionScanContext.setJsonDepthCap(maxJsonDepth)
     jsonDepthWarned.set(false)
     binaryMinRun.set(binaryMinRunLength)
+    scanTimeBudget.set(ScanTimeBudget(maxScanSeconds))
+    this.semanticExcludedHeaders.set(semanticExcludedHeaders)
     try {
       return block()
     } finally {
@@ -89,7 +105,27 @@ public object DetectionScanBudget {
       DetectionScanContext.setJsonDepthCap(prevDepthCap)
       jsonDepthWarned.set(prevDepthWarned)
       binaryMinRun.set(prevBinaryRun)
+      scanTimeBudget.set(prevTimeBudget)
+      this.semanticExcludedHeaders.set(prevSemanticExcluded)
     }
+  }
+
+  /** The request's scan time budget; null outside a scan block (no cap). */
+  public fun scanTimeBudget(): ScanTimeBudget? = scanTimeBudget.get()
+
+  /**
+   * Python `_context_header_is_semantic_excluded`: the header context names an opted-out header.
+   */
+  public fun contextHeaderIsSemanticExcluded(context: String): Boolean {
+    val excluded = semanticExcludedHeaders.get()
+    if (excluded.isEmpty()) {
+      return false
+    }
+    if (!context.startsWith("header:")) {
+      return false
+    }
+    val name = context.removePrefix("header:").removeSuffix(":embedded_json")
+    return name.trim().lowercase() in excluded
   }
 
   /** Python `_binary_island_min_run_length` (detection_scan.py:73). */

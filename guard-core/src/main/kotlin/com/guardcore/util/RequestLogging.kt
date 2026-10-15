@@ -383,13 +383,15 @@ public object RequestLogging {
       triggerInfo: String,
   ): Pair<String, String> {
     if (passiveMode) {
-      val message = "[PASSIVE MODE] Penetration attempt detected from"
+      val label = if (triggerInfo.isNotEmpty()) "Penetration attempt" else "Suspicious activity"
+      val message = "[PASSIVE MODE] $label detected from"
       val details = "$message ${context["client_ip"]}: ${context["method"]} ${context["url"]}"
-      val triggerMessage = if (triggerInfo.isNotEmpty()) "Trigger: $triggerInfo" else ""
-      var reasonMessage = "Headers: ${context["headers"]}"
-      if (triggerMessage.isNotEmpty()) {
-        reasonMessage = "$triggerMessage - $reasonMessage"
-      }
+      val reasonMessage =
+          if (triggerInfo.isNotEmpty()) {
+            "Trigger: $triggerInfo - Headers: ${context["headers"]}"
+          } else {
+            "Reason: $reason - Headers: ${context["headers"]}"
+          }
       return details to reasonMessage
     }
     val message = "Suspicious activity detected from"

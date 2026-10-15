@@ -522,7 +522,9 @@ class BlockHookAndLogActivityTest {
             passiveMode = true,
         )
         val line = capture.records.single().message ?: ""
-        assertTrue(line.contains("[PASSIVE MODE] Penetration attempt detected from"), line)
+        assertTrue(line.contains("[PASSIVE MODE] Suspicious activity detected from"), line)
+        assertFalse(line.contains("Penetration attempt"), line)
+        assertTrue(line.contains("Reason: blacklisted"), line)
         assertFalse(line.contains("Trigger:"), line)
       } finally {
         capture.detach(logger)

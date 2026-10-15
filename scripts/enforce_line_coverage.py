@@ -80,19 +80,19 @@ EXCLUDES = {
                      "microsecond builders)"),
     ],
     "SusPatternsManager.kt": [
-        ((437, 439), "scan-window iteration PyReDeadlines arm: the per-scan deadline is "
+        ((450, 452), "scan-window iteration PyReDeadlines arm: the per-scan deadline is "
                      "seconds-scale against microsecond window scans - a host-scheduling "
                      "race"),
-        ((507, 508), "checkPatternWithTimeout generic catch: PyRe.search either matches, "
+        ((520, 521), "checkPatternWithTimeout generic catch: PyRe.search either matches, "
                      "returns null, or raises the handled DeadlineExceededException; "
                      "region bounds are clamped in PyRe.search - defensive only"),
-        ((572, 575), "checkPattern loop deadline/exception arms: same defensive/race "
+        ((585, 588), "checkPattern loop deadline/exception arms: same defensive/race "
                      "family as 508-509"),
-        ((674, 676), "PatternValidationTimeout in the enhanced-validate path: the "
+        ((698, 700), "PatternValidationTimeout in the enhanced-validate path: the "
                      "validation budgets are size-triggered and throw inside "
                      "reachProbeCandidateBuilders (covered there); this outer arm fires "
                      "only on a mid-phase host race"),
-        ((416, 418), "scan-window iteration PyReDeadlines arm: the per-scan deadline is "
+        ((429, 431), "scan-window iteration PyReDeadlines arm: the per-scan deadline is "
                      "seconds-scale against microsecond window scans - the same host- "
                      "scheduling race family as 438-440"),
     ],
@@ -260,43 +260,43 @@ EXCLUDES = {
                      "matchAt over that span always matches"),
     ],
     "SecurityConfigBuilder.kt": [
-        ((1457, 1458), "MapApplier.intValue wrong-type arms: fromMap pre-validates every "
+        ((1479, 1480), "MapApplier.intValue wrong-type arms: fromMap pre-validates every "
                        "field through the ConfigValidators per-field pass, which rejects "
                        "wrong-typed raw values before MapApplier.apply runs (probe: "
                        "fromMap('trusted_proxy_depth' to true) rejects 'Input should be a "
                        "valid integer (got bool)' without entering intValue) - the applier "
                        "only ever sees pre-validated types"),
-        ((1462, 1462), "intOrNullValue: same pre-pass - the null/wrong-type shapes never "
+        ((1484, 1484), "intOrNullValue: same pre-pass - the null/wrong-type shapes never "
                        "reach the applier"),
-        ((1466, 1471), "floatValue wrong-type arms: same pre-pass proof as 1457-1458"),
-        ((1474, 1474), "floatOrNullValue: same pre-pass proof as 1457-1458"),
-        ((1479, 1479), "boolValue wrong-type arm: same pre-pass proof as 1457-1458"),
-        ((1483, 1483), "boolOrNullValue: same pre-pass proof as 1457-1458"),
-        ((1488, 1488), "strValue wrong-type arm: same pre-pass proof as 1457-1458"),
-        ((1492, 1492), "strOrNullValue: same pre-pass proof as 1457-1458"),
-        ((1497, 1497), "strList wrong-type arm: same pre-pass proof as 1457-1458"),
-        ((1507, 1507), "setValue wrong-type arm: same pre-pass proof as 1457-1458"),
-        ((1519, 1519), "strAnyDictOrNull wrong-type arm: same pre-pass proof as 1457-1458"),
-        ((1525, 1525), "intKeyedStrDict wrong-type arm: same pre-pass proof as 1457-1458"),
-        ((1531, 1531), "strKeyedStrDict wrong-type arm: same pre-pass proof as 1457-1458"),
-        ((1538, 1539), "pathOrNullValue String/else arms: the pre-pass validates "
+        ((1488, 1493), "floatValue wrong-type arms: same pre-pass proof as 1457-1458"),
+        ((1496, 1496), "floatOrNullValue: same pre-pass proof as 1457-1458"),
+        ((1501, 1501), "boolValue wrong-type arm: same pre-pass proof as 1457-1458"),
+        ((1505, 1505), "boolOrNullValue: same pre-pass proof as 1457-1458"),
+        ((1510, 1510), "strValue wrong-type arm: same pre-pass proof as 1457-1458"),
+        ((1514, 1514), "strOrNullValue: same pre-pass proof as 1457-1458"),
+        ((1519, 1519), "strList wrong-type arm: same pre-pass proof as 1457-1458"),
+        ((1529, 1529), "setValue wrong-type arm: same pre-pass proof as 1457-1458"),
+        ((1541, 1541), "strAnyDictOrNull wrong-type arm: same pre-pass proof as 1457-1458"),
+        ((1547, 1547), "intKeyedStrDict wrong-type arm: same pre-pass proof as 1457-1458"),
+        ((1553, 1553), "strKeyedStrDict wrong-type arm: same pre-pass proof as 1457-1458"),
+        ((1560, 1561), "pathOrNullValue String/else arms: the pre-pass validates "
                        "ipinfo_db_path/dynamic_rules_cache_path before the applier runs"),
-        ((1554, 1554), "levelValue wrong-type arm: same pre-pass proof as 1457-1458"),
-        ((1562, 1563), "logFormatValue reject arms: same pre-pass proof as 1457-1458"),
-        ((1572, 1573), "policyValue reject arms: same pre-pass proof as 1457-1458"),
-        ((1589, 1589), "threatBanValue non-map arm: same pre-pass proof as 1457-1458"),
-        ((1592, 1592), "behaviorRulesValue non-list arm: same pre-pass proof as 1457-1458"),
-        ((1602, 1602), "behaviorRulesValue per-item non-map arm: same pre-pass proof"),
-        ((1605, 1605), "behaviorRulesValue value-level arm: same pre-pass proof as "
+        ((1576, 1576), "levelValue wrong-type arm: same pre-pass proof as 1457-1458"),
+        ((1584, 1585), "logFormatValue reject arms: same pre-pass proof as 1457-1458"),
+        ((1594, 1595), "policyValue reject arms: same pre-pass proof as 1457-1458"),
+        ((1611, 1611), "threatBanValue non-map arm: same pre-pass proof as 1457-1458"),
+        ((1614, 1614), "behaviorRulesValue non-list arm: same pre-pass proof as 1457-1458"),
+        ((1624, 1624), "behaviorRulesValue per-item non-map arm: same pre-pass proof"),
+        ((1627, 1627), "behaviorRulesValue value-level arm: same pre-pass proof as "
                        "1457-1458"),
-        ((1612, 1612), "behaviorRuleFromMap unknown rule_type arm: the ConfigValidators "
+        ((1634, 1634), "behaviorRuleFromMap unknown rule_type arm: the ConfigValidators "
                        "pre-pass (ConfigValidators.kt:587-592) rejects unknown rule types "
                        "before the applier runs"),
-        ((1616, 1616), "behaviorRuleFromMap unknown action arm: same pre-pass proof as "
+        ((1638, 1638), "behaviorRuleFromMap unknown action arm: same pre-pass proof as "
                        "1612"),
-        ((1639, 1639), "endpointRateLimitsValue bad-tuple arm: same pre-pass proof as "
+        ((1661, 1661), "endpointRateLimitsValue bad-tuple arm: same pre-pass proof as "
                        "1457-1458"),
-        ((1643, 1643), "endpointRateLimitsValue non-dict arm: same pre-pass proof as "
+        ((1665, 1665), "endpointRateLimitsValue non-dict arm: same pre-pass proof as "
                        "1457-1458"),
         ((318, 318), "dynamicRulesCachePath property-declaration field-init probe: a "
                      "Kotlin backing-field artifact; the builder is constructed "
