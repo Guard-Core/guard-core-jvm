@@ -31,7 +31,8 @@ request_body, unknown) per the spec 06 context table: `cmd_injection`,
 each (`url_path` for the first two, `header` for the last three).
 
 Configuration knobs: `enabled_detection_categories`,
-`excluded_detection_headers`, `excluded_detection_params`,
+`excluded_detection_headers`, `excluded_semantic_detection_headers`,
+`excluded_detection_params`,
 `excluded_detection_body_fields`, and the threshold family - all documented
 in [Configuration](configuration.md) under Detection / penetration.
 

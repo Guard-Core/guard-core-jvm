@@ -649,6 +649,13 @@ public object ConfigFieldRegistry {
               revalidatedOnAssignment = true,
           ),
           FieldMeta(
+              "excluded_semantic_detection_headers",
+              "excludedSemanticDetectionHeaders",
+              Kind.STR_SET,
+              "set()",
+              revalidatedOnAssignment = true,
+          ),
+          FieldMeta(
               "excluded_detection_params",
               "excludedDetectionParams",
               Kind.STR_SET,

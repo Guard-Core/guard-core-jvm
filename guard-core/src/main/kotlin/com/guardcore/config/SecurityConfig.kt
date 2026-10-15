@@ -1539,6 +1539,22 @@ internal constructor(
       bumpRevision()
     }
 
+  private var _excludedSemanticDetectionHeaders: Set<String> = emptySet()
+
+  /**
+   * python_name: excluded_semantic_detection_headers. Opt-in header names whose values skip the
+   * semantic analyzer only, matched case-insensitively. Regex category scanning of these headers is
+   * unchanged. Default empty.
+   */
+  public var excludedSemanticDetectionHeaders: Set<String>
+    get() = _excludedSemanticDetectionHeaders
+    set(value) {
+      val validated = ConfigValidators.validateStrSet(value, "excluded_semantic_detection_headers")
+      if (geoStateHook("excluded_semantic_detection_headers", validated)) return
+      _excludedSemanticDetectionHeaders = validated
+      bumpRevision()
+    }
+
   private var _excludedDetectionParams: Set<String> = emptySet()
 
   /** python_name: excluded_detection_params (models.py:1061). */
@@ -2096,6 +2112,10 @@ internal constructor(
     _excludedDetectionHeaders = value
   }
 
+  internal fun setRawExcludedSemanticDetectionHeaders(value: Set<String>) {
+    _excludedSemanticDetectionHeaders = value
+  }
+
   internal fun setRawExcludedDetectionParams(value: Set<String>) {
     _excludedDetectionParams = value
   }
@@ -2447,6 +2467,8 @@ internal constructor(
       "logfire_service_name" -> logfireServiceName = value as String
       "enable_enrichment" -> enableEnrichment = value as Boolean
       "excluded_detection_headers" -> excludedDetectionHeaders = value as Set<String>
+      "excluded_semantic_detection_headers" ->
+          excludedSemanticDetectionHeaders = value as Set<String>
       "excluded_detection_params" -> excludedDetectionParams = value as Set<String>
       "excluded_detection_body_fields" -> excludedDetectionBodyFields = value as Set<String>
       "detection_scan_body" -> detectionScanBody = value as Boolean
@@ -2574,6 +2596,7 @@ internal constructor(
         "agent_sensitive_headers" -> agentSensitiveHeaders
         "otel_resource_attributes" -> otelResourceAttributes
         "excluded_detection_headers" -> excludedDetectionHeaders
+        "excluded_semantic_detection_headers" -> excludedSemanticDetectionHeaders
         "excluded_detection_params" -> excludedDetectionParams
         "excluded_detection_body_fields" -> excludedDetectionBodyFields
         else -> throw ConfigValidationError("Unknown SecurityConfig field '$name'")

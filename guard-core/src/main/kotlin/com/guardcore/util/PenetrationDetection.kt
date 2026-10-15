@@ -298,12 +298,15 @@ public object PenetrationDetection {
     val maxJsonDepth = DetectionConfig.resolveMaxJsonDepth(config)
     val maxScanChars = DetectionConfig.resolveMaxScanChars(config)
     val binaryMinRun = DetectionConfig.resolveBinaryMinRunLength(config)
+    val semanticExcludedHeaders =
+        DetectionConfig.resolveSemanticExcludedHeaders(config, routeConfig)
 
     return DetectionScanBudget.withScanBudget(
         maxValues = maxScanValues,
         maxJsonDepth = maxJsonDepth,
         maxScanChars = maxScanChars,
         binaryMinRunLength = binaryMinRun,
+        semanticExcludedHeaders = semanticExcludedHeaders,
     ) {
       val surfaceHit =
           scanRequestSurface(

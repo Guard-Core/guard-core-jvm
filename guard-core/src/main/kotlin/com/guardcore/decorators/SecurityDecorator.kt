@@ -331,10 +331,14 @@ public open class SecurityDecorator(
       bodyFields: Set<String>? = null,
       categories: Set<String>? = null,
       scanBody: Boolean? = null,
+      semanticHeaders: Set<String>? = null,
   ) {
     val routeConfig = ensureRouteConfig(routeKey)
     if (headers != null) {
       routeConfig.excludedDetectionHeaders = headers
+    }
+    if (semanticHeaders != null) {
+      routeConfig.excludedSemanticDetectionHeaders = semanticHeaders
     }
     if (params != null) {
       routeConfig.excludedDetectionParams = params

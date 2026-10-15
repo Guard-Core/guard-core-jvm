@@ -377,6 +377,7 @@ public class SecurityConfigBuilder {
   public var logfireServiceName: String? = null
   public var enableEnrichment: Boolean? = null
   public var excludedDetectionHeaders: Set<String>? = null
+  public var excludedSemanticDetectionHeaders: Set<String>? = null
   public var excludedDetectionParams: Set<String>? = null
   public var excludedDetectionBodyFields: Set<String>? = null
   public var detectionScanBody: Boolean? = null
@@ -967,6 +968,14 @@ public class SecurityConfigBuilder {
             )
         else excludedDetectionHeaders ?: emptySet<String>(),
     )
+    config.setRawExcludedSemanticDetectionHeaders(
+        if (v)
+            ConfigValidators.validateStrSet(
+                excludedSemanticDetectionHeaders ?: emptySet<String>(),
+                "excluded_semantic_detection_headers",
+            )
+        else excludedSemanticDetectionHeaders ?: emptySet<String>(),
+    )
     config.setRawExcludedDetectionParams(
         if (v)
             ConfigValidators.validateStrSet(
@@ -1173,6 +1182,7 @@ public class SecurityConfigBuilder {
       b.logfireServiceName = config.logfireServiceName
       b.enableEnrichment = config.enableEnrichment
       b.excludedDetectionHeaders = cpSet(config.excludedDetectionHeaders)
+      b.excludedSemanticDetectionHeaders = cpSet(config.excludedSemanticDetectionHeaders)
       b.excludedDetectionParams = cpSet(config.excludedDetectionParams)
       b.excludedDetectionBodyFields = cpSet(config.excludedDetectionBodyFields)
       b.detectionScanBody = config.detectionScanBody
@@ -1438,6 +1448,8 @@ private object MapApplier {
       "logfire_service_name" -> b.logfireServiceName = strValue(value, name)
       "enable_enrichment" -> b.enableEnrichment = boolValue(value, name)
       "excluded_detection_headers" -> b.excludedDetectionHeaders = setValue(value, name)
+      "excluded_semantic_detection_headers" ->
+          b.excludedSemanticDetectionHeaders = setValue(value, name)
       "excluded_detection_params" -> b.excludedDetectionParams = setValue(value, name)
       "excluded_detection_body_fields" -> b.excludedDetectionBodyFields = setValue(value, name)
       "detection_scan_body" -> b.detectionScanBody = boolValue(value, name)

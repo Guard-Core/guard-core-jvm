@@ -259,6 +259,7 @@ public class RouteConfig(public val revision: RouteConfigRevision? = null) {
     }
 
   public var excludedDetectionHeaders: Set<String>? = null
+  public var excludedSemanticDetectionHeaders: Set<String>? = null
   public var excludedDetectionParams: Set<String>? = null
   public var excludedDetectionBodyFields: Set<String>? = null
   public var enabledDetectionCategories: Set<String>? = null

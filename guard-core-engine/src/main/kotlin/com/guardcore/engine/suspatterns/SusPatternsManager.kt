@@ -939,6 +939,7 @@ public class SusPatternsManager private constructor() {
       context: String = "unknown",
       correlationId: String? = null,
       enabledCategories: Set<String>? = null,
+      skipSemantic: Boolean = false,
   ): DetectResult =
       // The whole pipeline runs on one big-stack scan-pool worker: java.util.regex recurses
       // per group-repetition iteration, so the table's long-input scans need the 512 MiB
@@ -950,6 +951,7 @@ public class SusPatternsManager private constructor() {
             context,
             correlationId,
             enabledCategories,
+            skipSemantic,
         )
       }
 
@@ -959,6 +961,7 @@ public class SusPatternsManager private constructor() {
       context: String,
       correlationId: String?,
       enabledCategories: Set<String>?,
+      skipSemantic: Boolean,
   ): DetectResult {
     val originalContent = content
     val executionStart = System.nanoTime()
@@ -1021,7 +1024,9 @@ public class SusPatternsManager private constructor() {
     matchedPatterns.addAll(shortBase64Matched)
     timeouts.addAll(shortBase64Timeouts)
 
-    val (semanticThreats, _) = checkSemanticThreats(processedContent, state, originalContent)
+    val semanticThreats =
+        if (skipSemantic) emptyList()
+        else checkSemanticThreats(processedContent, state, originalContent).first
 
     val threats = ArrayList(regexThreats)
     threats.addAll(semanticThreats)

@@ -192,6 +192,7 @@ public object DetectionScan {
                       context = context,
                       correlationId = correlationId,
                       enabledCategories = enabledCategories,
+                      skipSemantic = DetectionScanBudget.contextHeaderIsSemanticExcluded(context),
                   )
         } catch (e: java.util.concurrent.ExecutionException) {
           // Python re-raises RecursionError ahead of the generic handler (detection_scan.py:
