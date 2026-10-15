@@ -3,10 +3,10 @@
 ## No prior JVM version exists
 
 guard-core-jvm is a fresh port family: the first stable release is the
-current 4.3.3 mirror line, and no earlier JVM major version exists to migrate
+current 4.4.0 mirror line, and no earlier JVM major version exists to migrate
 from. Nothing was ever published under the interim `com.guardcore` group ID
 (see the CHANGELOG's groupId note), so there is no coordinate migration
-either. Consumers adopt at `com.guard-core:guard-core:4.3.3` or through an
+either. Consumers adopt at `com.guard-core:guard-core:4.4.0` or through an
 adapter.
 
 ## Porting from another guard family
@@ -37,5 +37,5 @@ check before rolling a JVM port into an existing mixed-family Redis fleet.
 ## Deprecations
 
 Deprecated config fields or checks are documented in the CHANGELOG with
-their replacement and the removal target version. At the 4.3.3 baseline
+their replacement and the removal target version. At the 4.4.0 baseline
 there are no deprecations.

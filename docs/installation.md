@@ -16,9 +16,9 @@ Maven Central:
 ```kotlin
 dependencies {
     // the facade: one artifact with config, pipeline, handlers, protocols
-    implementation("com.guard-core:guard-core:4.3.3")
+    implementation("com.guard-core:guard-core:4.4.0")
     // framework-free detection engine only (no coroutines/redis deps)
-    implementation("com.guard-core:guard-core-engine:4.3.3")
+    implementation("com.guard-core:guard-core-engine:4.4.0")
 }
 ```
 

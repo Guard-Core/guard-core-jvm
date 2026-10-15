@@ -8,7 +8,7 @@ import kotlinx.coroutines.delay
  * adapter-facing API lands in W1+.
  */
 public object GuardCore {
-  /** Engine version this facade is locked to (mirror-lockstep with guard-core 4.3.3). */
+  /** Engine version this facade is locked to (mirror-lockstep with guard-core 4.4.0). */
   public val engineVersion: String
     get() = GuardCoreEngine.VERSION
 
@@ -21,6 +21,6 @@ public object GuardCore {
   /** Trivial suspend placeholder; kept until the real facade surface ships. */
   public suspend fun info(): String {
     delay(1)
-    return "guard-core-jvm 4.3.3 (engine $engineVersion)"
+    return "guard-core-jvm 4.4.0 (engine $engineVersion)"
   }
 }
