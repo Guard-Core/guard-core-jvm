@@ -286,6 +286,19 @@ public object BodyContentScan {
     return hit
   }
 
+  /**
+   * Python `_header_items_to_scan`: the Cookie header is scanned one name=value pair at a time
+   * (split on ';', spaces trimmed, empty pairs skipped); every other header is one item.
+   */
+  public fun headerItemsToScan(headers: Map<String, String>): List<Pair<String, String>> =
+      headers.flatMap { (key, value) ->
+        if (key.trim().lowercase() != "cookie") {
+          listOf(key to value)
+        } else {
+          value.split(";").map { it.trim(' ') }.filter { it.isNotEmpty() }.map { key to it }
+        }
+      }
+
   /** Python async `_scan_headers` (body_content_scan.py:294). */
   public suspend fun scanHeaders(
       request: com.guardcore.protocols.GuardRequest,
@@ -299,7 +312,7 @@ public object BodyContentScan {
       excludedBodyFields: Set<String> = emptySet(),
       sensitiveParams: Set<String> = emptySet(),
   ): Triple<Boolean, String, List<Threat>> {
-    for ((key, value) in request.headers) {
+    for ((key, value) in headerItemsToScan(request.headers)) {
       val hit =
           when {
             key.trim().lowercase() in sensitiveHeaders ->

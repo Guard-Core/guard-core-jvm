@@ -36,6 +36,12 @@ Configuration knobs: `enabled_detection_categories`,
 `excluded_detection_body_fields`, and the threshold family - all documented
 in [Configuration](configuration.md) under Detection / penetration.
 
+The `Cookie` header is scanned one `name=value` pair at a time (split on `;`,
+spaces trimmed, empty pairs skipped), each pair through the same header path
+and the same value budget, so a logged-in session cookie no longer scores as
+one long value. An attack in any single pair is still detected, and
+`excluded_semantic_detection_headers` applies per pair.
+
 ## Detection limits (bounded reads)
 
 These limits are part of the contract (spec 01.2/01.4), not defects, and
