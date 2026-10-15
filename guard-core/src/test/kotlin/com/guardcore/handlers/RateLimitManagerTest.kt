@@ -912,4 +912,33 @@ class CheckRateLimitByIpAutobanTest {
       IpBanManager.resetInstance()
     }
   }
+
+  @Test
+  fun passiveRateLimitHitLogNamesTheRateLimitNotAPenetrationAttempt() = runTest {
+    val config =
+        SecurityConfigBuilder()
+            .apply {
+              enableRedis = false
+              passiveMode = true
+            }
+            .build()
+    val manager = RateLimitManager.getInstance(config)
+    captureLogs("guard_core.handlers.ratelimit", java.util.logging.Level.WARNING) { capture ->
+      manager.handleRateLimitExceeded(
+          com.guardcore.core.TestRequest(),
+          "1.2.3.4",
+          10,
+          createErrorResponse = { code: Int, message: String ->
+            object : com.guardcore.protocols.GuardResponse {
+              override val headers: MutableMap<String, String> = linkedMapOf()
+              override val statusCode: Int = code
+              override val body: ByteArray = message.encodeToByteArray()
+            }
+          },
+      )
+      val text = capture.records.joinToString("\n") { it.message ?: "" }
+      assertTrue("Rate limit exceeded for IP: 1.2.3.4" in text, text)
+      assertFalse("Penetration attempt" in text, text)
+    }
+  }
 }
