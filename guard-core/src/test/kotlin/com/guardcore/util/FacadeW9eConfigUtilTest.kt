@@ -72,12 +72,14 @@ class FacadeW9eConfigUtilTest {
         config.copyWith(
             mapOf(
                 "excluded_detection_params" to setOf("other"),
+                "excluded_semantic_detection_headers" to setOf("cookie"),
                 "excluded_detection_body_fields" to setOf("secret"),
                 "detection_scan_body" to true,
                 "enabled_detection_categories" to setOf("xss"),
             ),
         )
     assertEquals(setOf("other"), copied.excludedDetectionParams)
+    assertEquals(setOf("cookie"), copied.excludedSemanticDetectionHeaders)
     assertEquals(setOf("secret"), copied.excludedDetectionBodyFields)
     assertTrue(copied.detectionScanBody)
     assertEquals(setOf("xss"), copied.enabledDetectionCategories)
