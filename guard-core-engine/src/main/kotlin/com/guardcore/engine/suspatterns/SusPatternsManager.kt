@@ -653,86 +653,90 @@ public class SusPatternsManager private constructor() {
 
     val workerBudget = workerScanBudget.get()
     val scanBudget = workerBudget?.first
-    for (row in allPatterns) {
-      if (scanBudget != null && scanBudget.exhausted()) {
-        val budgetThreat = scanTimeBudgetExhaustedThreat()
-        scanBudget.warnOnce(workerBudget.second)
-        threats.add(budgetThreat)
-        matchedPatterns.add(budgetThreat.pattern)
-        timeouts.add(budgetThreat.pattern)
-        break
-      }
-      if (
-          patternShouldBeSkipped(
-              row.compiled.source,
-              row.contexts,
-              row.category,
-              rawViewOnly,
-              skipFilter,
-              normalized,
-              enabledCategories,
-              urlDecodedViewOnly,
-          )
-      ) {
-        continue
-      }
-
-      val patternStart = System.nanoTime()
-      val cpuStart = scanBudget?.currentCpuNanos() ?: 0L
-
-      var threat: Threat?
-      var timeoutOccurred: Boolean
-      try {
-        val (t, occurred) =
-            checkRegexPattern(
-                row.compiled,
-                content,
-                patternStart,
+    scanBudget?.openPass()
+    try {
+      for (row in allPatterns) {
+        if (scanBudget != null && scanBudget.exhausted()) {
+          val budgetThreat = scanTimeBudgetExhaustedThreat()
+          scanBudget.warnOnce(workerBudget.second)
+          threats.add(budgetThreat)
+          matchedPatterns.add(budgetThreat.pattern)
+          timeouts.add(budgetThreat.pattern)
+          break
+        }
+        if (
+            patternShouldBeSkipped(
+                row.compiled.source,
+                row.contexts,
                 row.category,
-                state,
-                validatorContext,
-                binaryPrefix,
+                rawViewOnly,
+                skipFilter,
+                normalized,
+                enabledCategories,
+                urlDecodedViewOnly,
             )
-        threat = t
-        timeoutOccurred = occurred
-      } catch (e: PatternValidationTimeout) {
-        threat = null
-        timeoutOccurred = true
-      }
-      scanBudget?.record(scanBudget.currentCpuNanos() - cpuStart)
-
-      if (timeoutOccurred) {
-        timeouts.add(row.compiled.source)
-        if (threat == null) {
-          threat = buildTimeoutThreat(row.compiled, row.category, patternStart)
+        ) {
+          continue
         }
-      }
 
-      if (threat != null) {
-        threats.add(threat)
-        matchedPatterns.add(row.compiled.source)
-        if (System.getProperty("guardcore.debug.views") != null) {
-          System.err.println(
-              "[view=" +
-                  (if (rawViewOnly == true) "raw"
-                  else if (urlDecodedViewOnly == true) "url" else "main") +
-                  "] matched: " +
-                  row.compiled.source.take(70) +
-                  " threat=" +
-                  threat.type,
+        val patternStart = System.nanoTime()
+
+        var threat: Threat?
+        var timeoutOccurred: Boolean
+        try {
+          val (t, occurred) =
+              checkRegexPattern(
+                  row.compiled,
+                  content,
+                  patternStart,
+                  row.category,
+                  state,
+                  validatorContext,
+                  binaryPrefix,
+              )
+          threat = t
+          timeoutOccurred = occurred
+        } catch (e: PatternValidationTimeout) {
+          threat = null
+          timeoutOccurred = true
+        }
+        scanBudget?.sliceCheck()
+
+        if (timeoutOccurred) {
+          timeouts.add(row.compiled.source)
+          if (threat == null) {
+            threat = buildTimeoutThreat(row.compiled, row.category, patternStart)
+          }
+        }
+
+        if (threat != null) {
+          threats.add(threat)
+          matchedPatterns.add(row.compiled.source)
+          if (System.getProperty("guardcore.debug.views") != null) {
+            System.err.println(
+                "[view=" +
+                    (if (rawViewOnly == true) "raw"
+                    else if (urlDecodedViewOnly == true) "url" else "main") +
+                    "] matched: " +
+                    row.compiled.source.take(70) +
+                    " threat=" +
+                    threat.type,
+            )
+          }
+        }
+
+        if (performanceMonitor != null) {
+          performanceMonitor.recordMetric(
+              row.compiled.source,
+              (System.nanoTime() - patternStart) / 1e9,
+              content.length,
+              matched = threat != null,
+              timeout = timeoutOccurred,
           )
         }
       }
-
-      if (performanceMonitor != null) {
-        performanceMonitor.recordMetric(
-            row.compiled.source,
-            (System.nanoTime() - patternStart) / 1e9,
-            content.length,
-            matched = threat != null,
-            timeout = timeoutOccurred,
-        )
-      }
+    } finally {
+      scanBudget?.closePass()
     }
 
     return Triple(threats, matchedPatterns, timeouts)
