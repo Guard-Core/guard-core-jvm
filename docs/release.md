@@ -10,15 +10,15 @@ runbooks with the same structure and a version-flip checklist.
 
 | Artifact | Repo | Version | Rule |
 |---|---|---|---|
-| `guard-core-engine` | guard-core-jvm (this repo) | 4.4.0 | lockstep with guard-core 4.4.0 |
-| `guard-core` (facade) | guard-core-jvm (this repo) | 4.4.0 | lockstep with guard-core 4.4.0 |
+| `guard-core-engine` | guard-core-jvm (this repo) | 4.4.1 | lockstep with guard-core 4.4.1 |
+| `guard-core` (facade) | guard-core-jvm (this repo) | 4.4.1 | lockstep with guard-core 4.4.1 |
 | `spring-boot-guard` | spring-boot-guard | 1.0.0 | fresh family version |
 | `ktor-guard` | ktor-guard | 1.0.0 | fresh family version |
 | `guard-agent-jvm` | guard-agent-jvm | 3.2.3 | mirrors guard-agent 3.2.3 |
 
 - The engine version is set in-file (`build.gradle.kts`, `allprojects`).
-  Tags must match it exactly: the engine tags `v4.4.0`.
-- Tags are bare `vX.Y.z` only: no suffixes (`v4.4.0-jvm` is wrong), no build
+  Tags must match it exactly: the engine tags `v4.4.1`.
+- Tags are bare `vX.Y.z` only: no suffixes (`v4.4.1-jvm` is wrong), no build
   metadata. The `verify` job of release.yml refuses anything else. This audit exists
   because of the guard-core-rs invisible-rule incident on `refs/tags/v4.3.2`.
 - CHANGELOG entries use `## [SEMVER] - YYYY-MM-DD` and mirror the narrative
@@ -90,14 +90,14 @@ adapters and the agent.
 
 ### 1. Engine (this repo)
 
-1. Confirm `build.gradle.kts` carries the release version (4.4.0 - no flip
+1. Confirm `build.gradle.kts` carries the release version (4.4.1 - no flip
    needed while in lockstep; the version lives in the file, never on the
-   command line) and the CHANGELOG has a `## [4.4.0] - YYYY-MM-DD` section.
-2. Tag on the release commit: `git tag v4.4.0 && git push origin v4.4.0`.
+   command line) and the CHANGELOG has a `## [4.4.1] - YYYY-MM-DD` section.
+2. Tag on the release commit: `git tag v4.4.1 && git push origin v4.4.1`.
    The tag push runs nothing: the release commit's push run of ci.yml (build
    + full-corpus certification + coverage) and ecosystem-gate.yml on master
    is the gate.
-3. Create the GitHub release for `v4.4.0` (Create release from the tag). The
+3. Create the GitHub release for `v4.4.1` (Create release from the tag). The
    `release: created` event starts release.yml, which runs no build or test
    for validation. The `verify` job checks the tag is bare `vX.Y.z`, equals
    the in-file version (and is not a SNAPSHOT), and that the newest push run
@@ -113,8 +113,8 @@ adapters and the agent.
    deployment first, the facade second.
 5. Wait for replication and verify liveness (this is the signal the consumer
    releases wait on):
-   - `curl -f https://repo1.maven.org/maven2/com/guard-core/guard-core-engine/4.4.0/guard-core-engine-4.4.0.pom`
-   - `curl -f https://repo1.maven.org/maven2/com/guard-core/guard-core/4.4.0/guard-core-4.4.0.pom`
+   - `curl -f https://repo1.maven.org/maven2/com/guard-core/guard-core-engine/4.4.1/guard-core-engine-4.4.1.pom`
+   - `curl -f https://repo1.maven.org/maven2/com/guard-core/guard-core/4.4.1/guard-core-4.4.1.pom`
 
 ### 2. Adapters and agent (spring-boot-guard, ktor-guard, guard-agent-jvm)
 
@@ -127,7 +127,7 @@ Only after step 1.5 succeeds (their workflows re-check it anyway):
    CI (verify), then the engine-artifact pre-flight.
 3. Create the GitHub release. The publish job runs with
    `GUARD_CORE_USE_COMPOSITE=false`, so the build resolves
-   `com.guard-core:guard-core:4.4.0` from Maven Central (mavenLocal, then
+   `com.guard-core:guard-core:4.4.1` from Maven Central (mavenLocal, then
    Central) - proving the published graph, not the composite checkout.
 4. Release the VALIDATED deployment in the Portal UI.
 5. Verify liveness:
@@ -140,7 +140,7 @@ Only after step 1.5 succeeds (their workflows re-check it anyway):
 - [ ] `build.gradle.kts`: `version = "1.0.0-SNAPSHOT"` -> `version = "1.0.0"`
       (agent: `3.2.3-SNAPSHOT` -> `3.2.3`).
 - [ ] `gradle/libs.versions.toml`: the `guardCore` version ref still reads
-      `4.4.0` (the lockstep engine pin - bump it only when the engine train
+      `4.4.1` (the lockstep engine pin - bump it only when the engine train
       moves).
 - [ ] `CHANGELOG.md`: rename the `Unreleased` section to
       `## [1.0.0] - YYYY-MM-DD` and state the engine pin.
@@ -165,7 +165,7 @@ Only after step 1.5 succeeds (their workflows re-check it anyway):
 ## Rerun safety and failure recovery
 
 - A publish job that dies mid-train re-drives via workflow_dispatch (Actions
-  > Release > Run workflow, with the `tag` input, for example `v4.4.0`). The
+  > Release > Run workflow, with the `tag` input, for example `v4.4.1`). The
   run checks that tag out with master's current workflow, so a fixed workflow
   can publish an existing tag. The existence check skips anything already
   live on repo1, and only the missing deployment uploads again.

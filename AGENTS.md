@@ -6,7 +6,7 @@ Guidance for AI agents (including Claude Code) working in this repository.
 guard-core-jvm is the Kotlin/JVM engine library of the guard-core API security
 ecosystem. It is a library, not an application: there is no main class and
 nothing to run. Gradle multi-module workspace (Kotlin DSL), group
-`com.guard-core`, version `4.4.0`, JVM toolchain 17.
+`com.guard-core`, version `4.4.1`, JVM toolchain 17.
 
 Module layout:
 
@@ -53,6 +53,6 @@ gate yet; that lands with real engine code in W1+.
 ## Versioning
 
 Mirror-lockstep: guard-core-jvm releases carry the same version number as the
-guard-core engine release they mirror (currently 4.4.0). The conformance corpus
+guard-core engine release they mirror (currently 4.4.1). The conformance corpus
 records the exact engine commit it was generated at; when the engine moves,
 re-vendor the corpus and bump the workspace version together.

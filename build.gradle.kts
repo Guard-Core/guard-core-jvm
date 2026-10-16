@@ -15,7 +15,7 @@ plugins {
 // standard practice for hyphenated domains.
 allprojects {
     group = "com.guard-core"
-    version = "4.4.0"
+    version = "4.4.1"
 }
 
 subprojects {

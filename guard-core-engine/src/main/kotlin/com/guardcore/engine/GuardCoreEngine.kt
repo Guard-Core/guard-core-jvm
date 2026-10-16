@@ -7,5 +7,5 @@ package com.guardcore.engine
  * detection, pipeline, and handler code lands in W1+.
  */
 public object GuardCoreEngine {
-  public const val VERSION: String = "4.4.0"
+  public const val VERSION: String = "4.4.1"
 }

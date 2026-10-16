@@ -11,8 +11,8 @@ guard-core spec 4.1.0 corpus.
 - **Parity status**: [every-feature matrix](every-feature-matrix.md) (880
   rows: 826 FULL / 54 IDIOMATIC / 0 PARTIAL / 0 MISSING) and the
   [jvm column of the spec section table](https://github.com/Guard-Core/guard-core/blob/master/specs/README.md#parity-matrix)
-- **Mirror statement**: guard-core-jvm 4.4.0 mirrors
-  [guard-core 4.4.0](https://github.com/Guard-Core/guard-core); versions move
+- **Mirror statement**: guard-core-jvm 4.4.1 mirrors
+  [guard-core 4.4.1](https://github.com/Guard-Core/guard-core); versions move
   in lockstep
 - **Maven group ID**: `com.guard-core` (Kotlin packages `com.guardcore.*`)
 

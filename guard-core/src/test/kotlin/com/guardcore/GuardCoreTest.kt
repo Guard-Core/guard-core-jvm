@@ -7,11 +7,11 @@ import kotlinx.coroutines.runBlocking
 class GuardCoreTest {
   @Test
   fun engineVersionIsPinnedInLockstep() {
-    assertEquals("4.4.0", GuardCore.engineVersion)
+    assertEquals("4.4.1", GuardCore.engineVersion)
   }
 
   @Test
   fun infoReportsTheLockstepEngineVersion() = runBlocking {
-    assertEquals("guard-core-jvm 4.4.0 (engine 4.4.0)", GuardCore.info())
+    assertEquals("guard-core-jvm 4.4.1 (engine 4.4.1)", GuardCore.info())
   }
 }

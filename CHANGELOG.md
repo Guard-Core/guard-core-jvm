@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.4.1] - 2026-10-16
+
+guard-core-jvm 4.4.1 mirrors the guard-core 4.4.1 release and cuts the CPU cost of the scan time budget.
+
+### Fixed
+
+- The scan time budget charges CPU once per pass instead of once per pattern (#62, #63). `checkRegexPatterns` and the fallback scan read `ThreadMXBean.currentThreadCpuTime` twice per pattern check. `ScanTimeBudget` now reads the worker thread's CPU clock when a pass opens, charges it only when the 2 ms wall slice has elapsed, and makes a final charge when the pass closes. The slice starts with the request budget, so it spans every value of the request. `exhausted()` stays arithmetic only, and the fallback scan charges after each pattern like the reference. Measured detection CPU on a ~1.1 KB JSON-like body plus 10 headers: 14.7 ms to 10.4 ms.
+- The performance monitor iterates the window directly under its lock instead of taking snapshot copies, computes the variance with a compensated sum and no list allocation, and skips the sanitized anomaly copy when no callback is registered (#62, #63).
+
+### Changed
+
+- `ScanTimeBudget` API (guard-core-engine): `currentCpuNanos()` and `record(cpuNanos)` are removed and replaced by `openPass()`, `sliceCheck()`, `charge()` and `closePass()`. The constructor takes optional `cpuClock` and `wallClock` parameters so tests can inject clocks. Code that called `currentCpuNanos()` and `record(...)` around its own scan loop must call `openPass()` before the loop, `sliceCheck()` after each pattern and `closePass()` after it.
+- The release workflow publishes a tag only from green CI and can be re-driven by tag input (#61).
+
 ## [4.4.0] - 2026-10-15
 
 guard-core-jvm 4.4.0 mirrors the guard-core 4.4.0 scan-budget release and carries the JVM agent telemetry fixes.
