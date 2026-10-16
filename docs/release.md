@@ -19,7 +19,7 @@ runbooks with the same structure and a version-flip checklist.
 - The engine version is set in-file (`build.gradle.kts`, `allprojects`).
   Tags must match it exactly: the engine tags `v4.4.0`.
 - Tags are bare `vX.Y.z` only: no suffixes (`v4.4.0-jvm` is wrong), no build
-  metadata. The `tag-consistency` job refuses anything else. This audit exists
+  metadata. The `verify` job of release.yml refuses anything else. This audit exists
   because of the guard-core-rs invisible-rule incident on `refs/tags/v4.3.2`.
 - CHANGELOG entries use `## [SEMVER] - YYYY-MM-DD` and mirror the narrative
   naming of the guard-core Python repo.
@@ -94,10 +94,15 @@ adapters and the agent.
    needed while in lockstep; the version lives in the file, never on the
    command line) and the CHANGELOG has a `## [4.4.0] - YYYY-MM-DD` section.
 2. Tag on the release commit: `git tag v4.4.0 && git push origin v4.4.0`.
-   The tag push runs the gate suite (build + full-corpus certification +
-   tag-consistency audit). Wait for it to go green.
+   The tag push runs nothing: the release commit's push run of ci.yml (build
+   + full-corpus certification + coverage) and ecosystem-gate.yml on master
+   is the gate.
 3. Create the GitHub release for `v4.4.0` (Create release from the tag). The
-   `release: created` event starts the publish job:
+   `release: created` event starts release.yml, which runs no build or test
+   for validation. The `verify` job checks the tag is bare `vX.Y.z`, equals
+   the in-file version (and is not a SNAPSHOT), and that the newest push run
+   of ci.yml and ecosystem-gate.yml on the tagged commit succeeded (it waits
+   up to an hour for runs still in progress). Then the publish job runs:
    - secrets gate -> existence check per artifact (skip if already live) ->
      `guard-core-engine` staging bundle -> Portal upload -> VALIDATED ->
      `guard-core` staging bundle -> Portal upload -> VALIDATED
@@ -117,8 +122,9 @@ Only after step 1.5 succeeds (their workflows re-check it anyway):
 
 1. Version-flip PR per repo (see the checklist below): flip the project
    version, update the CHANGELOG, merge with CI green.
-2. Tag: `git tag v1.0.0 && git push origin v1.0.0` (agent: `v3.2.3`). Gates
-   run: engine-artifact pre-flight, tests at tag, tag-consistency.
+2. Tag: `git tag v1.0.0 && git push origin v1.0.0` (agent: `v3.2.3`). The tag
+   push runs nothing; each repo's release.yml gates on the merge commit's push
+   CI (verify), then the engine-artifact pre-flight.
 3. Create the GitHub release. The publish job runs with
    `GUARD_CORE_USE_COMPOSITE=false`, so the build resolves
    `com.guard-core:guard-core:4.4.0` from Maven Central (mavenLocal, then
@@ -138,12 +144,12 @@ Only after step 1.5 succeeds (their workflows re-check it anyway):
       moves).
 - [ ] `CHANGELOG.md`: rename the `Unreleased` section to
       `## [1.0.0] - YYYY-MM-DD` and state the engine pin.
-- [ ] The workflow's `tag-consistency` job is the safety net: it fails with a
+- [ ] The workflow's `verify` job is the safety net: it fails with a
       clear message if the tag is pushed without the flip (SNAPSHOT version)
       or if the tag does not equal the in-file version.
 - [ ] The consumers' `GUARD_CORE_JVM_REF` pins (ci.yml + settings comments)
       already point at the released engine SHA: they bump AT TRAIN TIME,
-      before the consumer tags, so the at-tag tests run against the engine
+      before the consumer tags, so the push CI runs against the engine
       that actually ships (the family spec pins this; a pin bump is an
       ordinary development PR).
 
@@ -158,9 +164,11 @@ Only after step 1.5 succeeds (their workflows re-check it anyway):
 
 ## Rerun safety and failure recovery
 
-- A publish job that dies mid-train re-drives via workflow_dispatch: the
-  existence check skips anything already live on repo1, and only the missing
-  deployment uploads again.
+- A publish job that dies mid-train re-drives via workflow_dispatch (Actions
+  > Release > Run workflow, with the `tag` input, for example `v4.4.0`). The
+  run checks that tag out with master's current workflow, so a fixed workflow
+  can publish an existing tag. The existence check skips anything already
+  live on repo1, and only the missing deployment uploads again.
 - A deployment stuck in VALIDATED that you do NOT want: click **Drop** in the
   Portal UI, then re-drive the workflow.
 - Validation FAILED: the job logs print the Portal's error messages; fix the

@@ -1,133 +1,148 @@
 name: Release
 
-# Family release gate for guard-core-jvm. NOTHING releases on a tag push
-# alone: the tag runs the full gate suite (build + full-corpus certification
-# + tag/version audit) and only the `release: created` event (or an explicit
-# workflow_dispatch re-drive) reaches the Maven Central publish job. Bare
-# vX.Y.z tags only (v4.3.2): the tag-consistency job refuses anything else
-# (the guard-core-rs invisible-rule incident on refs/tags/v4.3.2 is the
-# standing lesson; the audit here is the family precedent for the JVM lane).
+# Publishes guard-core-engine and guard-core to Maven Central (Central Portal)
+# for a release tag. Nothing is built or tested for validation here: the tagged
+# commit must already have passed the push workflows listed in
+# REQUIRED_WORKFLOWS (ci.yml runs the build, the full corpus certification gate,
+# coverage and the dependency audit; ecosystem-gate.yml runs the consumers
+# against this engine). A release can therefore never fail on a check its pull
+# request did not run.
+#
+# Re-drive: run this workflow by hand (Actions > Release > Run workflow) with
+# the tag, for example v4.4.0. It checks out that tag, so a fixed workflow on
+# master can publish an existing tag. An artifact already on Maven Central is
+# skipped (repo1.maven.org is authoritative). Bare vX.Y.z tags only.
 #
 # Auth reality (verified 2026-10-11): the Central Portal Publisher API takes
 # a Portal user token (Bearer base64(username:password)); OIDC trusted
 # publishing does not exist for Maven Central yet, so the publish job needs
 # no id-token scope and carries the least-privilege permission set. GPG
 # signing is mandatory per Portal rules; the key arrives via secrets and
-# never leaves the runner. See docs/release.md for the operator choreography.
+# never leaves the runner. Deployments upload as USER_MANAGED: release each
+# VALIDATED deployment from the Portal UI. See docs/release.md.
 
 on:
-  push:
-    tags:
-      - 'v*'
   release:
     types: [created]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish, for example v4.4.0'
+        required: true
 
 permissions: {}
 
+concurrency:
+  group: release-${{ inputs.tag || github.event.release.tag_name }}
+  cancel-in-progress: false
+
+env:
+  REQUIRED_WORKFLOWS: >-
+    .github/workflows/ci.yml
+    .github/workflows/ecosystem-gate.yml
+
 jobs:
-  test:
-    name: Test at tag (JDK 17)
+  verify:
+    name: Tagged commit passed CI
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
+      actions: read
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
-      - name: Checkout tag
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
-
-      - name: Start Redis
+      - name: Resolve the tag
+        id: tag
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          docker run -d --name guard-redis -p 6379:6379 redis:8
-          for _ in $(seq 1 30); do
-            if docker exec guard-redis redis-cli ping | grep -q PONG; then break; fi
-            sleep 1
-          done
+          tag="${INPUT_TAG:-$RELEASE_TAG}"
+          if ! printf '%s' "$tag" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::tag '$tag' is not of the form v1.2.3"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
-      - name: Build (detekt, ktfmt check, tests, benchmarks compile)
-        run: ./gradlew build --no-daemon
-
-      - name: Full corpus certification gate (21 suites + cost budgets, one gate)
-        run: ./gradlew :guard-core-conformance:fullCorpusGate --no-daemon
-
-      - name: Stop Redis
-        if: always()
-        run: docker rm -f guard-redis || true
-
-  tag-consistency:
-    name: Tag matches the project version
-    needs: [test]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout tag
+      - name: Checkout the tag
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: refs/tags/${{ steps.tag.outputs.tag }}
           persist-credentials: false
 
-      # The project version set in build.gradle.kts is the source of truth
-      # (the guard-core-rs precedent). The tag must equal it exactly, and a
-      # SNAPSHOT version here means the release PR forgot the flip.
-      - name: Verify bare tag equals the project version
+      # The project version in build.gradle.kts is the source of truth. The
+      # tag must equal it, and a SNAPSHOT version here means the release PR
+      # forgot the flip (docs/release.md, version-flip checklist).
+      - name: Verify the tag equals the project version
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
         run: |
           set -euo pipefail
-          case "${GITHUB_REF_NAME}" in
-            v[0-9]*.[0-9]*.[0-9]*)
-              ;;
-            *)
-              echo "refusing non-bare tag '${GITHUB_REF_NAME}': use bare vX.Y.z (v4.3.2, no suffixes)"
-              exit 1
-              ;;
-          esac
-          tag="${GITHUB_REF_NAME#v}"
           version=$(grep -m1 'version = "' build.gradle.kts | sed 's/^.*version = "\([^"]*\)".*$/\1/')
           if [ -z "$version" ]; then
-            echo "could not read the project version from build.gradle.kts"
+            echo "::error::could not read the project version from build.gradle.kts"
             exit 1
           fi
           case "$version" in
             *-SNAPSHOT)
-              echo "project version $version is a SNAPSHOT: the release PR must flip it (docs/release.md, version-flip checklist)"
+              echo "::error::project version $version is a SNAPSHOT: the release PR must flip it (docs/release.md, version-flip checklist)"
               exit 1
               ;;
           esac
-          if [ "$tag" != "$version" ]; then
-            echo "tag v$tag does not match the project version $version"
+          if [ "${TAG#v}" != "$version" ]; then
+            echo "::error::tag $TAG does not match the project version $version"
             exit 1
           fi
-          echo "ok: bare tag v$tag matches the project version $version"
+          echo "ok: $TAG matches the project version $version"
+
+      # The newest push run of each required workflow on the tagged commit
+      # must have succeeded. A release created right after a merge waits for
+      # them (up to an hour) instead of failing.
+      - name: Require green CI on the tagged commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          sha=$(git rev-parse HEAD)
+          for _ in $(seq 1 60); do
+            runs=$(gh api "repos/$REPO/actions/runs?head_sha=$sha&event=push&per_page=100" \
+              --jq '[.workflow_runs | group_by(.path)[] | max_by(.run_number) | {path, status, conclusion}]')
+            waiting=0
+            for wf in $REQUIRED_WORKFLOWS; do
+              run=$(jq -c --arg p "$wf" '.[] | select(.path == $p)' <<< "$runs")
+              if [ -z "$run" ]; then
+                echo "$wf: no push run on $sha yet"; waiting=1; continue
+              fi
+              status=$(jq -r .status <<< "$run"); conclusion=$(jq -r .conclusion <<< "$run")
+              if [ "$status" != "completed" ]; then
+                echo "$wf: $status"; waiting=1
+              elif [ "$conclusion" != "success" ]; then
+                echo "::error::$wf concluded $conclusion on $sha; fix master and release a new tag"
+                exit 1
+              else
+                echo "ok: $wf success on $sha"
+              fi
+            done
+            [ "$waiting" = "0" ] && exit 0
+            sleep 60
+          done
+          echo "::error::required workflows did not finish on $sha within an hour"
+          exit 1
 
   publish:
     name: Publish to Maven Central (Central Portal)
-    needs: [tag-consistency]
-    # The tag push runs the gates; the publish runs on GitHub release creation
-    # (the operator-facing event) and can be re-driven with workflow_dispatch
-    # after a partial failure. Publishing is two separate Portal deployments,
-    # engine before facade (the within-lane ordering rule), each gated on a
-    # registry existence check so a re-drive never double-publishes (the
-    # guard-core-ts #115 changed-only pattern, Maven edition).
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    needs: [verify]
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      TAG: ${{ needs.verify.outputs.tag }}
 
     steps:
-      - name: Checkout release tag
+      - name: Checkout the tag
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: refs/tags/${{ needs.verify.outputs.tag }}
           persist-credentials: false
 
       - name: Set up JDK 17
@@ -174,7 +189,7 @@ jobs:
         id: artifacts
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          version="${TAG#v}"
           code_engine=$(curl -sS -o /dev/null -w '%{http_code}' \
             "https://repo1.maven.org/maven2/com/guard-core/guard-core-engine/${version}/guard-core-engine-${version}.pom" \
             || echo 000)
@@ -217,7 +232,7 @@ jobs:
           CENTRAL_PORTAL_PASSWORD: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          version="${TAG#v}"
           token=$(printf '%s:%s' "$CENTRAL_PORTAL_USERNAME" "$CENTRAL_PORTAL_PASSWORD" | base64 | tr -d '\n')
           rm -f central-bundle.zip
           (cd guard-core-engine/build/central-staging && zip -qr "$GITHUB_WORKSPACE/central-bundle.zip" .)
@@ -283,7 +298,7 @@ jobs:
           if [ -f guard-core-engine-deployment-id.txt ]; then
             echo "engine deployment $(cat guard-core-engine-deployment-id.txt) is VALIDATED; proceeding with the facade"
           fi
-          version="${GITHUB_REF_NAME#v}"
+          version="${TAG#v}"
           token=$(printf '%s:%s' "$CENTRAL_PORTAL_USERNAME" "$CENTRAL_PORTAL_PASSWORD" | base64 | tr -d '\n')
           rm -f central-bundle.zip
           (cd guard-core/build/central-staging && zip -qr "$GITHUB_WORKSPACE/central-bundle.zip" .)
@@ -331,7 +346,7 @@ jobs:
       - name: Summary
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          version="${TAG#v}"
           echo "Publish run for ${version} finished. Operator steps:"
           echo "  1. Release every VALIDATED deployment in the Portal UI (central.sonatype.com, Deployments): engine first, facade second."
           echo "  2. Wait for the artifacts to reach repo1.maven.org (the release workflows for the adapters and the agent check this)."

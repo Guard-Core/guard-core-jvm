@@ -1,19 +1,10 @@
 name: CI
 
 on:
+  # No paths filter on push: release.yml requires a push run of this workflow on
+  # the tagged commit, and a docs-only commit must still get one.
   push:
     branches: [master]
-    paths:
-      - "**.kt"
-      - "**.kts"
-      - "gradle/**"
-      - "gradlew"
-      - "gradle.properties"
-      - "conformance/**"
-      - "scripts/**"
-      - "**/gradle.lockfile"
-      - "osv-scanner.toml"
-      - ".github/workflows/ci.yml"
   pull_request:
     branches: [master]
     paths:
