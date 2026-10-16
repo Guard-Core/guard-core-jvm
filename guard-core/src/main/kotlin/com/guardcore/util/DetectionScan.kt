@@ -71,42 +71,46 @@ public object DetectionScan {
     val allCompiled = manager.getAllCompiledPatterns()
     val binaryPrefix = BinaryPrefix.buildBinaryPrefix(value)
     val scanBudget = DetectionScanBudget.scanTimeBudget()
-    for (row in allCompiled) {
-      if (scanBudget != null && scanBudget.exhausted()) {
-        return true to "Scan time budget exhausted (fallback)"
+    scanBudget?.openPass()
+    try {
+      for (row in allCompiled) {
+        if (scanBudget != null && scanBudget.exhausted()) {
+          return true to "Scan time budget exhausted (fallback)"
+        }
+        val patternStart = System.nanoTime()
+        val threat =
+            try {
+              val matches = row.compiled.finditer(value, deadlineNanos = Long.MAX_VALUE)
+              firstAcceptedRegexThreat(
+                  matches,
+                  row.compiled,
+                  row.category,
+                  patternStart,
+                  normalizedContext,
+                  binaryPrefix,
+              )
+            } catch (e: StackOverflowError) {
+              // Python catches ONLY RecursionError here (detection_scan.py:216-222): the pattern
+              // whose engine search blows the recursion limit is logged with its redacted source,
+              // skipped, and the fallback scan continues; every other failure propagates. The JVM
+              // recursion-limit analog is StackOverflowError (an Error, which the previous
+              // catch-all Exception both missed and over-swallowed real exceptions with).
+              DetectionScanContext.guardLogger.warning(
+                  "Fallback pattern search hit the regex engine's recursion limit on pattern " +
+                      "'${DetectionScanRedaction.redactPatternSource(row.compiled.source)}'; " +
+                      "skipping it and continuing the fallback scan",
+              )
+              null
+            }
+        scanBudget?.charge()
+        if (threat != null) {
+          return true to "Value matched pattern (fallback)"
+        }
       }
-      val patternStart = System.nanoTime()
-      val cpuStart = scanBudget?.currentCpuNanos() ?: 0L
-      val threat =
-          try {
-            val matches = row.compiled.finditer(value, deadlineNanos = Long.MAX_VALUE)
-            firstAcceptedRegexThreat(
-                matches,
-                row.compiled,
-                row.category,
-                patternStart,
-                normalizedContext,
-                binaryPrefix,
-            )
-          } catch (e: StackOverflowError) {
-            // Python catches ONLY RecursionError here (detection_scan.py:216-222): the pattern
-            // whose engine search blows the recursion limit is logged with its redacted source,
-            // skipped, and the fallback scan continues; every other failure propagates. The JVM
-            // recursion-limit analog is StackOverflowError (an Error, which the previous
-            // catch-all Exception both missed and over-swallowed real exceptions with).
-            DetectionScanContext.guardLogger.warning(
-                "Fallback pattern search hit the regex engine's recursion limit on pattern " +
-                    "'${DetectionScanRedaction.redactPatternSource(row.compiled.source)}'; " +
-                    "skipping it and continuing the fallback scan",
-            )
-            null
-          }
-      scanBudget?.record(scanBudget.currentCpuNanos() - cpuStart)
-      if (threat != null) {
-        return true to "Value matched pattern (fallback)"
-      }
+      return false to ""
+    } finally {
+      scanBudget?.closePass()
     }
-    return false to ""
   }
 
   /** Python `_resolve_json_redact_all` (detection_scan.py:245). */

@@ -74,4 +74,53 @@ class ScanTimeBudgetTest {
       manager.configure(null)
     }
   }
+
+  @Test
+  fun theCpuClockIsReadASmallConstantNumberOfTimesPerPass() {
+    val manager = SusPatternsManager.shared()
+    manager.configure(config())
+    try {
+      var reads = 0
+      var wallReads = 0
+      val budget =
+          ScanTimeBudget(
+              60.0,
+              cpuClock = { reads++.toLong() },
+              wallClock = { wallReads++.toLong() },
+          )
+      manager.detect("hello world", "203.0.113.7", scanBudget = budget)
+      assertTrue(wallReads > 100, "the table has many patterns ($wallReads checked)")
+      assertTrue(reads in 2..12, "CPU clock read $reads times over $wallReads patterns")
+    } finally {
+      manager.configure(null)
+    }
+  }
+
+  @Test
+  fun aLongPassStopsAtTheBudgetWithinAboutOneSlice() {
+    val manager = SusPatternsManager.shared()
+    manager.configure(config())
+    try {
+      // Every pattern costs 1 ms on a fake clock shared by wall and CPU; the cap is 50 ms.
+      var nowNanos = 0L
+      val budget =
+          ScanTimeBudget(
+              0.05,
+              cpuClock = { nowNanos },
+              wallClock = {
+                nowNanos += 1_000_000L
+                nowNanos
+              },
+          )
+      val result = manager.detect("hello world", "203.0.113.7", scanBudget = budget)
+      assertTrue(SCAN_TIME_BUDGET_EXHAUSTED_PATTERN in result.timeouts)
+      assertTrue(budget.spentSeconds >= 0.05, "spent ${budget.spentSeconds}")
+      assertTrue(
+          budget.spentSeconds <= 0.05 + 0.002 + 0.001,
+          "overshoot beyond one slice plus one pattern: ${budget.spentSeconds}",
+      )
+    } finally {
+      manager.configure(null)
+    }
+  }
 }

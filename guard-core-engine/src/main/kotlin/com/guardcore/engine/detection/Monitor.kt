@@ -73,11 +73,11 @@ public fun detectSlowExecutionAnomaly(
     }
 
 /** math.fsum analog: Kahan compensated summation over the same order. */
-private fun fsum(values: List<Double>): Double {
+private inline fun fsum(values: Iterable<Double>, transform: (Double) -> Double = { it }): Double {
   var sum = 0.0
   var compensation = 0.0
   for (value in values) {
-    val adjusted = value - compensation
+    val adjusted = transform(value) - compensation
     val total = sum + adjusted
     compensation = (total - sum) - adjusted
     sum = total
@@ -93,14 +93,14 @@ public fun detectStatisticalAnomaly(
 ): Map<String, Any>? {
   if (stats == null || stats.recentTimes.size < minSamplesForAnomaly) return null
 
-  val recentTimes = stats.recentTimesSnapshot()
+  val recentTimes = stats.recentTimes
   val sampleCount = recentTimes.size
   if (sampleCount < 2) return null
 
   val avgTime = fsum(recentTimes) / sampleCount
   if (anomalyThreshold >= 0 && metric.executionTime <= avgTime) return null
 
-  val variance = fsum(recentTimes.map { (it - avgTime) * (it - avgTime) }) / (sampleCount - 1)
+  val variance = fsum(recentTimes) { (it - avgTime) * (it - avgTime) } / (sampleCount - 1)
   val stdTime = sqrt(variance)
   if (stdTime <= 0) return null
 
@@ -414,6 +414,7 @@ public class PerformanceMonitor(
       agentHandler: AnomalyEventSink?,
       correlationId: String?,
   ) {
+    if (anomalyCallbacks.isEmpty()) return
     val safeAnomaly = sanitizeAnomalyData(anomaly)
     for (callback in anomalyCallbacks.toList()) {
       try {

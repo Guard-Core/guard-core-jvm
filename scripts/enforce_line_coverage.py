@@ -88,7 +88,7 @@ EXCLUDES = {
                      "region bounds are clamped in PyRe.search - defensive only"),
         ((585, 588), "checkPattern loop deadline/exception arms: same defensive/race "
                      "family as 508-509"),
-        ((698, 700), "PatternValidationTimeout in the enhanced-validate path: the "
+        ((699, 701), "PatternValidationTimeout in the enhanced-validate path: the "
                      "validation budgets are size-triggered and throw inside "
                      "reachProbeCandidateBuilders (covered there); this outer arm fires "
                      "only on a mid-phase host race"),
