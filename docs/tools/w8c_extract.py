@@ -348,7 +348,7 @@ def extract_python() -> list[PySym]:
 # Kotlin side extraction
 # ---------------------------------------------------------------------------
 
-KT_CLASS_RE = re.compile(r"^\s*(?:@\w+[^ ]*\s+)*(?:(?:public|private|internal|abstract|sealed|open|data|enum|value|annotation)\s+)*(?:class|object|interface)\s+(\w+)")
+KT_CLASS_RE = re.compile(r"^\s*(?:@\w\S*\s+)*(?:(?:public|private|internal|abstract|sealed|open|data|enum|value|annotation)\s+)*(?:class|object|interface)\s+(\w+)")
 KT_FUN_RE = re.compile(r"^\s*(?:(?:public|private|internal|protected|override|open|abstract|suspend|inline|operator|expect|actual|final|tailrec)\s+)*fun\s+(?:<[^>]+>\s+)?(?:[\w?.<>]*\.)?(\w+)\s*[<(]")
 KT_CONST_RE = re.compile(r"^\s*(?:(?:public|private|internal|protected|override|open)\s+)*(?:const\s+)?(?:val|var)\s+(?:[\w?.<>]*\.)?(\w+)\s*[:=]")
 KT_COMMENT_RE = re.compile(r"^\s*(//|/\*|\*)")
