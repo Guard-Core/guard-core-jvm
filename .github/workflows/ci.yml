@@ -7,17 +7,6 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
-    paths:
-      - "**.kt"
-      - "**.kts"
-      - "gradle/**"
-      - "gradlew"
-      - "gradle.properties"
-      - "conformance/**"
-      - "scripts/**"
-      - "**/gradle.lockfile"
-      - "osv-scanner.toml"
-      - ".github/workflows/ci.yml"
 
 permissions: {}
 
@@ -26,8 +15,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ci:
-    name: ci
+  changes:
+    # pull_request used to carry a workflow-level paths filter, so a PR outside those paths got no run at all
+    # and the required ci context never reported. The same filter lives here now; the jobs below skip on it.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Did this change touch the paths this workflow tests
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ "$EVENT" != pull_request ]; then echo "code=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if git diff --name-only "$BASE" HEAD | grep -qE '\.kts?$|^gradle/|^gradlew$|^gradle\.properties$|^conformance/|^scripts/|(^|/)gradle\.lockfile$|^osv-scanner\.toml$|^\.github/workflows/ci\.yml$'; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  test:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    name: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -53,7 +72,7 @@ jobs:
       - name: Start Redis
         run: |
           docker run -d --name guard-redis -p 6379:6379 redis:8
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             if docker exec guard-redis redis-cli ping | grep -q PONG; then break; fi
             sleep 1
           done
@@ -69,6 +88,8 @@ jobs:
         run: docker rm -f guard-redis || true
 
   coverage:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     name: coverage (100 percent line gate)
     runs-on: ubuntu-latest
     permissions:
@@ -89,7 +110,7 @@ jobs:
       - name: Start Redis
         run: |
           docker run -d --name guard-redis -p 6379:6379 redis:8
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             if docker exec guard-redis redis-cli ping | grep -q PONG; then break; fi
             sleep 1
           done
@@ -106,6 +127,8 @@ jobs:
         run: docker rm -f guard-redis || true
 
   dependency-audit:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     name: Dependency audit (osv-scanner)
     runs-on: ubuntu-latest
     permissions:
@@ -138,3 +161,20 @@ jobs:
             --lockfile guard-core/gradle.lockfile \
             --lockfile guard-core-conformance/gradle.lockfile \
             --lockfile guard-core-benchmark/gradle.lockfile
+
+  ci:
+    # The context master-rule requires: it reports on every run and fails when a job above failed or was
+    # cancelled. A skipped job counts as passed.
+    if: always()
+    needs: [changes, test, coverage, dependency-audit]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every job above succeeded or was skipped
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "needs: $RESULTS"
+          for result in $RESULTS; do
+            case "$result" in failure|cancelled) exit 1 ;; esac
+          done
