@@ -13,6 +13,7 @@ netty = "4.2.20.Final"
 maxmindDb = "4.2.0"
 slf4j = "2.0.20"
 dokka = "2.3.0"
+jackson = "2.22.3"
 
 [libraries]
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
@@ -21,6 +22,7 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serializationJson" }
 lettuce-core = { module = "io.lettuce:lettuce-core", version.ref = "lettuce" }
 netty-bom = { module = "io.netty:netty-bom", version.ref = "netty" }
+jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson" }
 maxmind-db = { module = "com.maxmind.db:maxmind-db", version.ref = "maxmindDb" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
