@@ -33,6 +33,16 @@ subprojects {
         lockAllConfigurations()
     }
 
+    // Dokka 2.3.0's doc-generator runtime resolves jackson 2.22.2, which carries
+    // GHSA-p6pp-m3f8-5c89 (fixed in 2.22.3). Align the whole jackson family to
+    // the patched BOM; drop this when Dokka ships jackson >= 2.22.3.
+    dependencies {
+        add(
+            "dokkaHtmlGeneratorRuntime",
+            platform(rootProject.libs.jackson.bom),
+        )
+    }
+
     configure<DetektExtension> {
         buildUponDefaultConfig = true
         config.setFrom(rootProject.files("detekt.yml"))
