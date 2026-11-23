@@ -2,13 +2,13 @@
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
 # To regenerate this file, run: ./gradlew :guard-core-engine:dependencies --write-locks
-com.fasterxml.jackson.core:jackson-annotations:2.22=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.jackson.core:jackson-core:2.22.3=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.jackson.core:jackson-databind:2.22.3=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.22.3=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.jackson.module:jackson-module-kotlin:2.22.3=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.jackson:jackson-bom:2.22.3=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.woodstox:woodstox-core:7.2.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson.core:jackson-annotations:2.23=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson.core:jackson-core:2.23.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson.core:jackson-databind:2.23.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.23.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson.module:jackson-module-kotlin:2.23.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson:jackson-bom:2.23.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.woodstox:woodstox-core:7.3.0=dokkaHtmlGeneratorRuntimeResolver~internal
 dev.drewhamilton.poko:poko-annotations-jvm:0.17.1=detekt
 dev.drewhamilton.poko:poko-annotations:0.17.1=detekt
 io.github.davidburstrom.contester:contester-breakpoint:0.2.0=detekt
@@ -38,7 +38,7 @@ io.gitlab.arturbosch.detekt:detekt-rules:1.23.8=detekt
 io.gitlab.arturbosch.detekt:detekt-tooling:1.23.8=detekt
 io.gitlab.arturbosch.detekt:detekt-utils:1.23.8=detekt
 org.apiguardian:apiguardian-api:1.1.2=testCompileClasspath
-org.codehaus.woodstox:stax2-api:4.3.0=dokkaHtmlGeneratorRuntimeResolver~internal
+org.codehaus.woodstox:stax2-api:4.3.1=dokkaHtmlGeneratorRuntimeResolver~internal
 org.freemarker:freemarker:2.3.35=dokkaHtmlGeneratorRuntimeResolver~internal
 org.jacoco:org.jacoco.agent:0.8.15=jacocoAgent
 org.jcommander:jcommander:1.85=detekt

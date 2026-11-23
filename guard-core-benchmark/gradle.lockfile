@@ -2,16 +2,16 @@
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
 # To regenerate this file, run: ./gradlew :guard-core-benchmark:dependencies --write-locks
-com.fasterxml.jackson.core:jackson-annotations:2.22=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.jackson.core:jackson-core:2.22.3=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.jackson.core:jackson-databind:2.22.3=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.22.3=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.jackson.module:jackson-module-kotlin:2.22.3=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.jackson:jackson-bom:2.22.3=dokkaHtmlGeneratorRuntimeResolver~internal
-com.fasterxml.woodstox:woodstox-core:7.2.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson.core:jackson-annotations:2.23=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson.core:jackson-core:2.23.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson.core:jackson-databind:2.23.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.23.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson.module:jackson-module-kotlin:2.23.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.jackson:jackson-bom:2.23.0=dokkaHtmlGeneratorRuntimeResolver~internal
+com.fasterxml.woodstox:woodstox-core:7.3.0=dokkaHtmlGeneratorRuntimeResolver~internal
 net.sf.jopt-simple:jopt-simple:5.0.4=jmh,jmhCompileClasspath,jmhRuntimeClasspath
 org.apache.commons:commons-math3:3.6.1=jmh,jmhCompileClasspath,jmhRuntimeClasspath
-org.codehaus.woodstox:stax2-api:4.3.0=dokkaHtmlGeneratorRuntimeResolver~internal
+org.codehaus.woodstox:stax2-api:4.3.1=dokkaHtmlGeneratorRuntimeResolver~internal
 org.freemarker:freemarker:2.3.35=dokkaHtmlGeneratorRuntimeResolver~internal
 org.jetbrains.dokka:analysis-kotlin-symbols:2.3.0=dokkaHtmlGeneratorRuntimeResolver~internal
 org.jetbrains.dokka:analysis-markdown:2.3.0=dokkaHtmlGeneratorRuntimeResolver~internal
